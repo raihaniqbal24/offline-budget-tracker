@@ -1,0 +1,54 @@
+{
+  "app": {
+    "name": "Budget Tracker"
+  },
+  "tabs": {
+    "home": "Home",
+    "entries": "Entries",
+    "summary": "Summary",
+    "accounts": "Accounts",
+    "more": "More"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "undo": "Undo",
+    "edit": "Edit",
+    "done": "Done",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "ok": "OK"
+  },
+  "placeholder": {
+    "comingSoon": "This screen arrives in phase {{phase}}."
+  },
+  "more": {
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageSystem": "Same as phone",
+    "languageEn": "English",
+    "languageId": "Bahasa Indonesia",
+    "data": "Data",
+    "schemaVersion": "Database version"
+  },
+  "category": {
+    "builtin": {
+      "unrecorded": "Unrecorded",
+      "transferFees": "Transfer fees"
+    },
+    "starter": {
+      "food": "Food",
+      "transport": "Transport",
+      "bills": "Bills",
+      "shopping": "Shopping",
+      "health": "Health",
+      "other": "Other",
+      "salary": "Salary",
+      "otherIncome": "Other"
+    }
+  }
+}

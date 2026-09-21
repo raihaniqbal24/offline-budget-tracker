@@ -1,0 +1,54 @@
+{
+  "app": {
+    "name": "Budget Tracker"
+  },
+  "tabs": {
+    "home": "Beranda",
+    "entries": "Transaksi",
+    "summary": "Ringkasan",
+    "accounts": "Akun",
+    "more": "Lainnya"
+  },
+  "common": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "undo": "Urungkan",
+    "edit": "Ubah",
+    "done": "Selesai",
+    "today": "Hari ini",
+    "yesterday": "Kemarin",
+    "ok": "OK"
+  },
+  "placeholder": {
+    "comingSoon": "Layar ini hadir di fase {{phase}}."
+  },
+  "more": {
+    "settings": "Pengaturan"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "language": "Bahasa",
+    "languageSystem": "Ikuti bahasa ponsel",
+    "languageEn": "English",
+    "languageId": "Bahasa Indonesia",
+    "data": "Data",
+    "schemaVersion": "Versi database"
+  },
+  "category": {
+    "builtin": {
+      "unrecorded": "Tidak tercatat",
+      "transferFees": "Biaya transfer"
+    },
+    "starter": {
+      "food": "Makanan",
+      "transport": "Transportasi",
+      "bills": "Tagihan",
+      "shopping": "Belanja",
+      "health": "Kesehatan",
+      "other": "Lainnya",
+      "salary": "Gaji",
+      "otherIncome": "Lainnya"
+    }
+  }
+}
