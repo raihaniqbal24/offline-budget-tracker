@@ -9,13 +9,13 @@ import { listTransfers, type TransferWithDetails } from "../db/transfersDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { getPeriodRange, shiftPeriod, today, type ISODate } from "../lib/dates";
 import { formatDayHeader, formatMonthYear } from "../lib/dateLabels";
-import { formatRupiah, type AppLanguage } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
 import { colors, spacing, typography } from "../theme";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Chip from "../components/Chip";
 import EmptyState from "../components/EmptyState";
+import TransferRow from "../components/TransferRow";
 import Fab from "../components/Fab";
 
 const PAGE_SIZE = 100;
@@ -139,7 +139,7 @@ export default function TransfersScreen() {
               transfer={item}
               lang={lang}
               isUpcoming={item.occurredOn > todayDate}
-              onPress={() => navigation.navigate("TransferForm", { transferId: item.id })}
+              onPress={(id) => navigation.navigate("TransferForm", { transferId: id })}
             />
           )}
           renderSectionHeader={({ section }) => (
@@ -156,46 +156,6 @@ export default function TransfersScreen() {
       )}
       <Fab label={t("transfers.new")} onPress={() => navigation.navigate("TransferForm", accountId ? { fromAccountId: accountId } : undefined)} />
     </View>
-  );
-}
-
-function TransferRow({
-  transfer,
-  lang,
-  isUpcoming,
-  onPress,
-}: {
-  transfer: TransferWithDetails;
-  lang: AppLanguage;
-  isUpcoming: boolean;
-  onPress: () => void;
-}) {
-  const { t } = useTranslation();
-  const payer = transfer.feePaidBy === "sender" ? t("transfers.payerSender") : t("transfers.payerRecipient");
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]} accessibilityRole="button">
-      <View style={styles.iconCircle}>
-        <MaterialCommunityIcons name="bank-transfer" size={20} color={colors.transfer} />
-      </View>
-      <View style={styles.middle}>
-        <Text style={typography.body} numberOfLines={1}>
-          {transfer.fromAccountName} → {transfer.toAccountName}
-        </Text>
-        {transfer.note || isUpcoming ? (
-          <Text style={typography.caption} numberOfLines={1}>
-            {[isUpcoming ? t("entries.upcoming") : null, transfer.note].filter(Boolean).join(" · ")}
-          </Text>
-        ) : null}
-      </View>
-      <View style={styles.right}>
-        <Text style={[typography.amount, { color: colors.transfer }]}>{formatRupiah(transfer.amount, lang)}</Text>
-        {transfer.fee > 0 ? (
-          <Text style={typography.caption}>
-            {t("transfers.feeCaption", { amount: formatRupiah(transfer.fee, lang), payer })}
-          </Text>
-        ) : null}
-      </View>
-    </Pressable>
   );
 }
 
@@ -220,25 +180,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
     fontWeight: "600",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    backgroundColor: colors.surface,
-  },
-  pressed: { backgroundColor: colors.primarySoft },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: `${colors.transfer}22`,
-  },
-  middle: { flex: 1, gap: 2 },
-  right: { alignItems: "flex-end", gap: 2 },
   separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginLeft: 72 },
   listContent: { paddingBottom: 96 },
   emptyContainer: { flexGrow: 1, justifyContent: "center" },

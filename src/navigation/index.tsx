@@ -25,7 +25,13 @@ import TransfersScreen from "../screens/TransfersScreen";
 import ReconcileScreen from "../screens/ReconcileScreen";
 import AdjustmentScreen from "../screens/AdjustmentScreen";
 import AdjustmentsScreen from "../screens/AdjustmentsScreen";
+import CategoriesScreen from "../screens/CategoriesScreen";
+import CategoryFormScreen from "../screens/CategoryFormScreen";
+import BudgetsScreen from "../screens/BudgetsScreen";
+import BudgetFormScreen from "../screens/BudgetFormScreen";
+import SearchScreen from "../screens/SearchScreen";
 import UndoSnackbar from "../components/UndoSnackbar";
+import BudgetToast from "../components/BudgetToast";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -174,9 +180,39 @@ export default function AppNavigator() {
             component={AdjustmentsScreen}
             options={{ title: t("adjustment.listTitle") }}
           />
+          <Stack.Screen
+            name="Categories"
+            component={CategoriesScreen}
+            options={{ title: t("categories.title") }}
+          />
+          <Stack.Screen
+            name="CategoryForm"
+            component={CategoryFormScreen}
+            options={({ route }) => ({
+              title: route.params?.categoryId
+                ? t("categories.edit")
+                : t("categories.new"),
+            })}
+          />
+          <Stack.Screen
+            name="Budgets"
+            component={BudgetsScreen}
+            options={{ title: t("budgets.title") }}
+          />
+          <Stack.Screen
+            name="BudgetForm"
+            component={BudgetFormScreen}
+            options={{ title: t("budgets.monthlyLimit") }}
+          />
+          <Stack.Screen
+            name="Search"
+            component={SearchScreen}
+            options={{ title: t("search.title") }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <UndoSnackbar />
+      <BudgetToast />
     </View>
   );
 }

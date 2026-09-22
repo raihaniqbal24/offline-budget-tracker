@@ -7,12 +7,14 @@ import { useTranslation } from "react-i18next";
 import { getDb } from "../db/client";
 import { getPeriodTotals, listEntries, type EntryWithDetails, type PeriodTotals } from "../db/entriesDao";
 import { getCategoryBreakdown, getSpendingTrend, hasActivity, type CategorySlice } from "../db/summariesDao";
+import { getBudgetProgress, type BudgetProgress } from "../db/budgetsDao";
 import { categoryLabel } from "../i18n";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import {
   canGoToNextPeriod,
   getPeriodRange,
   isCurrentPeriod,
+  monthKey,
   shiftPeriod,
   today,
   type ISODate,
@@ -33,6 +35,8 @@ import { useLedgerStore } from "../store/ledgerStore";
 import { colors, radius, spacing, typography } from "../theme";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
+import BudgetBar from "../components/BudgetBar";
+import { budgetLabel } from "../components/budgetLabel";
 import CategoryIcon from "../components/CategoryIcon";
 import Chip from "../components/Chip";
 import EmptyState from "../components/EmptyState";
@@ -49,6 +53,7 @@ interface SummaryData {
   breakdown: CategorySlice[];
   trend: TrendBar[];
   dayEntries: EntryWithDetails[];
+  budgets: BudgetProgress[];
 }
 
 const PERIODS: PeriodType[] = ["day", "week", "month", "year"];
@@ -63,6 +68,7 @@ export default function SummaryScreen() {
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
   const accounts = useLedgerStore((s) => s.accounts);
+  const categories = useLedgerStore((s) => s.categories);
   const dataVersion = useLedgerStore((s) => s.dataVersion);
 
   const todayDate = today();
@@ -78,7 +84,7 @@ export default function SummaryScreen() {
     (async () => {
       const db = await getDb();
       const previous = getPeriodRange(type, shiftPeriod(type, anchor, -1));
-      const [totals, prevTotals, prevActive, breakdown, trendData, dayEntries] = await Promise.all([
+      const [totals, prevTotals, prevActive, breakdown, trendData, dayEntries, budgets] = await Promise.all([
         getPeriodTotals(db, range, todayDate, accountId),
         getPeriodTotals(db, previous, todayDate, accountId),
         hasActivity(db, previous, todayDate, accountId),
@@ -89,6 +95,10 @@ export default function SummaryScreen() {
         type === "day" && range.start <= todayDate
           ? listEntries(db, { limit: 500, range, accountId })
           : Promise.resolve([] as EntryWithDetails[]),
+        // FR-7.4: limits in force for the month shown, so past months keep theirs.
+        type === "month"
+          ? getBudgetProgress(db, monthKey(range.start), todayDate)
+          : Promise.resolve([]),
       ]);
       if (cancelled) return;
       setData({
@@ -97,6 +107,8 @@ export default function SummaryScreen() {
         breakdown,
         trend: buildTrend(type, range, trendData),
         dayEntries,
+        // With an account filter, only that account's own limit applies.
+        budgets: accountId === null ? budgets : budgets.filter((b) => b.scope === "account" && b.accountId === accountId),
       });
     })();
     return () => {
@@ -193,6 +205,32 @@ export default function SummaryScreen() {
               ) : null}
             </View>
           </View>
+
+          {data.budgets.length > 0 ? (
+            <View style={styles.card}>
+              <Text style={typography.title}>{t("summary.budgets")}</Text>
+              {data.budgets.map((b) => (
+                <BudgetBar
+                  key={b.budgetId}
+                  label={budgetLabel(b, accounts, categories, t)}
+                  spent={b.spent}
+                  limit={b.limit}
+                  percent={b.percent}
+                  lang={lang}
+                  onPress={
+                    isCurrent
+                      ? () =>
+                          navigation.navigate("BudgetForm", {
+                            scope: b.scope,
+                            categoryId: b.categoryId ?? undefined,
+                            accountId: b.accountId ?? undefined,
+                          })
+                      : undefined
+                  }
+                />
+              ))}
+            </View>
+          ) : null}
 
           {isEmpty ? (
             <EmptyState

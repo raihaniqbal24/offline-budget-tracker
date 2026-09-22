@@ -136,21 +136,32 @@ export interface ListEntriesOptions {
   type?: EntryType | null;
 }
 
-/** Newest first, with category and account details for list rows. */
-export async function listEntries(
-  db: SQLiteDatabase,
-  options: ListEntriesOptions
-): Promise<EntryWithDetails[]> {
-  const { limit, offset = 0, accountId = null, range = null, type = null } = options;
-  const rows = await db.getAllAsync<EntryDetailsRow>(
-    `SELECT e.*,
+const DETAILS_SELECT = `SELECT e.*,
             c.name AS category_name, c.i18n_key AS category_i18n_key,
             c.icon AS category_icon, c.color AS category_color,
             c.builtin_key AS category_builtin_key,
             a.name AS account_name
        FROM entries e
        JOIN categories c ON c.id = e.category_id
-       JOIN accounts a ON a.id = e.account_id
+       JOIN accounts a ON a.id = e.account_id`;
+
+function mapDetails(row: EntryDetailsRow): EntryWithDetails {
+  return {
+    ...mapEntry(row),
+    categoryName: row.category_name,
+    categoryI18nKey: row.category_i18n_key,
+    categoryIcon: row.category_icon,
+    categoryColor: row.category_color,
+    categoryBuiltinKey: row.category_builtin_key,
+    accountName: row.account_name,
+  };
+}
+
+/** Newest first, with category and account details for list rows. */
+export async function listEntries(db: SQLiteDatabase, options: ListEntriesOptions): Promise<EntryWithDetails[]> {
+  const { limit, offset = 0, accountId = null, range = null, type = null } = options;
+  const rows = await db.getAllAsync<EntryDetailsRow>(
+    `${DETAILS_SELECT}
       WHERE (? IS NULL OR e.account_id = ?)
         AND (? IS NULL OR e.occurred_on BETWEEN ? AND ?)
         AND (? IS NULL OR e.type = ?)
@@ -166,15 +177,20 @@ export async function listEntries(
     limit,
     offset,
   );
-  return rows.map((row) => ({
-    ...mapEntry(row),
-    categoryName: row.category_name,
-    categoryI18nKey: row.category_i18n_key,
-    categoryIcon: row.category_icon,
-    categoryColor: row.category_color,
-    categoryBuiltinKey: row.category_builtin_key,
-    accountName: row.account_name,
-  }));
+  return rows.map(mapDetails);
+}
+
+/** Entries with details for a set of ids (order not guaranteed). */
+export async function listEntriesByIds(
+  db: SQLiteDatabase,
+  ids: ID[],
+): Promise<EntryWithDetails[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.getAllAsync<EntryDetailsRow>(
+    `${DETAILS_SELECT} WHERE e.id IN (${ids.map(() => "?").join(", ")})`,
+    ...ids
+  );
+  return rows.map(mapDetails);
 }
 
 export interface PeriodTotals {

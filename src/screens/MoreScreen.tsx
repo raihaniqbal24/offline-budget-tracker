@@ -9,7 +9,7 @@ import type { RootStackParamList } from "../navigation/types";
 
 /**
  * Hub for everything that isn't a daily screen. Later phases add rows for
- * categories, budgets, goals, recurring rules and backup.
+ * goals, recurring rules and backup.
  */
 export default function MoreScreen() {
   const { t } = useTranslation();
@@ -23,6 +23,24 @@ export default function MoreScreen() {
           icon="bank-transfer"
           label={t("more.transfers")}
           onPress={() => navigation.navigate("Transfers")}
+        />
+        <Row
+          icon="chart-box-outline"
+          label={t("more.budgets")}
+          onPress={() => navigation.navigate("Budgets")}
+          divider
+        />
+        <Row
+          icon="tag-outline"
+          label={t("more.categories")}
+          onPress={() => navigation.navigate("Categories")}
+          divider
+        />
+        <Row
+          icon="magnify"
+          label={t("more.search")}
+          onPress={() => navigation.navigate("Search")}
+          divider
         />
         <Row
           icon="cog-outline"

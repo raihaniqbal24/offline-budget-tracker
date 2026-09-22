@@ -25,7 +25,10 @@
   },
   "more": {
     "settings": "Settings",
-    "transfers": "Transfers"
+    "transfers": "Transfers",
+    "budgets": "Budgets",
+    "categories": "Categories",
+    "search": "Search and filter"
   },
   "settings": {
     "title": "Settings",
@@ -64,7 +67,10 @@
     "noAccountsTitle": "Add an account to start",
     "noAccountsBody": "Accounts are where your money lives: cash, a bank account or an e-wallet.",
     "accounts": "Accounts",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "budgets": "Budgets this month",
+    "manage": "Manage",
+    "setLimits": "Set limits"
   },
   "accounts": {
     "add": "Add account",
@@ -163,8 +169,11 @@
     "unrecordedSpending": "Unrecorded spending: {{amount}}",
     "unrecordedIncome": "Unrecorded income: {{amount}}",
     "matches": "The balances match. Nothing to record.",
-    "datedToday": "The difference is recorded as an Unrecorded adjustment dated today. You can then give it a category or split it.",
-    "save": "Record the difference"
+    "save": "Record the difference",
+    "checkedOn": "Date you checked the balance",
+    "appBalanceOn": "Balance in the app on {{date}}",
+    "noFuture": "Choose today or an earlier date.",
+    "datedOn": "The difference is recorded as an Unrecorded adjustment dated {{date}}. You can then give it a category or split it."
   },
   "adjustment": {
     "title": "Unrecorded adjustment",
@@ -209,6 +218,83 @@
     "noSpending": "No spending in this period.",
     "emptyTitle": "Nothing recorded in this period",
     "emptyBody": "Entries you add for these dates will show up here.",
-    "addEntry": "Add entry"
+    "addEntry": "Add entry",
+    "budgets": "Budgets"
+  },
+  "categories": {
+    "title": "Categories",
+    "new": "New category",
+    "edit": "Edit category",
+    "add": "Add category",
+    "expense": "Spending",
+    "income": "Income",
+    "name": "Name",
+    "namePlaceholder": "Category name",
+    "nameRequired": "Enter a name.",
+    "duplicate": "A category with this name already exists for this type.",
+    "icon": "Icon",
+    "color": "Color",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "builtin": "Built in",
+    "builtinHint": "Unrecorded and Transfer fees are filled in by the app and can't be changed or archived.",
+    "archive": "Archive category",
+    "restore": "Restore category",
+    "archiveHint": "Archived categories leave the pickers but stay on existing entries and in past summaries.",
+    "showArchived": "Show archived categories ({{count}})",
+    "hideArchived": "Hide archived categories"
+  },
+  "budgets": {
+    "title": "Budgets",
+    "monthlyLimit": "Monthly limit",
+    "thisMonth": "This month",
+    "intro": "Limits repeat every month until you change them. Unused budget doesn't carry over.",
+    "overall": "Overall",
+    "overallSection": "Overall",
+    "accountsSection": "Per account",
+    "categoriesSection": "Per category",
+    "noLimit": "No limit",
+    "leftOf": "{{spent}} of {{limit}} · {{left}} left",
+    "overBy": "{{spent}} of {{limit}} · {{over}} over",
+    "appliesFrom": "Applies from {{month}} on. Earlier months keep the limits they had.",
+    "remove": "Remove limit",
+    "scopeHint": {
+      "overall": "Counts all spending, including transfer fees and unrecorded spending.",
+      "account": "Counts all spending from this account, including transfer fees it paid and unrecorded spending.",
+      "category": "Counts spending in this category from every account."
+    },
+    "alertLevel": "{{name}}: {{percent}}% of this month's limit used ({{spent}} of {{limit}}).",
+    "alertReached": "{{name}}: this month's limit is used up ({{spent}} of {{limit}})."
+  },
+  "search": {
+    "title": "Search",
+    "notePlaceholder": "Search notes",
+    "clearText": "Clear text",
+    "filters": "Filters",
+    "filtersCount": "Filters ({{count}})",
+    "clearAll": "Clear all",
+    "type": "Type",
+    "types": {
+      "expense": "Expense",
+      "income": "Income",
+      "transfer": "Transfer",
+      "adjustment": "Unrecorded"
+    },
+    "account": "Account",
+    "categories": "Categories",
+    "amount": "Amount",
+    "exact": "Exact",
+    "range": "Range",
+    "from": "From",
+    "to": "To",
+    "dates": "Dates",
+    "fromAny": "From any date",
+    "toAny": "To any date",
+    "anyDate": "Any date",
+    "resultCount": "{{count}} results",
+    "spent": "Spent {{amount}}",
+    "income": "Income {{amount}}",
+    "transfers": "Including {{count}} transfers · fees {{fees}}",
+    "noResults": "Nothing matches these filters."
   }
 }

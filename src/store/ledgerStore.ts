@@ -7,7 +7,15 @@ import {
   updateAccount,
   type AccountInput,
 } from "../db/accountsDao";
-import { listCategories } from "../db/categoriesDao";
+import {
+  createCategory,
+  listCategories,
+  moveCategory,
+  setCategoryArchived,
+  updateCategory,
+  type CategoryInput,
+} from "../db/categoriesDao";
+import { checkBudgetAlerts, setBudgetLimit, type BudgetAlert, type BudgetTarget } from "../db/budgetsDao";
 import {
   createEntry,
   deleteEntry,
@@ -29,7 +37,7 @@ import {
   splitAdjustment,
   type SplitPart,
 } from "../db/adjustmentsDao";
-import { today } from "../lib/dates";
+import { monthKey, today, type ISODate } from "../lib/dates";
 import type { AccountWithBalance, Category, Entry, ID, Transfer } from "../types";
 
 /** How long the undo bar stays after a delete (decided: 5 seconds). */
@@ -50,6 +58,8 @@ interface LedgerState {
    */
   dataVersion: number;
   undo: UndoState | null;
+  /** Budget levels newly reached, shown one at a time after a save (FR-7.5). */
+  budgetAlerts: BudgetAlert[];
 
   load: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -60,12 +70,18 @@ interface LedgerState {
   saveTransfer: (input: TransferInput, id?: ID) => Promise<ID>;
   deleteTransfer: (id: ID) => Promise<void>;
   /** Returns the new adjustment's id, or null when the balance already matched. */
-  reconcile: (accountId: ID, realBalance: number) => Promise<ID | null>;
+  reconcile: (accountId: ID, realBalance: number, onDate: ISODate) => Promise<ID | null>;
   categorizeAdjustment: (id: ID, categoryId: ID, note: string | null) => Promise<void>;
   /** Returns the signed amount still unrecorded (0 when fully explained). */
   splitAdjustment: (id: ID, parts: SplitPart[]) => Promise<number>;
+  saveCategory: (input: CategoryInput, id?: ID, renamed?: boolean) => Promise<ID>;
+  setCategoryArchived: (id: ID, archived: boolean) => Promise<void>;
+  moveCategory: (id: ID, direction: -1 | 1) => Promise<void>;
+  /** Set (or remove, with null) a limit from the current month onward. */
+  setBudget: (target: BudgetTarget, amount: number | null) => Promise<void>;
   undoDelete: () => Promise<void>;
   dismissUndo: (token: number) => void;
+  dismissBudgetAlert: () => void;
 }
 
 let undoCounter = 0;
@@ -76,6 +92,7 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   lastUsedAccountId: null,
   dataVersion: 0,
   undo: null,
+  budgetAlerts: [],
 
   load: async () => {
     const db = await getDb();
@@ -84,14 +101,25 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
       listCategories(db),
       getSetting(db, "last_used_account_id"),
     ]);
-    set({ accounts, categories, lastUsedAccountId });
+    // FR-7.6: budget warnings are checked whenever the app opens.
+    const alerts = await checkBudgetAlerts(db, today());
+    set((s) => ({ accounts, categories, lastUsedAccountId, budgetAlerts: [...s.budgetAlerts, ...alerts] }));
   },
 
-  /** Recalculate balances for today's date and tell screens to re-query. */
+  /**
+   * Recalculate balances for today's date, check budget warnings, and tell
+   * screens to re-query. Runs after every write and when the app returns to
+   * the foreground, so warnings are checked on save and on open (FR-7.6).
+   */
   refresh: async () => {
     const db = await getDb();
     const accounts = await listAccountsWithBalances(db, today());
-    set((s) => ({ accounts, dataVersion: s.dataVersion + 1 }));
+    const alerts = await checkBudgetAlerts(db, today());
+    set((s) => ({
+      accounts,
+      dataVersion: s.dataVersion + 1,
+      budgetAlerts: alerts.length > 0 ? [...s.budgetAlerts, ...alerts] : s.budgetAlerts,
+    }));
   },
 
   saveAccount: async (input, id) => {
@@ -156,9 +184,9 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     await get().refresh();
   },
 
-  reconcile: async (accountId, realBalance) => {
+  reconcile: async (accountId, realBalance, onDate) => {
     const db = await getDb();
-    const id = await reconcileAccount(db, accountId, realBalance, today());
+    const id = await reconcileAccount(db, accountId, realBalance, onDate, today());
     await get().refresh();
     return id;
   },
@@ -176,6 +204,39 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     return remaining;
   },
 
+  saveCategory: async (input, id, renamed = false) => {
+    const db = await getDb();
+    let categoryId: ID;
+    if (id === undefined) {
+      categoryId = await createCategory(db, input);
+    } else {
+      await updateCategory(db, id, input, renamed);
+      categoryId = id;
+    }
+    set({ categories: await listCategories(db) });
+    await get().refresh();
+    return categoryId;
+  },
+
+  setCategoryArchived: async (id, archived) => {
+    const db = await getDb();
+    await setCategoryArchived(db, id, archived);
+    set({ categories: await listCategories(db) });
+    await get().refresh();
+  },
+
+  moveCategory: async (id, direction) => {
+    const db = await getDb();
+    await moveCategory(db, id, direction);
+    set({ categories: await listCategories(db) });
+  },
+
+  setBudget: async (target, amount) => {
+    const db = await getDb();
+    await setBudgetLimit(db, target, amount, monthKey(today()));
+    await get().refresh();
+  },
+
   undoDelete: async () => {
     const pending = get().undo;
     if (!pending) return;
@@ -189,6 +250,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   dismissUndo: (token) => {
     if (get().undo?.token === token) set({ undo: null });
   },
+
+  dismissBudgetAlert: () => set((s) => ({ budgetAlerts: s.budgetAlerts.slice(1) })),
 }));
 
 /*

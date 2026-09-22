@@ -25,7 +25,10 @@
   },
   "more": {
     "settings": "Pengaturan",
-    "transfers": "Transfer"
+    "transfers": "Transfer",
+    "budgets": "Anggaran",
+    "categories": "Kategori",
+    "search": "Cari dan saring"
   },
   "settings": {
     "title": "Pengaturan",
@@ -64,7 +67,10 @@
     "noAccountsTitle": "Tambahkan akun untuk mulai",
     "noAccountsBody": "Akun adalah tempat uang Anda berada: tunai, rekening bank, atau dompet digital.",
     "accounts": "Akun",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "budgets": "Anggaran bulan ini",
+    "manage": "Kelola",
+    "setLimits": "Atur batas"
   },
   "accounts": {
     "add": "Tambah akun",
@@ -163,8 +169,11 @@
     "unrecordedSpending": "Pengeluaran tidak tercatat: {{amount}}",
     "unrecordedIncome": "Pemasukan tidak tercatat: {{amount}}",
     "matches": "Saldo sudah cocok. Tidak ada yang perlu dicatat.",
-    "datedToday": "Selisihnya dicatat sebagai penyesuaian Tidak tercatat bertanggal hari ini. Setelah itu, Anda bisa memberinya kategori atau memecahnya.",
-    "save": "Catat selisihnya"
+    "save": "Catat selisihnya",
+    "checkedOn": "Tanggal Anda mengecek saldo",
+    "appBalanceOn": "Saldo di aplikasi pada {{date}}",
+    "noFuture": "Pilih hari ini atau tanggal sebelumnya.",
+    "datedOn": "Selisihnya dicatat sebagai penyesuaian Tidak tercatat bertanggal {{date}}. Setelah itu, Anda bisa memberinya kategori atau memecahnya."
   },
   "adjustment": {
     "title": "Penyesuaian tidak tercatat",
@@ -209,6 +218,83 @@
     "noSpending": "Tidak ada pengeluaran di periode ini.",
     "emptyTitle": "Belum ada catatan di periode ini",
     "emptyBody": "Transaksi yang Anda tambahkan untuk tanggal-tanggal ini akan muncul di sini.",
-    "addEntry": "Tambah transaksi"
+    "addEntry": "Tambah transaksi",
+    "budgets": "Anggaran"
+  },
+  "categories": {
+    "title": "Kategori",
+    "new": "Kategori baru",
+    "edit": "Ubah kategori",
+    "add": "Tambah kategori",
+    "expense": "Pengeluaran",
+    "income": "Pemasukan",
+    "name": "Nama",
+    "namePlaceholder": "Nama kategori",
+    "nameRequired": "Masukkan nama.",
+    "duplicate": "Kategori dengan nama ini sudah ada untuk jenis ini.",
+    "icon": "Ikon",
+    "color": "Warna",
+    "moveUp": "Pindah ke atas",
+    "moveDown": "Pindah ke bawah",
+    "builtin": "Bawaan",
+    "builtinHint": "Tidak tercatat dan Biaya transfer diisi oleh aplikasi dan tidak bisa diubah atau diarsipkan.",
+    "archive": "Arsipkan kategori",
+    "restore": "Pulihkan kategori",
+    "archiveHint": "Kategori yang diarsipkan hilang dari pilihan, tetapi tetap ada di transaksi lama dan ringkasan sebelumnya.",
+    "showArchived": "Tampilkan kategori yang diarsipkan ({{count}})",
+    "hideArchived": "Sembunyikan kategori yang diarsipkan"
+  },
+  "budgets": {
+    "title": "Anggaran",
+    "monthlyLimit": "Batas bulanan",
+    "thisMonth": "Bulan ini",
+    "intro": "Batas berlaku setiap bulan sampai Anda mengubahnya. Sisa anggaran tidak dibawa ke bulan berikutnya.",
+    "overall": "Keseluruhan",
+    "overallSection": "Keseluruhan",
+    "accountsSection": "Per akun",
+    "categoriesSection": "Per kategori",
+    "noLimit": "Tanpa batas",
+    "leftOf": "{{spent}} dari {{limit}} · sisa {{left}}",
+    "overBy": "{{spent}} dari {{limit}} · lebih {{over}}",
+    "appliesFrom": "Berlaku mulai {{month}}. Bulan-bulan sebelumnya tetap memakai batas lamanya.",
+    "remove": "Hapus batas",
+    "scopeHint": {
+      "overall": "Menghitung semua pengeluaran, termasuk biaya transfer dan pengeluaran tidak tercatat.",
+      "account": "Menghitung semua pengeluaran dari akun ini, termasuk biaya transfer yang dibayarnya dan pengeluaran tidak tercatat.",
+      "category": "Menghitung pengeluaran di kategori ini dari semua akun."
+    },
+    "alertLevel": "{{name}}: {{percent}}% dari batas bulan ini terpakai ({{spent}} dari {{limit}}).",
+    "alertReached": "{{name}}: batas bulan ini sudah habis ({{spent}} dari {{limit}})."
+  },
+  "search": {
+    "title": "Cari",
+    "notePlaceholder": "Cari di catatan",
+    "clearText": "Hapus teks",
+    "filters": "Filter",
+    "filtersCount": "Filter ({{count}})",
+    "clearAll": "Hapus semua",
+    "type": "Jenis",
+    "types": {
+      "expense": "Pengeluaran",
+      "income": "Pemasukan",
+      "transfer": "Transfer",
+      "adjustment": "Tidak tercatat"
+    },
+    "account": "Akun",
+    "categories": "Kategori",
+    "amount": "Jumlah",
+    "exact": "Tepat",
+    "range": "Rentang",
+    "from": "Dari",
+    "to": "Sampai",
+    "dates": "Tanggal",
+    "fromAny": "Dari tanggal mana pun",
+    "toAny": "Sampai tanggal mana pun",
+    "anyDate": "Tanggal mana pun",
+    "resultCount": "{{count}} hasil",
+    "spent": "Pengeluaran {{amount}}",
+    "income": "Pemasukan {{amount}}",
+    "transfers": "Termasuk {{count}} transfer · biaya {{fees}}",
+    "noResults": "Tidak ada yang cocok dengan filter ini."
   }
 }

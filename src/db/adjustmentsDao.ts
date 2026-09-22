@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from "expo-sqlite";
-import type { ISODate } from "../lib/dates";
+import { isValidISODate, type ISODate } from "../lib/dates";
 import { isValidEntryAmount } from "../lib/money";
 import type { Entry, ID } from "../types";
 import { listAccountsWithBalances } from "./accountsDao";
@@ -22,17 +22,21 @@ async function unrecordedCategoryId(db: SQLiteDatabase): Promise<ID> {
 
 /**
  * FR-1.4: record the difference between the real balance and the app's
- * balance as of `today`, dated today. Returns the adjustment id, or null when
- * the balances already match.
+ * balance as of `onDate` (the day the user checked their bank or wallet),
+ * dated that day. Returns the adjustment id, or null when the balances
+ * already match. Future dates are refused: there is no real balance yet.
  */
 export async function reconcileAccount(
   db: SQLiteDatabase,
   accountId: ID,
   realBalance: number,
-  today: ISODate
+  onDate: ISODate,
+  today: ISODate = onDate,
 ): Promise<ID | null> {
   if (!Number.isSafeInteger(realBalance)) throw new Error("invalid_amount");
-  const account = (await listAccountsWithBalances(db, today)).find((a) => a.id === accountId);
+  if (!isValidISODate(onDate)) throw new Error("invalid_date");
+  if (onDate > today) throw new Error("future_date");
+  const account = (await listAccountsWithBalances(db, onDate)).find((a) => a.id === accountId);
   if (!account) throw new Error("account_not_found");
 
   const difference = realBalance - account.balance;
@@ -44,7 +48,7 @@ export async function reconcileAccount(
     difference,
     accountId,
     await unrecordedCategoryId(db),
-    today
+    onDate,
   );
   return result.lastInsertRowId;
 }

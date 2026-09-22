@@ -11,8 +11,9 @@ import {
   type EntryWithDetails,
   type PeriodTotals,
 } from "../db/entriesDao";
+import { getBudgetProgress, type BudgetProgress } from "../db/budgetsDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
-import { getPeriodRange, today } from "../lib/dates";
+import { getPeriodRange, monthKey, today } from "../lib/dates";
 import { formatMonthYear } from "../lib/dateLabels";
 import { formatRupiah } from "../lib/money";
 import { activeAccounts, useLedgerStore } from "../store/ledgerStore";
@@ -20,6 +21,8 @@ import { colors, radius, spacing, typography } from "../theme";
 import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
+import BudgetBar from "../components/BudgetBar";
+import { budgetLabel } from "../components/budgetLabel";
 import Fab from "../components/Fab";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -29,6 +32,7 @@ export default function HomeScreen() {
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
   const accounts = useLedgerStore((s) => s.accounts);
+  const categories = useLedgerStore((s) => s.categories);
   const dataVersion = useLedgerStore((s) => s.dataVersion);
   const active = useMemo(() => activeAccounts(accounts), [accounts]);
   const total = useMemo(
@@ -39,18 +43,21 @@ export default function HomeScreen() {
   const todayDate = today();
   const [totals, setTotals] = useState<PeriodTotals | null>(null);
   const [recent, setRecent] = useState<EntryWithDetails[]>([]);
+  const [budgets, setBudgets] = useState<BudgetProgress[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const db = await getDb();
-      const [monthTotals, latest] = await Promise.all([
+      const [monthTotals, latest, limits] = await Promise.all([
         getPeriodTotals(db, getPeriodRange("month", todayDate), todayDate),
         listEntries(db, { limit: 5 }),
+        getBudgetProgress(db, monthKey(todayDate), todayDate),
       ]);
       if (!cancelled) {
         setTotals(monthTotals);
         setRecent(latest);
+        setBudgets(limits);
       }
     })();
     return () => {
@@ -60,6 +67,13 @@ export default function HomeScreen() {
 
   const openEntry = (id: number) =>
     navigation.navigate("EntryForm", { entryId: id });
+
+  // FR-7.4: limits on archived accounts or categories are hidden.
+  const visibleBudgets = budgets.filter(
+    (b) =>
+      (b.scope !== "account" || accounts.some((a) => a.id === b.accountId && !a.archived)) &&
+      (b.scope !== "category" || categories.some((c) => c.id === b.categoryId && !c.archived))
+  );
 
   if (active.length === 0) {
     return (
@@ -170,6 +184,27 @@ export default function HomeScreen() {
             </Pressable>
           ))}
         </ScrollView>
+
+        <View style={styles.sectionHeader}>
+          <Text style={typography.title}>{t("home.budgets")}</Text>
+          <Pressable onPress={() => navigation.navigate("Budgets")} hitSlop={8}>
+            <Text style={styles.link}>{visibleBudgets.length > 0 ? t("home.manage") : t("home.setLimits")}</Text>
+          </Pressable>
+        </View>
+        {visibleBudgets.length > 0 ? (
+          <View style={styles.card}>
+            {visibleBudgets.map((b) => (
+              <BudgetBar
+                key={b.budgetId}
+                label={budgetLabel(b, accounts, categories, t)}
+                spent={b.spent}
+                limit={b.limit}
+                percent={b.percent}
+                lang={lang}
+              />
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.sectionHeader}>
           <Text style={typography.title}>{t("home.recent")}</Text>

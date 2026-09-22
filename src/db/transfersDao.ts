@@ -107,17 +107,25 @@ export async function restoreTransfer(db: SQLiteDatabase, t: Transfer): Promise<
   );
 }
 
+const DETAILS_SELECT = `SELECT t.*, fa.name AS from_name, ta.name AS to_name
+       FROM transfers t
+       JOIN accounts fa ON fa.id = t.from_account_id
+       JOIN accounts ta ON ta.id = t.to_account_id`;
+
+type TransferDetailsRow = TransferRow & { from_name: string; to_name: string };
+
+function mapDetails(row: TransferDetailsRow): TransferWithDetails {
+  return { ...mapTransfer(row), fromAccountName: row.from_name, toAccountName: row.to_name };
+}
+
 /** FR-5.6: newest first, optionally for one account (either side) and a date range. */
 export async function listTransfers(
   db: SQLiteDatabase,
   options: { limit: number; offset?: number; accountId?: ID | null; range?: DateRange | null }
 ): Promise<TransferWithDetails[]> {
   const { limit, offset = 0, accountId = null, range = null } = options;
-  const rows = await db.getAllAsync<TransferRow & { from_name: string; to_name: string }>(
-    `SELECT t.*, fa.name AS from_name, ta.name AS to_name
-       FROM transfers t
-       JOIN accounts fa ON fa.id = t.from_account_id
-       JOIN accounts ta ON ta.id = t.to_account_id
+  const rows = await db.getAllAsync<TransferDetailsRow>(
+    `${DETAILS_SELECT}
       WHERE (? IS NULL OR t.from_account_id = ? OR t.to_account_id = ?)
         AND (? IS NULL OR t.occurred_on BETWEEN ? AND ?)
       ORDER BY t.occurred_on DESC, t.id DESC
@@ -131,11 +139,17 @@ export async function listTransfers(
     limit,
     offset
   );
-  return rows.map((row) => ({
-    ...mapTransfer(row),
-    fromAccountName: row.from_name,
-    toAccountName: row.to_name,
-  }));
+  return rows.map(mapDetails);
+}
+
+/** Transfers with account names for a set of ids (order not guaranteed). */
+export async function listTransfersByIds(db: SQLiteDatabase, ids: ID[]): Promise<TransferWithDetails[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.getAllAsync<TransferDetailsRow>(
+    `${DETAILS_SELECT} WHERE t.id IN (${ids.map(() => "?").join(", ")})`,
+    ...ids
+  );
+  return rows.map(mapDetails);
 }
 
 /** What a transfer does to each side, for the form's preview line. */

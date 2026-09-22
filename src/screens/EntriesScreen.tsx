@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   SectionList,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -36,6 +38,23 @@ export default function EntriesScreen() {
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
   const dataVersion = useLedgerStore((s) => s.dataVersion);
+
+  // FR-8: search and filters open from the list header.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={() => navigation.navigate("Search")}
+          hitSlop={10}
+          style={styles.headerButton}
+          accessibilityRole="button"
+          accessibilityLabel={t("search.title")}
+        >
+          <MaterialCommunityIcons name="magnify" size={26} color={colors.primary} />
+        </Pressable>
+      ),
+    });
+  }, [navigation, t]);
 
   const [entries, setEntries] = useState<EntryWithDetails[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -144,6 +163,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  headerButton: {
+    marginRight: spacing.md,
   },
   loader: {
     marginTop: spacing.xl,

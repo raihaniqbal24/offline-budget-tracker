@@ -1,4 +1,5 @@
 import type { NavigatorScreenParams } from "@react-navigation/native";
+import type { BudgetScope, CategoryType } from "../types";
 
 export type TabParamList = {
   Home: undefined;
@@ -20,4 +21,9 @@ export type RootStackParamList = {
   Adjustment: { entryId: number };
   /** Unrecorded adjustments dated within start..end, optionally for one account. */
   Adjustments: { start: string; end: string; accountId?: number | null };
+  Categories: undefined;
+  CategoryForm: { categoryId?: number; type?: CategoryType } | undefined;
+  Budgets: undefined;
+  BudgetForm: { scope: BudgetScope; categoryId?: number; accountId?: number };
+  Search: undefined;
 };
