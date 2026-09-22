@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { bootstrap } from "./src/bootstrap";
+import { bootstrap, resetLocalDatabaseForDevelopment } from "./src/bootstrap";
 import AppNavigator from "./src/navigation";
+import Button from "./src/components/Button";
 import { colors, spacing, typography } from "./src/theme";
 
 type StartupState =
@@ -14,7 +15,8 @@ type StartupState =
 export default function App() {
   const [state, setState] = useState<StartupState>({ status: "loading" });
 
-  useEffect(() => {
+  const start = useCallback(() => {
+    setState({ status: "loading" });
     bootstrap()
       .then(() => setState({ status: "ready" }))
       .catch((error: unknown) =>
@@ -24,6 +26,22 @@ export default function App() {
         }),
       );
   }, []);
+
+  useEffect(() => {
+    start();
+  }, [start]);
+
+  const resetAndRetry = useCallback(async () => {
+    try {
+      await resetLocalDatabaseForDevelopment();
+      start();
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, [start]);
 
   if (state.status === "loading") {
     return (
@@ -46,6 +64,19 @@ export default function App() {
           lagi.
         </Text>
         <Text style={[typography.caption, styles.detail]}>{state.message}</Text>
+        {__DEV__ ? (
+          <View style={styles.devBox}>
+            <Button
+              label="Reset local database (development only)"
+              variant="danger"
+              onPress={resetAndRetry}
+            />
+            <Text style={[typography.caption, styles.detail]}>
+              Deletes everything stored in the app on this phone, then starts
+              again.
+            </Text>
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -67,5 +98,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors.background,
   },
-  detail: { textAlign: "center" },
+  detail: {
+    textAlign: "center",
+  },
+  devBox: {
+    alignSelf: "stretch",
+    marginTop: spacing.lg,
+    gap: spacing.sm,
+  },
 });
