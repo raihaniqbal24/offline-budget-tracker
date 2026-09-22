@@ -1,4 +1,4 @@
-import { formatDate, formatDayHeader, formatMonthYear } from "../dateLabels";
+import { formatDate, formatDayHeader, formatMonthYear, monthInitial, weekdayInitial } from "../dateLabels";
 
 const TODAY = "2026-09-21"; // a Monday
 
@@ -19,5 +19,11 @@ describe("date labels", () => {
   it("formats month and year", () => {
     expect(formatMonthYear("2026-09-01", "en")).toBe("September 2026");
     expect(formatMonthYear("2026-08-01", "id")).toBe("Agustus 2026");
+  });
+
+  it("gives chart axis initials", () => {
+    expect(weekdayInitial("2026-09-21", "en")).toBe("M"); // Monday
+    expect(weekdayInitial("2026-09-23", "id")).toBe("R"); // Rabu
+    expect(monthInitial("2026-09", "en")).toBe("S");
   });
 });

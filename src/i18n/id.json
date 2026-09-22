@@ -24,7 +24,8 @@
     "comingSoon": "Layar ini hadir di fase {{phase}}."
   },
   "more": {
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "transfers": "Transfer"
   },
   "settings": {
     "title": "Pengaturan",
@@ -61,7 +62,9 @@
     "noEntries": "Belum ada transaksi. Ketuk + untuk menambahkan yang pertama.",
     "quickAdd": "Tambah transaksi",
     "noAccountsTitle": "Tambahkan akun untuk mulai",
-    "noAccountsBody": "Akun adalah tempat uang Anda berada: tunai, rekening bank, atau dompet digital."
+    "noAccountsBody": "Akun adalah tempat uang Anda berada: tunai, rekening bank, atau dompet digital.",
+    "accounts": "Akun",
+    "transfer": "Transfer"
   },
   "accounts": {
     "add": "Tambah akun",
@@ -113,7 +116,6 @@
     "futureHint": "Masuk ke saldo mulai {{date}}.",
     "delete": "Hapus transaksi",
     "archivedSuffix": "(diarsipkan)",
-    "adjustmentLater": "Penyesuaian tidak tercatat dapat diubah setelah fitur rekonsiliasi hadir di fase 2.",
     "noAccount": "Tambahkan akun sebelum mencatat transaksi.",
     "selectCategory": "Pilih kategori.",
     "selectAccount": "Pilih akun."
@@ -125,5 +127,88 @@
   },
   "errors": {
     "saveFailed": "Gagal menyimpan: {{message}}"
+  },
+  "transfers": {
+    "title": "Transfer",
+    "new": "Transfer baru",
+    "edit": "Ubah transfer",
+    "from": "Dari",
+    "to": "Ke",
+    "fee": "Biaya (opsional)",
+    "senderPays": "Biaya ditanggung pengirim",
+    "recipientPays": "Biaya ditanggung penerima",
+    "delete": "Hapus transfer",
+    "deleted": "Transfer dihapus",
+    "emptyTitle": "Belum ada transfer",
+    "emptyBody": "Ketuk + untuk memindahkan uang antarakun.",
+    "allAccounts": "Semua akun",
+    "allDates": "Semua tanggal",
+    "feeCaption": "Biaya {{amount}} · {{payer}}",
+    "payerSender": "pengirim",
+    "payerRecipient": "penerima",
+    "needTwoAccounts": "Tambahkan akun kedua untuk memindahkan uang antarakun.",
+    "errors": {
+      "chooseAccounts": "Pilih kedua akun.",
+      "sameAccount": "Pilih dua akun yang berbeda.",
+      "invalidFee": "Masukkan biaya yang valid, atau biarkan kosong.",
+      "feeExceedsAmount": "Jika penerima yang menanggung, biaya tidak boleh melebihi jumlah transfer."
+    }
+  },
+  "reconcile": {
+    "title": "Cocokkan saldo",
+    "hint": "Masukkan saldo sebenarnya dari aplikasi bank, dompet digital, atau dompet Anda. Selisihnya dicatat sebagai Tidak tercatat.",
+    "appBalance": "Saldo di aplikasi",
+    "realBalance": "Saldo sebenarnya",
+    "realBalanceHint": "Cek aplikasi bank, dompet digital, atau dompet Anda, lalu masukkan saldo yang tertera.",
+    "unrecordedSpending": "Pengeluaran tidak tercatat: {{amount}}",
+    "unrecordedIncome": "Pemasukan tidak tercatat: {{amount}}",
+    "matches": "Saldo sudah cocok. Tidak ada yang perlu dicatat.",
+    "datedToday": "Selisihnya dicatat sebagai penyesuaian Tidak tercatat bertanggal hari ini. Setelah itu, Anda bisa memberinya kategori atau memecahnya.",
+    "save": "Catat selisihnya"
+  },
+  "adjustment": {
+    "title": "Penyesuaian tidak tercatat",
+    "listTitle": "Penyesuaian tidak tercatat",
+    "spending": "Pengeluaran tidak tercatat",
+    "income": "Pemasukan tidak tercatat",
+    "modeOne": "Satu kategori",
+    "modeSplit": "Pecah",
+    "categorizeHint": "Beri seluruh jumlah satu kategori. Penyesuaian ini menjadi transaksi biasa.",
+    "splitHint": "Pecah sebagian atau seluruhnya ke beberapa kategori. Sisanya tetap Tidak tercatat.",
+    "part": "Bagian {{n}}",
+    "addPart": "Tambah bagian",
+    "remove": "Hapus",
+    "remaining": "Masih tidak tercatat: {{amount}}",
+    "exceeds": "Jumlah semua bagian melebihi penyesuaian.",
+    "partNeedsAmount": "Masukkan jumlah di atas nol untuk setiap bagian.",
+    "partNeedsCategory": "Pilih kategori untuk setiap bagian.",
+    "delete": "Hapus penyesuaian",
+    "noneLeft": "Tidak ada lagi penyesuaian tidak tercatat di periode ini."
+  },
+  "summary": {
+    "day": "Hari",
+    "week": "Minggu",
+    "month": "Bulan",
+    "year": "Tahun",
+    "previous": "Periode sebelumnya",
+    "next": "Periode berikutnya",
+    "backToToday": "Kembali ke hari ini",
+    "allAccounts": "Semua akun",
+    "spent": "Pengeluaran",
+    "income": "Pemasukan",
+    "net": "Selisih",
+    "averagePerDay": "Rata-rata per hari",
+    "vsPrevious": {
+      "day": "dibanding hari sebelumnya",
+      "week": "dibanding minggu sebelumnya",
+      "month": "dibanding bulan sebelumnya",
+      "year": "dibanding tahun sebelumnya"
+    },
+    "breakdown": "Pengeluaran per kategori",
+    "trend": "Tren pengeluaran",
+    "noSpending": "Tidak ada pengeluaran di periode ini.",
+    "emptyTitle": "Belum ada catatan di periode ini",
+    "emptyBody": "Transaksi yang Anda tambahkan untuk tanggal-tanggal ini akan muncul di sini.",
+    "addEntry": "Tambah transaksi"
   }
 }

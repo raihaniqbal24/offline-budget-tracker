@@ -12,7 +12,6 @@ import { useTranslation } from "react-i18next";
 import { colors } from "../theme";
 import { useLedgerStore } from "../store/ledgerStore";
 import type { RootStackParamList, TabParamList } from "./types";
-import PlaceholderScreen from "../screens/PlaceholderScreen";
 import HomeScreen from "../screens/HomeScreen";
 import EntriesScreen from "../screens/EntriesScreen";
 import AccountsScreen from "../screens/AccountsScreen";
@@ -20,6 +19,12 @@ import MoreScreen from "../screens/MoreScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import EntryFormScreen from "../screens/EntryFormScreen";
 import AccountFormScreen from "../screens/AccountFormScreen";
+import SummaryScreen from "../screens/SummaryScreen";
+import TransferFormScreen from "../screens/TransferFormScreen";
+import TransfersScreen from "../screens/TransfersScreen";
+import ReconcileScreen from "../screens/ReconcileScreen";
+import AdjustmentScreen from "../screens/AdjustmentScreen";
+import AdjustmentsScreen from "../screens/AdjustmentsScreen";
 import UndoSnackbar from "../components/UndoSnackbar";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
@@ -34,9 +39,6 @@ const TAB_ICONS: Record<keyof TabParamList, IconName> = {
   Accounts: "wallet-outline",
   More: "dots-horizontal-circle-outline",
 };
-
-// Replaced in phase 2.
-const SummaryScreen = () => <PlaceholderScreen phase={2} />;
 
 const navTheme: Theme = {
   ...DefaultTheme,
@@ -144,6 +146,33 @@ export default function AppNavigator() {
                 ? t("accountForm.titleEdit")
                 : t("accountForm.titleNew"),
             })}
+          />
+          <Stack.Screen
+            name="TransferForm"
+            component={TransferFormScreen}
+            options={({ route }) => ({
+              title: route.params?.transferId ? t("transfers.edit") : t("transfers.new"),
+            })}
+          />
+          <Stack.Screen
+            name="Transfers"
+            component={TransfersScreen}
+            options={{ title: t("transfers.title") }}
+          />
+          <Stack.Screen
+            name="Reconcile"
+            component={ReconcileScreen}
+            options={{ title: t("reconcile.title") }}
+          />
+          <Stack.Screen
+            name="Adjustment"
+            component={AdjustmentScreen}
+            options={{ title: t("adjustment.title") }}
+          />
+          <Stack.Screen
+            name="Adjustments"
+            component={AdjustmentsScreen}
+            options={{ title: t("adjustment.listTitle") }}
           />
         </Stack.Navigator>
       </NavigationContainer>

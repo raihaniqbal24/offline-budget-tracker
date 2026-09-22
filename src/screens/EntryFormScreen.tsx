@@ -8,14 +8,12 @@ import {
   View,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";
 import { getDb } from "../db/client";
 import { getEntry } from "../db/entriesDao";
 import { categoryLabel } from "../i18n";
 import { useAppLanguage } from "../i18n/useAppLanguage";
-import { parseISODate, toISODate, today, yesterday } from "../lib/dates";
-import { formatDate } from "../lib/dateLabels";
+import { today } from "../lib/dates";
 import { formatNumber, isValidEntryAmount, parseAmount } from "../lib/money";
 import {
   activeAccounts,
@@ -23,12 +21,13 @@ import {
   useLedgerStore,
 } from "../store/ledgerStore";
 import { colors, radius, spacing, typography } from "../theme";
-import type { Entry, ID } from "../types";
+import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
 import Chip from "../components/Chip";
+import DateField from "../components/DateField";
 
 type Props = NativeStackScreenProps<RootStackParamList, "EntryForm">;
 type FormType = "expense" | "income";
@@ -51,13 +50,12 @@ export default function EntryFormScreen({ route, navigation }: Props) {
 
   const todayDate = today();
   const [loaded, setLoaded] = useState(entryId === undefined);
-  const [original, setOriginal] = useState<Entry | null>(null);
   const [type, setType] = useState<FormType>(route.params?.type ?? "expense");
   const [amountText, setAmountText] = useState("");
   const [categoryId, setCategoryId] = useState<ID | null>(null);
   const [accountId, setAccountId] = useState<ID | null>(() =>
     defaultAccountId(accounts, lastUsedAccountId),
-  );
+);
   const [occurredOn, setOccurredOn] = useState(todayDate);
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -74,8 +72,12 @@ export default function EntryFormScreen({ route, navigation }: Props) {
         navigation.goBack();
         return;
       }
-      setOriginal(entry);
-      if (entry.type !== "adjustment") setType(entry.type);
+      // Unrecorded adjustments have their own editor (categorize or split).
+      if (entry.type === "adjustment") {
+        navigation.replace("Adjustment", { entryId: entry.id });
+        return;
+      }
+      setType(entry.type);
       setAmountText(formatNumber(Math.abs(entry.amount), lang));
       setCategoryId(entry.categoryId);
       setAccountId(entry.accountId);
@@ -96,8 +98,8 @@ export default function EntryFormScreen({ route, navigation }: Props) {
       categories.filter(
         (c) =>
           c.type === type &&
-          c.builtinKey === null &&
-          (!c.archived || c.id === categoryId),
+        c.builtinKey === null &&
+        (!c.archived || c.id === categoryId),
       ),
     [categories, type, categoryId],
   );
@@ -111,16 +113,6 @@ export default function EntryFormScreen({ route, navigation }: Props) {
     setType(next);
     // Categories are per type, so a category from the other type can't stay selected.
     setCategoryId(null);
-  };
-
-  const pickDate = () => {
-    DateTimePickerAndroid.open({
-      value: parseISODate(occurredOn),
-      mode: "date",
-      onChange: (event, date) => {
-        if (event.type === "set" && date) setOccurredOn(toISODate(date));
-      },
-    });
   };
 
   const save = async () => {
@@ -157,20 +149,6 @@ export default function EntryFormScreen({ route, navigation }: Props) {
     return <ActivityIndicator style={styles.loader} color={colors.primary} />;
   }
 
-  // Reconciliation adjustments get their own editor in phase 2.
-  if (original?.type === "adjustment") {
-    return (
-      <View style={[styles.screen, styles.content]}>
-        <Text style={typography.body}>{t("entryForm.adjustmentLater")}</Text>
-        <Button
-          label={t("entryForm.delete")}
-          variant="danger"
-          onPress={remove}
-        />
-      </View>
-    );
-  }
-
   if (activeAccounts(accounts).length === 0 && entryId === undefined) {
     return (
       <View style={[styles.screen, styles.content]}>
@@ -182,8 +160,6 @@ export default function EntryFormScreen({ route, navigation }: Props) {
       </View>
     );
   }
-
-  const isOtherDate = occurredOn !== todayDate && occurredOn !== yesterday();
 
   return (
     <View style={styles.screen}>
@@ -250,35 +226,12 @@ export default function EntryFormScreen({ route, navigation }: Props) {
         <Text style={[typography.label, styles.label]}>
           {t("entryForm.date")}
         </Text>
-        <View style={styles.wrap}>
-          <Chip
-            label={t("common.today")}
-            selected={occurredOn === todayDate}
-            onPress={() => setOccurredOn(todayDate)}
-          />
-          <Chip
-            label={t("common.yesterday")}
-            selected={occurredOn === yesterday()}
-            onPress={() => setOccurredOn(yesterday())}
-          />
-          <Chip
-            label={
-              isOtherDate
-                ? formatDate(occurredOn, lang, { todayDate, weekday: true })
-                : t("entryForm.pickDate")
-            }
-            icon="calendar"
-            selected={isOtherDate}
-            onPress={pickDate}
-          />
-        </View>
-        {occurredOn > todayDate ? (
-          <Text style={typography.caption}>
-            {t("entryForm.futureHint", {
-              date: formatDate(occurredOn, lang, { todayDate }),
-            })}
-          </Text>
-        ) : null}
+        <DateField
+          value={occurredOn}
+          onChange={setOccurredOn}
+          lang={lang}
+          todayDate={todayDate}
+        />
 
         <Text style={[typography.label, styles.label]}>
           {t("entryForm.note")}

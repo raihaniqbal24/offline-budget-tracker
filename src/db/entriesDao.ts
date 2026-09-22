@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import type { DateRange, ISODate } from "../lib/dates";
 import { isValidISODate } from "../lib/dates";
 import { isValidEntryAmount } from "../lib/money";
-import type { BuiltinCategoryKey, Entry, ID } from "../types";
+import type { BuiltinCategoryKey, Entry, EntryType, ID } from "../types";
 import { mapEntry, SQL_NOW, type EntryRow } from "./rows";
 
 /** What the entry form saves. Adjustments are created by reconciliation (phase 2). */
@@ -127,12 +127,21 @@ export async function restoreEntry(
   );
 }
 
+export interface ListEntriesOptions {
+  limit: number;
+  offset?: number;
+  accountId?: ID | null;
+  /** Inclusive date range; omit for all dates. */
+  range?: DateRange | null;
+  type?: EntryType | null;
+}
+
 /** Newest first, with category and account details for list rows. */
 export async function listEntries(
   db: SQLiteDatabase,
-  options: { limit: number; offset?: number; accountId?: ID | null },
+  options: ListEntriesOptions
 ): Promise<EntryWithDetails[]> {
-  const { limit, offset = 0, accountId = null } = options;
+  const { limit, offset = 0, accountId = null, range = null, type = null } = options;
   const rows = await db.getAllAsync<EntryDetailsRow>(
     `SELECT e.*,
             c.name AS category_name, c.i18n_key AS category_i18n_key,
@@ -143,10 +152,17 @@ export async function listEntries(
        JOIN categories c ON c.id = e.category_id
        JOIN accounts a ON a.id = e.account_id
       WHERE (? IS NULL OR e.account_id = ?)
+        AND (? IS NULL OR e.occurred_on BETWEEN ? AND ?)
+        AND (? IS NULL OR e.type = ?)
       ORDER BY e.occurred_on DESC, e.id DESC
       LIMIT ? OFFSET ?`,
     accountId,
     accountId,
+    range?.start ?? null,
+    range?.start ?? null,
+    range?.end ?? null,
+    type,
+    type,
     limit,
     offset,
   );

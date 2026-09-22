@@ -14,4 +14,10 @@ export type RootStackParamList = {
   Settings: undefined;
   EntryForm: { entryId?: number; type?: "expense" | "income" } | undefined;
   AccountForm: { accountId?: number } | undefined;
+  TransferForm: { transferId?: number; fromAccountId?: number } | undefined;
+  Transfers: undefined;
+  Reconcile: { accountId: number };
+  Adjustment: { entryId: number };
+  /** Unrecorded adjustments dated within start..end, optionally for one account. */
+  Adjustments: { start: string; end: string; accountId?: number | null };
 };

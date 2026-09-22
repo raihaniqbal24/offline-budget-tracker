@@ -11,7 +11,9 @@ import type {
   CurrencyCode,
   Entry,
   EntryType,
+  FeePaidBy,
   ID,
+  Transfer,
 } from "../types";
 
 export interface AccountRow {
@@ -44,6 +46,20 @@ export interface EntryRow {
   currency_code: CurrencyCode;
   account_id: ID;
   category_id: ID;
+  occurred_on: string;
+  note: string | null;
+  recurring_rule_id: ID | null;
+  created_at: string;
+}
+
+export interface TransferRow {
+  id: ID;
+  from_account_id: ID;
+  to_account_id: ID;
+  amount: number;
+  fee: number;
+  fee_paid_by: FeePaidBy;
+  currency_code: CurrencyCode;
   occurred_on: string;
   note: string | null;
   recurring_rule_id: ID | null;
@@ -85,6 +101,22 @@ export function mapEntry(row: EntryRow): Entry {
     currencyCode: row.currency_code,
     accountId: row.account_id,
     categoryId: row.category_id,
+    occurredOn: row.occurred_on,
+    note: row.note,
+    recurringRuleId: row.recurring_rule_id,
+    createdAt: row.created_at,
+  };
+}
+
+export function mapTransfer(row: TransferRow): Transfer {
+  return {
+    id: row.id,
+    fromAccountId: row.from_account_id,
+    toAccountId: row.to_account_id,
+    amount: row.amount,
+    fee: row.fee,
+    feePaidBy: row.fee_paid_by,
+    currencyCode: row.currency_code,
     occurredOn: row.occurred_on,
     note: row.note,
     recurringRuleId: row.recurring_rule_id,

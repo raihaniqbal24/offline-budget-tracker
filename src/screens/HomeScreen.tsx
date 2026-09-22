@@ -106,6 +106,29 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <View style={styles.sectionHeader}>
+          <Text style={typography.title}>
+            {t("home.accounts")}
+          </Text>
+          {active.length >= 2 ? (
+            <Pressable
+              onPress={() => navigation.navigate("TransferForm")}
+              hitSlop={8}
+              style={styles.inlineAction}
+              accessibilityRole="button"
+            >
+              <MaterialCommunityIcons
+                name="bank-transfer"
+                size={18}
+                color={colors.primary}
+              />
+              <Text style={styles.link}>
+                {t("home.transfer")}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -279,6 +302,11 @@ const styles = StyleSheet.create({
   link: {
     color: colors.primary,
     fontWeight: "600",
+  },
+  inlineAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   emptyRecent: {
     textAlign: "center",

@@ -24,7 +24,8 @@
     "comingSoon": "This screen arrives in phase {{phase}}."
   },
   "more": {
-    "settings": "Settings"
+    "settings": "Settings",
+    "transfers": "Transfers"
   },
   "settings": {
     "title": "Settings",
@@ -61,7 +62,9 @@
     "noEntries": "No entries yet. Tap + to add your first.",
     "quickAdd": "Add entry",
     "noAccountsTitle": "Add an account to start",
-    "noAccountsBody": "Accounts are where your money lives: cash, a bank account or an e-wallet."
+    "noAccountsBody": "Accounts are where your money lives: cash, a bank account or an e-wallet.",
+    "accounts": "Accounts",
+    "transfer": "Transfer"
   },
   "accounts": {
     "add": "Add account",
@@ -113,7 +116,6 @@
     "futureHint": "Counts toward the balance from {{date}}.",
     "delete": "Delete entry",
     "archivedSuffix": "(archived)",
-    "adjustmentLater": "Unrecorded adjustments can be edited once reconciliation arrives in phase 2.",
     "noAccount": "Add an account before recording entries.",
     "selectCategory": "Choose a category.",
     "selectAccount": "Choose an account."
@@ -125,5 +127,88 @@
   },
   "errors": {
     "saveFailed": "Couldn't save: {{message}}"
+  },
+  "transfers": {
+    "title": "Transfers",
+    "new": "New transfer",
+    "edit": "Edit transfer",
+    "from": "From",
+    "to": "To",
+    "fee": "Fee (optional)",
+    "senderPays": "Sender pays the fee",
+    "recipientPays": "Recipient pays the fee",
+    "delete": "Delete transfer",
+    "deleted": "Transfer deleted",
+    "emptyTitle": "No transfers yet",
+    "emptyBody": "Tap + to move money between your accounts.",
+    "allAccounts": "All accounts",
+    "allDates": "All dates",
+    "feeCaption": "Fee {{amount}} · {{payer}}",
+    "payerSender": "sender",
+    "payerRecipient": "recipient",
+    "needTwoAccounts": "Add a second account to move money between accounts.",
+    "errors": {
+      "chooseAccounts": "Choose both accounts.",
+      "sameAccount": "Choose two different accounts.",
+      "invalidFee": "Enter a valid fee, or leave it empty.",
+      "feeExceedsAmount": "When the recipient pays, the fee can't be more than the amount."
+    }
+  },
+  "reconcile": {
+    "title": "Reconcile balance",
+    "hint": "Enter the real balance from your bank app, e-wallet or wallet. Any difference is recorded as Unrecorded.",
+    "appBalance": "Balance in the app",
+    "realBalance": "Real balance",
+    "realBalanceHint": "Check your bank app, e-wallet or wallet and enter what it shows.",
+    "unrecordedSpending": "Unrecorded spending: {{amount}}",
+    "unrecordedIncome": "Unrecorded income: {{amount}}",
+    "matches": "The balances match. Nothing to record.",
+    "datedToday": "The difference is recorded as an Unrecorded adjustment dated today. You can then give it a category or split it.",
+    "save": "Record the difference"
+  },
+  "adjustment": {
+    "title": "Unrecorded adjustment",
+    "listTitle": "Unrecorded adjustments",
+    "spending": "Unrecorded spending",
+    "income": "Unrecorded income",
+    "modeOne": "One category",
+    "modeSplit": "Split",
+    "categorizeHint": "Give the whole amount a category. It becomes a normal entry.",
+    "splitHint": "Split part or all of it across categories. Anything left stays Unrecorded.",
+    "part": "Part {{n}}",
+    "addPart": "Add another part",
+    "remove": "Remove",
+    "remaining": "Still unrecorded: {{amount}}",
+    "exceeds": "The parts add up to more than the adjustment.",
+    "partNeedsAmount": "Enter an amount above zero for each part.",
+    "partNeedsCategory": "Choose a category for each part.",
+    "delete": "Delete adjustment",
+    "noneLeft": "No unrecorded adjustments left in this period."
+  },
+  "summary": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "previous": "Previous period",
+    "next": "Next period",
+    "backToToday": "Back to today",
+    "allAccounts": "All accounts",
+    "spent": "Spent",
+    "income": "Income",
+    "net": "Net",
+    "averagePerDay": "Average per day",
+    "vsPrevious": {
+      "day": "vs previous day",
+      "week": "vs previous week",
+      "month": "vs previous month",
+      "year": "vs previous year"
+    },
+    "breakdown": "Spending by category",
+    "trend": "Spending trend",
+    "noSpending": "No spending in this period.",
+    "emptyTitle": "Nothing recorded in this period",
+    "emptyBody": "Entries you add for these dates will show up here.",
+    "addEntry": "Add entry"
   }
 }

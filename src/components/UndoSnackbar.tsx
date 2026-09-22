@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { UNDO_WINDOW_MS, useLedgerStore } from "../store/ledgerStore";
 import { colors, radius, spacing } from "../theme";
 
-/** App-wide bar offering undo for 5 seconds after an entry is deleted (FR-2.7). */
+/** App-wide bar offering undo for 5 seconds after an entry or transfer is deleted (FR-2.7). */
 export default function UndoSnackbar() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -26,7 +26,7 @@ export default function UndoSnackbar() {
       style={[styles.bar, { bottom: insets.bottom + 72 }]}
       accessibilityLiveRegion="polite"
     >
-      <Text style={styles.text}>{t("entries.deleted")}</Text>
+      <Text style={styles.text}>{undo.kind === "entry" ? t("entries.deleted") : t("transfers.deleted")}</Text>
       <Pressable onPress={undoDelete} accessibilityRole="button" hitSlop={12}>
         <Text style={styles.action}>{t("common.undo")}</Text>
       </Pressable>

@@ -37,7 +37,7 @@ export default function AccountFormScreen({ route, navigation }: Props) {
     (existing?.openingBalance ?? 0) < 0,
   );
   const [alertText, setAlertText] = useState(
-    existing?.alertLine != null
+    existing?.alertLine != null 
       ? formatNumber(Math.abs(existing.alertLine), lang)
       : "",
   );
@@ -155,6 +155,17 @@ export default function AccountFormScreen({ route, navigation }: Props) {
           placeholder={t("accountForm.alertLinePlaceholder")}
         />
         <Text style={typography.caption}>{t("accountForm.alertLineHint")}</Text>
+
+        {existing && !existing.archived ? (
+          <View style={styles.archiveBox}>
+            <Button
+              label={t("reconcile.title")}
+              variant="secondary"
+              onPress={() => navigation.navigate("Reconcile", { accountId: existing.id })}
+            />
+            <Text style={typography.caption}>{t("reconcile.hint")}</Text>
+          </View>
+        ) : null}
 
         {existing ? (
           <View style={styles.archiveBox}>

@@ -16,17 +16,29 @@ import {
   type EntryInput,
 } from "../db/entriesDao";
 import { getSetting, setSetting } from "../db/settingsDao";
+import {
+  createTransfer,
+  deleteTransfer,
+  restoreTransfer,
+  updateTransfer,
+  type TransferInput,
+} from "../db/transfersDao";
+import {
+  categorizeAdjustment,
+  reconcileAccount,
+  splitAdjustment,
+  type SplitPart,
+} from "../db/adjustmentsDao";
 import { today } from "../lib/dates";
-import type { AccountWithBalance, Category, Entry, ID } from "../types";
+import type { AccountWithBalance, Category, Entry, ID, Transfer } from "../types";
 
 /** How long the undo bar stays after a delete (decided: 5 seconds). */
 export const UNDO_WINDOW_MS = 5_000;
 
-interface UndoState {
-  entry: Entry;
-  /** Changes on every delete, so an old timer can't dismiss a newer undo. */
-  token: number;
-}
+type UndoState =
+  | { kind: "entry"; entry: Entry; token: number }
+  | { kind: "transfer"; transfer: Transfer; token: number };
+// token changes on every delete, so an old timer can't dismiss a newer undo.
 
 interface LedgerState {
   accounts: AccountWithBalance[];
@@ -45,6 +57,13 @@ interface LedgerState {
   setAccountArchived: (id: ID, archived: boolean) => Promise<void>;
   saveEntry: (input: EntryInput, id?: ID) => Promise<ID>;
   deleteEntry: (id: ID) => Promise<void>;
+  saveTransfer: (input: TransferInput, id?: ID) => Promise<ID>;
+  deleteTransfer: (id: ID) => Promise<void>;
+  /** Returns the new adjustment's id, or null when the balance already matched. */
+  reconcile: (accountId: ID, realBalance: number) => Promise<ID | null>;
+  categorizeAdjustment: (id: ID, categoryId: ID, note: string | null) => Promise<void>;
+  /** Returns the signed amount still unrecorded (0 when fully explained). */
+  splitAdjustment: (id: ID, parts: SplitPart[]) => Promise<number>;
   undoDelete: () => Promise<void>;
   dismissUndo: (token: number) => void;
 }
@@ -113,8 +132,48 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   deleteEntry: async (id) => {
     const db = await getDb();
     const entry = await deleteEntry(db, id);
-    if (entry) set({ undo: { entry, token: ++undoCounter } });
+    if (entry) set({ undo: { kind: "entry", entry, token: ++undoCounter } });
     await get().refresh();
+  },
+
+  saveTransfer: async (input, id) => {
+    const db = await getDb();
+    let transferId: ID;
+    if (id === undefined) {
+      transferId = await createTransfer(db, input);
+    } else {
+      await updateTransfer(db, id, input);
+      transferId = id;
+    }
+    await get().refresh();
+    return transferId;
+  },
+
+  deleteTransfer: async (id) => {
+    const db = await getDb();
+    const transfer = await deleteTransfer(db, id);
+    if (transfer) set({ undo: { kind: "transfer", transfer, token: ++undoCounter } });
+    await get().refresh();
+  },
+
+  reconcile: async (accountId, realBalance) => {
+    const db = await getDb();
+    const id = await reconcileAccount(db, accountId, realBalance, today());
+    await get().refresh();
+    return id;
+  },
+
+  categorizeAdjustment: async (id, categoryId, note) => {
+    const db = await getDb();
+    await categorizeAdjustment(db, id, categoryId, note);
+    await get().refresh();
+  },
+
+  splitAdjustment: async (id, parts) => {
+    const db = await getDb();
+    const remaining = await splitAdjustment(db, id, parts);
+    await get().refresh();
+    return remaining;
   },
 
   undoDelete: async () => {
@@ -122,7 +181,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     if (!pending) return;
     set({ undo: null });
     const db = await getDb();
-    await restoreEntry(db, pending.entry);
+    if (pending.kind === "entry") await restoreEntry(db, pending.entry);
+    else await restoreTransfer(db, pending.transfer);
     await get().refresh();
   },
 

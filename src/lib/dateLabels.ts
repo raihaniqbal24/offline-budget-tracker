@@ -12,6 +12,8 @@ function parts(value: ISODate): [number, number, number] {
 }
 
 interface DateNames {
+  monthInitials: string[];
+  weekdayInitials: string[]; // Monday first
   monthsShort: string[];
   monthsLong: string[];
   weekdaysShort: string[]; // Monday first
@@ -22,6 +24,29 @@ interface DateNames {
 
 const NAMES: Record<AppLanguage, DateNames> = {
   en: {
+    monthInitials: [
+      "J",
+      "F",
+      "M",
+      "A",
+      "M",
+      "J",
+      "J",
+      "A",
+      "S",
+      "O",
+      "N",
+      "D",
+    ],
+    weekdayInitials: [
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S",
+      "S",
+    ],
     monthsShort: [
       "Jan",
       "Feb",
@@ -56,6 +81,29 @@ const NAMES: Record<AppLanguage, DateNames> = {
     tomorrow: "Tomorrow",
   },
   id: {
+    monthInitials: [
+      "J",
+      "F",
+      "M",
+      "A",
+      "M",
+      "J",
+      "J",
+      "A",
+      "S",
+      "O",
+      "N",
+      "D",
+    ],
+    weekdayInitials: [
+      "S",
+      "S",
+      "R",
+      "K",
+      "J",
+      "S",
+      "M",
+    ],
     monthsShort: [
       "Jan",
       "Feb",
@@ -111,8 +159,8 @@ export function formatDate(
   const sameYear = value.slice(0, 4) === options.todayDate.slice(0, 4);
   const base = `${d} ${names.monthsShort[m - 1]}${sameYear ? "" : ` ${y}`}`;
   return options.weekday
-    ? `${names.weekdaysShort[weekdayIndex(value)]}, ${base}`
-    : base;
+  ? `${names.weekdaysShort[weekdayIndex(value)]}, ${base}`
+  : base;
 }
 
 /** List headers: "Today", "Yesterday", "Tomorrow", otherwise "Mon, 21 Sep". */
@@ -132,4 +180,14 @@ export function formatDayHeader(
 export function formatMonthYear(value: ISODate, lang: AppLanguage): string {
   const [y, m] = parts(value);
   return `${NAMES[lang].monthsLong[m - 1]} ${y}`;
+}
+
+/** Single-letter weekday for chart axes: "M" (en) / "S" (id, Senin). */
+export function weekdayInitial(value: ISODate, lang: AppLanguage): string {
+  return NAMES[lang].weekdayInitials[weekdayIndex(value)];
+}
+
+/** Single-letter month for the Year chart axis, from "YYYY-MM". */
+export function monthInitial(monthKey: string, lang: AppLanguage): string {
+  return NAMES[lang].monthInitials[Number(monthKey.slice(5, 7)) - 1];
 }
