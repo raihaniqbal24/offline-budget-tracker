@@ -1,5 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -30,14 +39,20 @@ import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
 import Segmented from "../components/Segmented";
 import TransferRow from "../components/TransferRow";
+import { usePagedList } from "../hooks/usePagedList";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Search">;
 
 const PAGE_SIZE = 100;
 const TYPES: SearchType[] = ["expense", "income", "transfer", "adjustment"];
 
+const rowKey = (r: SearchRow) =>
+  r.kind === "entry" ? `e${r.entry.id}` : `t${r.transfer.id}`;
+
 function toggle<T>(list: T[], value: T): T[] {
-  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+  return list.includes(value)
+    ? list.filter((v) => v !== value)
+    : [...list, value];
 }
 
 /**
@@ -67,12 +82,7 @@ export default function SearchScreen({ navigation }: Props) {
   const [endDate, setEndDate] = useState<ISODate | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Results
-  const [rows, setRows] = useState<SearchRow[]>([]);
   const [summary, setSummary] = useState<SearchSummary | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const loaded = useRef(0);
-  const busy = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedText(text), 300);
@@ -89,7 +99,9 @@ export default function SearchScreen({ navigation }: Props) {
     return {
       min,
       max,
-      invalid: (minText.trim() !== "" && min === null) || (maxText.trim() !== "" && max === null),
+      invalid:
+        (minText.trim() !== "" && min === null) ||
+        (maxText.trim() !== "" && max === null),
     };
   }, [amountMode, exactText, minText, maxText]);
 
@@ -104,30 +116,39 @@ export default function SearchScreen({ navigation }: Props) {
       startDate,
       endDate,
     }),
-    [debouncedText, amountBounds.min, amountBounds.max, accountId, categoryIds, types, startDate, endDate]
+    [
+      debouncedText,
+      amountBounds.min,
+      amountBounds.max,
+      accountId,
+      categoryIds,
+      types,
+      startDate,
+      endDate,
+    ],
   );
 
   const filterKey = JSON.stringify(filters);
 
-  // A new filter starts from the first page (declared before the load effect).
-  useEffect(() => {
-    loaded.current = 0;
-  }, [filterKey]);
+  const fetchPage = useCallback(
+    async (limit: number, offset: number) =>
+      searchRecords(await getDb(), filters, { limit, offset }),
+    [filters],
+  );
+  const { items: rows, loadMore } = usePagedList<SearchRow>({
+    fetchPage,
+    keyOf: rowKey,
+    resetKey: filterKey,
+    refreshKey: dataVersion,
+    pageSize: PAGE_SIZE,
+  });
 
+  // Count and totals for the header (FR-8.3).
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const db = await getDb();
-      const limit = Math.max(PAGE_SIZE, loaded.current);
-      const [result, totals] = await Promise.all([
-        searchRecords(db, filters, { limit, offset: 0 }),
-        summarizeSearch(db, filters),
-      ]);
-      if (cancelled) return;
-      loaded.current = result.length;
-      setRows(result);
-      setSummary(totals);
-      setHasMore(result.length === limit);
+      const totals = await summarizeSearch(await getDb(), filters);
+      if (!cancelled) setSummary(totals);
     })();
     return () => {
       cancelled = true;
@@ -135,17 +156,6 @@ export default function SearchScreen({ navigation }: Props) {
     // filters is captured through filterKey
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey, dataVersion]);
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || busy.current) return;
-    busy.current = true;
-    const more = await searchRecords(await getDb(), filters, { limit: PAGE_SIZE, offset: loaded.current });
-    loaded.current += more.length;
-    setRows((prev) => [...prev, ...more]);
-    setHasMore(more.length === PAGE_SIZE);
-    busy.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMore, filterKey]);
 
   // FR-8.4: clearing restores the full list.
   const clearAll = () => {
@@ -179,13 +189,21 @@ export default function SearchScreen({ navigation }: Props) {
     (types.length > 0 ? 1 : 0) +
     (startDate !== null || endDate !== null ? 1 : 0);
 
-  const expenseCats = categories.filter((c) => c.type === "expense" && c.builtinKey === null);
-  const incomeCats = categories.filter((c) => c.type === "income" && c.builtinKey === null);
+  const expenseCats = categories.filter(
+    (c) => c.type === "expense" && c.builtinKey === null,
+  );
+  const incomeCats = categories.filter(
+    (c) => c.type === "income" && c.builtinKey === null,
+  );
 
   const header = (
     <View style={styles.header}>
       <View style={styles.searchBox}>
-        <MaterialCommunityIcons name="magnify" size={22} color={colors.textMuted} />
+        <MaterialCommunityIcons
+          name="magnify"
+          size={22}
+          color={colors.textMuted}
+        />
         <TextInput
           value={text}
           onChangeText={setText}
@@ -196,19 +214,41 @@ export default function SearchScreen({ navigation }: Props) {
           returnKeyType="search"
         />
         {text ? (
-          <Pressable onPress={() => setText("")} hitSlop={8} accessibilityLabel={t("search.clearText")}>
-            <MaterialCommunityIcons name="close-circle" size={20} color={colors.textMuted} />
+          <Pressable
+            onPress={() => setText("")}
+            hitSlop={8}
+            accessibilityLabel={t("search.clearText")}
+          >
+            <MaterialCommunityIcons
+              name="close-circle"
+              size={20}
+              color={colors.textMuted}
+            />
           </Pressable>
         ) : null}
       </View>
 
       <View style={styles.toolbar}>
-        <Pressable onPress={() => setShowFilters((v) => !v)} style={styles.filterToggle} hitSlop={6}>
-          <MaterialCommunityIcons name="filter-variant" size={20} color={colors.primary} />
+        <Pressable
+          onPress={() => setShowFilters((v) => !v)}
+          style={styles.filterToggle}
+          hitSlop={6}
+        >
+          <MaterialCommunityIcons
+            name="filter-variant"
+            size={20}
+            color={colors.primary}
+          />
           <Text style={styles.link}>
-            {filterCount > 0 ? t("search.filtersCount", { count: filterCount }) : t("search.filters")}
+            {filterCount > 0
+              ? t("search.filtersCount", { count: filterCount })
+              : t("search.filters")}
           </Text>
-          <MaterialCommunityIcons name={showFilters ? "chevron-up" : "chevron-down"} size={20} color={colors.primary} />
+          <MaterialCommunityIcons
+            name={showFilters ? "chevron-up" : "chevron-down"}
+            size={20}
+            color={colors.primary}
+          />
         </Pressable>
         {active ? (
           <Pressable onPress={clearAll} hitSlop={6}>
@@ -222,25 +262,56 @@ export default function SearchScreen({ navigation }: Props) {
           <Text style={typography.label}>{t("search.type")}</Text>
           <View style={styles.wrap}>
             {TYPES.map((type) => (
-              <Chip key={type} label={t(`search.types.${type}`)} selected={types.includes(type)} onPress={() => setTypes((v) => toggle(v, type))} />
+              <Chip
+                key={type}
+                label={t(`search.types.${type}`)}
+                selected={types.includes(type)}
+                onPress={() => setTypes((v) => toggle(v, type))}
+              />
             ))}
           </View>
 
-          <Text style={[typography.label, styles.label]}>{t("search.account")}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-            <Chip label={t("summary.allAccounts")} selected={accountId === null} onPress={() => setAccountId(null)} />
+          <Text style={[typography.label, styles.label]}>
+            {t("search.account")}
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipRow}
+          >
+            <Chip
+              label={t("summary.allAccounts")}
+              selected={accountId === null}
+              onPress={() => setAccountId(null)}
+            />
             {accounts.map((a) => (
-              <Chip key={a.id} label={a.name} selected={accountId === a.id} onPress={() => setAccountId(a.id)} />
+              <Chip
+                key={a.id}
+                label={a.name}
+                selected={accountId === a.id}
+                onPress={() => setAccountId(a.id)}
+              />
             ))}
           </ScrollView>
 
-          <Text style={[typography.label, styles.label]}>{t("search.categories")}</Text>
+          <Text style={[typography.label, styles.label]}>
+            {t("search.categories")}
+          </Text>
           {[expenseCats, incomeCats].map((list, i) => (
-            <ScrollView key={i} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+            <ScrollView
+              key={i}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipRow}
+            >
               {list.map((c) => (
                 <Chip
                   key={c.id}
-                  label={c.archived ? `${categoryLabel(c)} ${t("entryForm.archivedSuffix")}` : categoryLabel(c)}
+                  label={
+                    c.archived
+                      ? `${categoryLabel(c)} ${t("entryForm.archivedSuffix")}`
+                      : categoryLabel(c)
+                  }
                   icon={c.icon}
                   color={c.color}
                   selected={categoryIds.includes(c.id)}
@@ -250,7 +321,9 @@ export default function SearchScreen({ navigation }: Props) {
             </ScrollView>
           ))}
 
-          <Text style={[typography.label, styles.label]}>{t("search.amount")}</Text>
+          <Text style={[typography.label, styles.label]}>
+            {t("search.amount")}
+          </Text>
           <Segmented
             options={[
               { value: "exact", label: t("search.exact") },
@@ -260,31 +333,55 @@ export default function SearchScreen({ navigation }: Props) {
             onChange={setAmountMode}
           />
           {amountMode === "exact" ? (
-            <AmountInput value={exactText} onChangeText={setExactText} lang={lang} />
+            <AmountInput
+              value={exactText}
+              onChangeText={setExactText}
+              lang={lang}
+            />
           ) : (
             <View style={styles.rangeRow}>
               <View style={styles.flex}>
                 <Text style={typography.caption}>{t("search.from")}</Text>
-                <AmountInput value={minText} onChangeText={setMinText} lang={lang} />
+                <AmountInput
+                  value={minText}
+                  onChangeText={setMinText}
+                  lang={lang}
+                />
               </View>
               <View style={styles.flex}>
                 <Text style={typography.caption}>{t("search.to")}</Text>
-                <AmountInput value={maxText} onChangeText={setMaxText} lang={lang} />
+                <AmountInput
+                  value={maxText}
+                  onChangeText={setMaxText}
+                  lang={lang}
+                />
               </View>
             </View>
           )}
-          {amountBounds.invalid ? <Text style={styles.error}>{t("amount.invalid")}</Text> : null}
+          {amountBounds.invalid ? (
+            <Text style={styles.error}>{t("amount.invalid")}</Text>
+          ) : null}
 
-          <Text style={[typography.label, styles.label]}>{t("search.dates")}</Text>
+          <Text style={[typography.label, styles.label]}>
+            {t("search.dates")}
+          </Text>
           <View style={styles.wrap}>
             <Chip
-              label={startDate ? `${t("search.from")} ${formatDate(startDate, lang, { todayDate })}` : t("search.fromAny")}
+              label={
+                startDate
+                  ? `${t("search.from")} ${formatDate(startDate, lang, { todayDate })}`
+                  : t("search.fromAny")
+              }
               icon="calendar"
               selected={startDate !== null}
               onPress={() => pickDate(startDate, setStartDate)}
             />
             <Chip
-              label={endDate ? `${t("search.to")} ${formatDate(endDate, lang, { todayDate })}` : t("search.toAny")}
+              label={
+                endDate
+                  ? `${t("search.to")} ${formatDate(endDate, lang, { todayDate })}`
+                  : t("search.toAny")
+              }
               icon="calendar"
               selected={endDate !== null}
               onPress={() => pickDate(endDate, setEndDate)}
@@ -304,18 +401,27 @@ export default function SearchScreen({ navigation }: Props) {
 
       {summary ? (
         <View style={styles.summary}>
-          <Text style={typography.body}>{t("search.resultCount", { count: summary.count })}</Text>
+          <Text style={typography.body}>
+            {t("search.resultCount", { count: summary.count })}
+          </Text>
           <View style={styles.summaryRow}>
             <Text style={[typography.label, { color: colors.expense }]}>
-              {t("search.spent", { amount: formatRupiah(summary.spending, lang) })}
+              {t("search.spent", {
+                amount: formatRupiah(summary.spending, lang),
+              })}
             </Text>
             <Text style={[typography.label, { color: colors.income }]}>
-              {t("search.income", { amount: formatRupiah(summary.income, lang) })}
+              {t("search.income", {
+                amount: formatRupiah(summary.income, lang),
+              })}
             </Text>
           </View>
           {summary.transferCount > 0 ? (
             <Text style={typography.caption}>
-              {t("search.transfers", { count: summary.transferCount, fees: formatRupiah(summary.transferFees, lang) })}
+              {t("search.transfers", {
+                count: summary.transferCount,
+                fees: formatRupiah(summary.transferFees, lang),
+              })}
             </Text>
           ) : null}
         </View>
@@ -327,7 +433,7 @@ export default function SearchScreen({ navigation }: Props) {
     <FlatList
       style={styles.screen}
       data={rows}
-      keyExtractor={(r) => (r.kind === "entry" ? `e${r.entry.id}` : `t${r.transfer.id}`)}
+      keyExtractor={rowKey}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={header}
       renderItem={({ item }) =>
@@ -343,7 +449,9 @@ export default function SearchScreen({ navigation }: Props) {
             transfer={item.transfer}
             lang={lang}
             isUpcoming={item.transfer.occurredOn > todayDate}
-            onPress={(id) => navigation.navigate("TransferForm", { transferId: id })}
+            onPress={(id) =>
+              navigation.navigate("TransferForm", { transferId: id })
+            }
           />
         )
       }
@@ -378,7 +486,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   searchInput: { flex: 1, fontSize: 16, color: colors.text },
-  toolbar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  toolbar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   filterToggle: { flexDirection: "row", alignItems: "center", gap: 4 },
   link: { color: colors.primary, fontWeight: "600" },
   panel: {
@@ -397,6 +509,10 @@ const styles = StyleSheet.create({
   error: { fontSize: 13, color: colors.expense },
   summary: { gap: 2, paddingTop: spacing.sm },
   summaryRow: { flexDirection: "row", gap: spacing.md, flexWrap: "wrap" },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginLeft: 72 },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginLeft: 72,
+  },
   listContent: { paddingBottom: spacing.xl },
 });

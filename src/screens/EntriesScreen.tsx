@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -22,8 +22,10 @@ import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
 import Fab from "../components/Fab";
+import { usePagedList } from "../hooks/usePagedList";
 
 const PAGE_SIZE = 100;
+const entryKey = (e: EntryWithDetails) => String(e.id);
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -50,49 +52,33 @@ export default function EntriesScreen() {
           accessibilityRole="button"
           accessibilityLabel={t("search.title")}
         >
-          <MaterialCommunityIcons name="magnify" size={26} color={colors.primary} />
+          <MaterialCommunityIcons
+            name="magnify"
+            size={26}
+            color={colors.primary}
+          />
         </Pressable>
       ),
     });
   }, [navigation, t]);
 
-  const [entries, setEntries] = useState<EntryWithDetails[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const loadedCount = useRef(0);
-  const loadingMore = useRef(false);
-
-  // Reload whatever is already on screen after any write, so the scroll position holds.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const db = await getDb();
-      const limit = Math.max(PAGE_SIZE, loadedCount.current);
-      const rows = await listEntries(db, { limit });
-      if (cancelled) return;
-      loadedCount.current = rows.length;
-      setEntries(rows);
-      setHasMore(rows.length === limit);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [dataVersion]);
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loadingMore.current) return;
-    loadingMore.current = true;
-    const db = await getDb();
-    const rows = await listEntries(db, {
-      limit: PAGE_SIZE,
-      offset: loadedCount.current,
-    });
-    loadedCount.current += rows.length;
-    setEntries((prev) => [...prev, ...rows]);
-    setHasMore(rows.length === PAGE_SIZE);
-    loadingMore.current = false;
-  }, [hasMore]);
+  // Loaded 100 at a time; after any write, what is already on screen reloads.
+  const fetchPage = useCallback(
+    async (limit: number, offset: number) =>
+      listEntries(await getDb(), { limit, offset }),
+    [],
+  );
+  const {
+    items: entries,
+    loading,
+    loadMore,
+  } = usePagedList<EntryWithDetails>({
+    fetchPage,
+    keyOf: entryKey,
+    resetKey: "all",
+    refreshKey: dataVersion,
+    pageSize: PAGE_SIZE,
+  });
 
   const sections = useMemo<Section[]>(() => {
     const out: Section[] = [];
@@ -117,7 +103,7 @@ export default function EntriesScreen() {
       ) : (
         <SectionList
           sections={sections}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={entryKey}
           renderItem={({ item }) => (
             <EntryRow
               entry={item}
@@ -160,16 +146,9 @@ function Separator() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  headerButton: {
-    marginRight: spacing.md,
-  },
-  loader: {
-    marginTop: spacing.xl,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  headerButton: { marginRight: spacing.md },
+  loader: { marginTop: spacing.xl },
   header: {
     backgroundColor: colors.background,
     paddingHorizontal: spacing.md,
@@ -182,11 +161,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginLeft: 72,
   },
-  listContent: {
-    paddingBottom: 96,
-  },
-  emptyContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
+  listContent: { paddingBottom: 96 },
+  emptyContainer: { flexGrow: 1, justifyContent: "center" },
 });

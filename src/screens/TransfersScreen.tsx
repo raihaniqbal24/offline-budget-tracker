@@ -1,5 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, SectionList, StyleSheet, Text, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  SectionList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -17,8 +25,10 @@ import Chip from "../components/Chip";
 import EmptyState from "../components/EmptyState";
 import TransferRow from "../components/TransferRow";
 import Fab from "../components/Fab";
+import { usePagedList } from "../hooks/usePagedList";
 
 const PAGE_SIZE = 100;
+const transferKey = (t: TransferWithDetails) => String(t.id);
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 /** Transfers as from, to, amount and fee, filterable by account and month (FR-5.6). */
@@ -33,48 +43,27 @@ export default function TransfersScreen() {
   const [accountId, setAccountId] = useState<ID | null>(null);
   /** First day of the chosen month, or null for all dates. */
   const [month, setMonth] = useState<ISODate | null>(null);
-  const [rows, setRows] = useState<TransferWithDetails[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const loaded = useRef(0);
-  const busy = useRef(false);
+  const range = useMemo(
+    () => (month ? getPeriodRange("month", month) : null),
+    [month],
+  );
 
-  const range = useMemo(() => (month ? getPeriodRange("month", month) : null), [month]);
-
-  // A new filter starts from the first page. Declared before the load effect
-  // so it runs first when the filter changes.
-  useEffect(() => {
-    loaded.current = 0;
-  }, [accountId, range]);
-
-  // After any write, reload what is already on screen so the scroll position holds.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const db = await getDb();
-      const limit = Math.max(PAGE_SIZE, loaded.current);
-      const result = await listTransfers(db, { limit, accountId, range });
-      if (cancelled) return;
-      loaded.current = result.length;
-      setRows(result);
-      setHasMore(result.length === limit);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [dataVersion, accountId, range]);
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || busy.current) return;
-    busy.current = true;
-    const db = await getDb();
-    const more = await listTransfers(db, { limit: PAGE_SIZE, offset: loaded.current, accountId, range });
-    loaded.current += more.length;
-    setRows((prev) => [...prev, ...more]);
-    setHasMore(more.length === PAGE_SIZE);
-    busy.current = false;
-  }, [hasMore, accountId, range]);
+  const fetchPage = useCallback(
+    async (limit: number, offset: number) =>
+      listTransfers(await getDb(), { limit, offset, accountId, range }),
+    [accountId, range],
+  );
+  const {
+    items: rows,
+    loading,
+    loadMore,
+  } = usePagedList<TransferWithDetails>({
+    fetchPage,
+    keyOf: transferKey,
+    resetKey: `${accountId ?? "all"}:${month ?? "all"}`,
+    refreshKey: dataVersion,
+    pageSize: PAGE_SIZE,
+  });
 
   const sections = useMemo(() => {
     const out: { date: string; data: TransferWithDetails[] }[] = [];
@@ -91,29 +80,59 @@ export default function TransfersScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.filters}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          <Chip label={t("transfers.allAccounts")} selected={accountId === null} onPress={() => setAccountId(null)} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          <Chip
+            label={t("transfers.allAccounts")}
+            selected={accountId === null}
+            onPress={() => setAccountId(null)}
+          />
           {accounts.map((a) => (
-            <Chip key={a.id} label={a.name} selected={accountId === a.id} onPress={() => setAccountId(a.id)} />
+            <Chip
+              key={a.id}
+              label={a.name}
+              selected={accountId === a.id}
+              onPress={() => setAccountId(a.id)}
+            />
           ))}
         </ScrollView>
         <View style={styles.monthRow}>
-          <Chip label={t("transfers.allDates")} selected={month === null} onPress={() => setMonth(null)} />
+          <Chip
+            label={t("transfers.allDates")}
+            selected={month === null}
+            onPress={() => setMonth(null)}
+          />
           <Pressable
-            onPress={() => setMonth(shiftPeriod("month", month ?? currentMonth, -1))}
+            onPress={() =>
+              setMonth(shiftPeriod("month", month ?? currentMonth, -1))
+            }
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel={t("summary.previous")}
           >
-            <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={26}
+              color={colors.primary}
+            />
           </Pressable>
-          <Pressable onPress={() => setMonth(month ?? currentMonth)} style={styles.monthLabel}>
+          <Pressable
+            onPress={() => setMonth(month ?? currentMonth)}
+            style={styles.monthLabel}
+          >
             <Text style={[typography.body, month === null && styles.muted]}>
               {formatMonthYear(month ?? currentMonth, lang)}
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => month && month < currentMonth && setMonth(shiftPeriod("month", month, 1))}
+            onPress={() =>
+              month &&
+              month < currentMonth &&
+              setMonth(shiftPeriod("month", month, 1))
+            }
             hitSlop={8}
             disabled={month === null || month >= currentMonth}
             accessibilityRole="button"
@@ -122,7 +141,11 @@ export default function TransfersScreen() {
             <MaterialCommunityIcons
               name="chevron-right"
               size={26}
-              color={month !== null && month < currentMonth ? colors.primary : colors.border}
+              color={
+                month !== null && month < currentMonth
+                  ? colors.primary
+                  : colors.border
+              }
             />
           </Pressable>
         </View>
@@ -133,28 +156,46 @@ export default function TransfersScreen() {
       ) : (
         <SectionList
           sections={sections}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={transferKey}
           renderItem={({ item }) => (
             <TransferRow
               transfer={item}
               lang={lang}
               isUpcoming={item.occurredOn > todayDate}
-              onPress={(id) => navigation.navigate("TransferForm", { transferId: id })}
+              onPress={(id) =>
+                navigation.navigate("TransferForm", { transferId: id })
+              }
             />
           )}
           renderSectionHeader={({ section }) => (
-            <Text style={[typography.label, styles.header]}>{formatDayHeader(section.date, todayDate, lang)}</Text>
+            <Text style={[typography.label, styles.header]}>
+              {formatDayHeader(section.date, todayDate, lang)}
+            </Text>
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          contentContainerStyle={sections.length === 0 ? styles.emptyContainer : styles.listContent}
+          contentContainerStyle={
+            sections.length === 0 ? styles.emptyContainer : styles.listContent
+          }
           ListEmptyComponent={
-            <EmptyState icon="bank-transfer" title={t("transfers.emptyTitle")} body={t("transfers.emptyBody")} />
+            <EmptyState
+              icon="bank-transfer"
+              title={t("transfers.emptyTitle")}
+              body={t("transfers.emptyBody")}
+            />
           }
         />
       )}
-      <Fab label={t("transfers.new")} onPress={() => navigation.navigate("TransferForm", accountId ? { fromAccountId: accountId } : undefined)} />
+      <Fab
+        label={t("transfers.new")}
+        onPress={() =>
+          navigation.navigate(
+            "TransferForm",
+            accountId ? { fromAccountId: accountId } : undefined,
+          )
+        }
+      />
     </View>
   );
 }
@@ -169,7 +210,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   chips: { gap: spacing.sm, paddingHorizontal: spacing.md },
-  monthRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.md },
+  monthRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
   monthLabel: { flex: 1, alignItems: "center" },
   muted: { color: colors.textMuted },
   loader: { marginTop: spacing.xl },
@@ -180,7 +226,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
     fontWeight: "600",
   },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginLeft: 72 },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginLeft: 72,
+  },
   listContent: { paddingBottom: 96 },
   emptyContainer: { flexGrow: 1, justifyContent: "center" },
 });
