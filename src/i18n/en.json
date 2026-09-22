@@ -50,5 +50,80 @@
       "salary": "Salary",
       "otherIncome": "Other"
     }
+  },
+  "home": {
+    "totalInAccounts": "Total in accounts",
+    "spent": "Spent",
+    "income": "Income",
+    "net": "Net",
+    "recent": "Recent entries",
+    "seeAll": "See all",
+    "noEntries": "No entries yet. Tap + to add your first.",
+    "quickAdd": "Add entry",
+    "noAccountsTitle": "Add an account to start",
+    "noAccountsBody": "Accounts are where your money lives: cash, a bank account or an e-wallet."
+  },
+  "accounts": {
+    "add": "Add account",
+    "total": "Total",
+    "showArchived": "Show archived accounts ({{count}})",
+    "hideArchived": "Hide archived accounts",
+    "archivedBadge": "Archived",
+    "belowLine": "At or below alert line",
+    "types": {
+      "cash": "Cash",
+      "bank": "Bank",
+      "ewallet": "E-wallet",
+      "other": "Other"
+    }
+  },
+  "accountForm": {
+    "titleNew": "New account",
+    "titleEdit": "Edit account",
+    "name": "Name",
+    "namePlaceholder": "e.g. BCA, Cash, GoPay",
+    "nameRequired": "Enter a name.",
+    "type": "Type",
+    "openingBalance": "Opening balance",
+    "openingBalanceHint": "The balance before your first entry in this app. Tap + to switch to negative, e.g. for a credit card.",
+    "alertLine": "Balance alert line (optional)",
+    "alertLinePlaceholder": "No alert",
+    "alertLineHint": "The account is flagged when its balance reaches this amount or lower.",
+    "archive": "Archive account",
+    "restore": "Restore account",
+    "archiveHint": "Archived accounts leave the pickers and the total, but keep their history."
+  },
+  "entries": {
+    "upcoming": "Upcoming",
+    "deleted": "Entry deleted",
+    "emptyTitle": "No entries yet",
+    "emptyBody": "Tap + to record spending or income."
+  },
+  "entryForm": {
+    "titleNew": "New entry",
+    "titleEdit": "Edit entry",
+    "expense": "Expense",
+    "income": "Income",
+    "amount": "Amount",
+    "category": "Category",
+    "account": "Account",
+    "date": "Date",
+    "pickDate": "Other date",
+    "note": "Note (optional)",
+    "futureHint": "Counts toward the balance from {{date}}.",
+    "delete": "Delete entry",
+    "archivedSuffix": "(archived)",
+    "adjustmentLater": "Unrecorded adjustments can be edited once reconciliation arrives in phase 2.",
+    "noAccount": "Add an account before recording entries.",
+    "selectCategory": "Choose a category.",
+    "selectAccount": "Choose an account."
+  },
+  "amount": {
+    "invalid": "Enter an amount like 50000, 50rb or 1,5jt.",
+    "mustBePositive": "The amount must be more than zero.",
+    "toggleSign": "Switch between positive and negative"
+  },
+  "errors": {
+    "saveFailed": "Couldn't save: {{message}}"
   }
 }

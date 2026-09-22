@@ -50,5 +50,80 @@
       "salary": "Gaji",
       "otherIncome": "Lainnya"
     }
+  },
+  "home": {
+    "totalInAccounts": "Total di semua akun",
+    "spent": "Pengeluaran",
+    "income": "Pemasukan",
+    "net": "Selisih",
+    "recent": "Transaksi terbaru",
+    "seeAll": "Lihat semua",
+    "noEntries": "Belum ada transaksi. Ketuk + untuk menambahkan yang pertama.",
+    "quickAdd": "Tambah transaksi",
+    "noAccountsTitle": "Tambahkan akun untuk mulai",
+    "noAccountsBody": "Akun adalah tempat uang Anda berada: tunai, rekening bank, atau dompet digital."
+  },
+  "accounts": {
+    "add": "Tambah akun",
+    "total": "Total",
+    "showArchived": "Tampilkan akun yang diarsipkan ({{count}})",
+    "hideArchived": "Sembunyikan akun yang diarsipkan",
+    "archivedBadge": "Diarsipkan",
+    "belowLine": "Mencapai batas peringatan",
+    "types": {
+      "cash": "Tunai",
+      "bank": "Bank",
+      "ewallet": "Dompet digital",
+      "other": "Lainnya"
+    }
+  },
+  "accountForm": {
+    "titleNew": "Akun baru",
+    "titleEdit": "Ubah akun",
+    "name": "Nama",
+    "namePlaceholder": "mis. BCA, Tunai, GoPay",
+    "nameRequired": "Masukkan nama.",
+    "type": "Jenis",
+    "openingBalance": "Saldo awal",
+    "openingBalanceHint": "Saldo sebelum transaksi pertama Anda di aplikasi ini. Ketuk + untuk mengubah ke negatif, mis. untuk kartu kredit.",
+    "alertLine": "Batas peringatan saldo (opsional)",
+    "alertLinePlaceholder": "Tanpa peringatan",
+    "alertLineHint": "Akun ditandai saat saldonya mencapai jumlah ini atau lebih rendah.",
+    "archive": "Arsipkan akun",
+    "restore": "Pulihkan akun",
+    "archiveHint": "Akun yang diarsipkan hilang dari pilihan dan total, tetapi riwayatnya tetap tersimpan."
+  },
+  "entries": {
+    "upcoming": "Mendatang",
+    "deleted": "Transaksi dihapus",
+    "emptyTitle": "Belum ada transaksi",
+    "emptyBody": "Ketuk + untuk mencatat pengeluaran atau pemasukan."
+  },
+  "entryForm": {
+    "titleNew": "Transaksi baru",
+    "titleEdit": "Ubah transaksi",
+    "expense": "Pengeluaran",
+    "income": "Pemasukan",
+    "amount": "Jumlah",
+    "category": "Kategori",
+    "account": "Akun",
+    "date": "Tanggal",
+    "pickDate": "Tanggal lain",
+    "note": "Catatan (opsional)",
+    "futureHint": "Masuk ke saldo mulai {{date}}.",
+    "delete": "Hapus transaksi",
+    "archivedSuffix": "(diarsipkan)",
+    "adjustmentLater": "Penyesuaian tidak tercatat dapat diubah setelah fitur rekonsiliasi hadir di fase 2.",
+    "noAccount": "Tambahkan akun sebelum mencatat transaksi.",
+    "selectCategory": "Pilih kategori.",
+    "selectAccount": "Pilih akun."
+  },
+  "amount": {
+    "invalid": "Masukkan jumlah seperti 50000, 50rb, atau 1,5jt.",
+    "mustBePositive": "Jumlah harus lebih dari nol.",
+    "toggleSign": "Ganti antara positif dan negatif"
+  },
+  "errors": {
+    "saveFailed": "Gagal menyimpan: {{message}}"
   }
 }

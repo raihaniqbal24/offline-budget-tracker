@@ -43,8 +43,13 @@ export default function MoreScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: spacing.md,
+  },
   group: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -59,6 +64,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     minHeight: 56,
   },
-  rowPressed: { backgroundColor: colors.primarySoft },
-  rowLabel: { flex: 1 },
+  rowPressed: {
+    backgroundColor: colors.primarySoft,
+  },
+  rowLabel: {
+    flex: 1,
+  },
 });

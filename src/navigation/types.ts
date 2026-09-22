@@ -8,8 +8,10 @@ export type TabParamList = {
   More: undefined;
 };
 
-/** Full-screen pages opened on top of the tabs. Later phases add forms here. */
+/** Full-screen pages opened on top of the tabs. */
 export type RootStackParamList = {
-  Tabs: NavigatorScreenParams<TabParamList>;
+  Tabs: NavigatorScreenParams<TabParamList> | undefined;
   Settings: undefined;
+  EntryForm: { entryId?: number; type?: "expense" | "income" } | undefined;
+  AccountForm: { accountId?: number } | undefined;
 };

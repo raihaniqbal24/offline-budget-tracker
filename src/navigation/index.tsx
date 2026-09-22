@@ -1,4 +1,5 @@
-import type { ComponentProps } from "react";
+import { useEffect, type ComponentProps } from "react";
+import { AppState, StyleSheet, View } from "react-native";
 import {
   DefaultTheme,
   NavigationContainer,
@@ -9,10 +10,17 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { colors } from "../theme";
+import { useLedgerStore } from "../store/ledgerStore";
 import type { RootStackParamList, TabParamList } from "./types";
 import PlaceholderScreen from "../screens/PlaceholderScreen";
+import HomeScreen from "../screens/HomeScreen";
+import EntriesScreen from "../screens/EntriesScreen";
+import AccountsScreen from "../screens/AccountsScreen";
 import MoreScreen from "../screens/MoreScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import EntryFormScreen from "../screens/EntryFormScreen";
+import AccountFormScreen from "../screens/AccountFormScreen";
+import UndoSnackbar from "../components/UndoSnackbar";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -27,11 +35,8 @@ const TAB_ICONS: Record<keyof TabParamList, IconName> = {
   More: "dots-horizontal-circle-outline",
 };
 
-// Placeholders are replaced phase by phase.
-const HomeScreen = () => <PlaceholderScreen phase={1} />;
-const EntriesScreen = () => <PlaceholderScreen phase={1} />;
+// Replaced in phase 2.
 const SummaryScreen = () => <PlaceholderScreen phase={2} />;
-const AccountsScreen = () => <PlaceholderScreen phase={1} />;
 
 const navTheme: Theme = {
   ...DefaultTheme,
@@ -90,22 +95,65 @@ function Tabs() {
   );
 }
 
+/**
+ * Recalculate balances whenever the app comes back to the foreground, so a
+ * future-dated entry takes effect on its date without a restart (FR-2.3).
+ */
+function useRefreshOnForeground() {
+  const refresh = useLedgerStore((s) => s.refresh);
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refresh();
+    });
+    return () => sub.remove();
+  }, [refresh]);
+}
+
 export default function AppNavigator() {
   const { t } = useTranslation();
+  useRefreshOnForeground();
+
   return (
-    <NavigationContainer theme={navTheme}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Tabs"
-          component={Tabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ title: t("settings.title") }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.root}>
+      <NavigationContainer theme={navTheme}>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Tabs"
+            component={Tabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ title: t("settings.title") }}
+          />
+          <Stack.Screen
+            name="EntryForm"
+            component={EntryFormScreen}
+            options={({ route }) => ({
+              title: route.params?.entryId
+                ? t("entryForm.titleEdit")
+                : t("entryForm.titleNew"),
+            })}
+          />
+          <Stack.Screen
+            name="AccountForm"
+            component={AccountFormScreen}
+            options={({ route }) => ({
+              title: route.params?.accountId
+                ? t("accountForm.titleEdit")
+                : t("accountForm.titleNew"),
+            })}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+      <UndoSnackbar />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

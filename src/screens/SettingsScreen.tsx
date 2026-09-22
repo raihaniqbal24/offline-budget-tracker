@@ -68,9 +68,18 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: spacing.sm },
-  sectionTitle: { marginTop: spacing.md, marginLeft: spacing.xs },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  sectionTitle: {
+    marginTop: spacing.md,
+    marginLeft: spacing.xs,
+  },
   group: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -88,6 +97,10 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-  rowPressed: { backgroundColor: colors.primarySoft },
-  rowLabel: { flex: 1 },
+  rowPressed: {
+    backgroundColor: colors.primarySoft,
+  },
+  rowLabel: {
+    flex: 1,
+  },
 });
