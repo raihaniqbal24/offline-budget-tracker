@@ -46,8 +46,10 @@ export async function pickTextFile(): Promise<{
   name: string;
   text: string;
 } | null> {
+  // Any type: Android file providers report .json files inconsistently, and
+  // validateBackup refuses anything that isn't a backup anyway (FR-9.3).
   const result = await DocumentPicker.getDocumentAsync({
-    type: ["application/json", "text/plain", "application/octet-stream"],
+    type: "*/*",
     copyToCacheDirectory: true,
     multiple: false,
   });
