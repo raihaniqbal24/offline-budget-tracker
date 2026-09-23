@@ -23,7 +23,13 @@ export const describeDb: jest.Describe = sqliteAvailable
   ? describe
   : describe.skip;
 
-export async function createTestDb(): Promise<SQLiteDatabase> {
+/**
+ * A fresh in-memory database. By default it is migrated to the latest schema;
+ * pass `{ migrate: false }` to get an empty one (for migration tests).
+ */
+export async function createTestDb(
+  options: { migrate?: boolean } = {},
+): Promise<SQLiteDatabase> {
   if (!nodeSqlite)
     throw new Error("node:sqlite is not available; use Node 22.5 or later");
   const raw = new nodeSqlite.DatabaseSync(":memory:");
@@ -56,6 +62,6 @@ export async function createTestDb(): Promise<SQLiteDatabase> {
     },
   } as unknown as SQLiteDatabase;
 
-  await runMigrations(db);
+  if (options.migrate !== false) await runMigrations(db);
   return db;
 }

@@ -30,6 +30,7 @@ import CategoryFormScreen from "../screens/CategoryFormScreen";
 import BudgetsScreen from "../screens/BudgetsScreen";
 import BudgetFormScreen from "../screens/BudgetFormScreen";
 import SearchScreen from "../screens/SearchScreen";
+import ImportScreen from "../screens/ImportScreen";
 import UndoSnackbar from "../components/UndoSnackbar";
 import BudgetToast from "../components/BudgetToast";
 
@@ -157,7 +158,9 @@ export default function AppNavigator() {
             name="TransferForm"
             component={TransferFormScreen}
             options={({ route }) => ({
-              title: route.params?.transferId ? t("transfers.edit") : t("transfers.new"),
+              title: route.params?.transferId
+                ? t("transfers.edit")
+                : t("transfers.new"),
             })}
           />
           <Stack.Screen
@@ -209,6 +212,11 @@ export default function AppNavigator() {
             component={SearchScreen}
             options={{ title: t("search.title") }}
           />
+          <Stack.Screen
+            name="Import"
+            component={ImportScreen}
+            options={{ title: t("import.title") }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <UndoSnackbar />
@@ -218,7 +226,5 @@ export default function AppNavigator() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
+  root: { flex: 1 },
 });

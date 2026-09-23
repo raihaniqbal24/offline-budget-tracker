@@ -11,6 +11,8 @@ const decoders: { [K in SettingKey]: (raw: string) => SettingsMap[K] } = {
   backup_reminder_time: (v) => v,
   notification_permission_asked: (v) => v === "1",
   last_used_account_id: (v) => (v === "" ? null : Number(v)),
+  alerts_enabled: (v) => v === "1",
+  last_backup_at: (v) => (v === "" ? null : v),
 };
 
 function encode(value: unknown): string {

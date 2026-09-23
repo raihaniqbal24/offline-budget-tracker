@@ -37,7 +37,30 @@
     "languageEn": "English",
     "languageId": "Bahasa Indonesia",
     "data": "Data",
-    "schemaVersion": "Versi database"
+    "schemaVersion": "Versi database",
+    "notifications": "Notifikasi",
+    "dailyReminder": "Pengingat harian",
+    "dailyReminderHint": "Pengingat untuk mencatat pengeluaran hari ini. Juga menyebutkan akun yang mencapai batas peringatannya.",
+    "time": "Waktu",
+    "backupReminder": "Pengingat cadangan mingguan",
+    "backupReminderHint": "Pengingat untuk mengekspor cadangan, pada hari dan jam yang Anda pilih.",
+    "alerts": "Peringatan anggaran dan saldo",
+    "alertsHint": "Notifikasi saat pengeluaran mencapai 75%, 90%, atau 100% dari batas, atau saat saldo akun turun ke batas peringatannya.",
+    "permissionDenied": "Notifikasi untuk aplikasi ini dimatikan di pengaturan Android. Peringatan di dalam aplikasi tetap berfungsi.",
+    "openSystemSettings": "Buka pengaturan Android",
+    "backup": "Cadangan",
+    "lastBackup": "Terakhir diekspor: {{date}}",
+    "neverBackedUp": "Belum ada cadangan yang diekspor.",
+    "exportBackup": "Cadangan lengkap (JSON)",
+    "exportBackupHint": "Semua data di aplikasi. Gunakan untuk memulihkan di ponsel ini atau pindah ke ponsel baru.",
+    "exportCsv": "Transaksi (CSV)",
+    "exportCsvHint": "Transaksi Anda sebagai file spreadsheet, untuk Excel atau Google Sheets.",
+    "share": "Bagikan",
+    "saveToFolder": "Simpan ke folder",
+    "saved": "Tersimpan.",
+    "exportFailed": "Gagal mengekspor: {{message}}",
+    "importBackup": "Impor cadangan",
+    "importBackupHint": "Pulihkan dari cadangan JSON, atau gabungkan dengan data yang sudah ada."
   },
   "category": {
     "builtin": {
@@ -296,5 +319,43 @@
     "income": "Pemasukan {{amount}}",
     "transfers": "Termasuk {{count}} transfer · biaya {{fees}}",
     "noResults": "Tidak ada yang cocok dengan filter ini."
+  },
+  "import": {
+    "title": "Impor cadangan",
+    "intro": "Pilih cadangan JSON yang diekspor dari aplikasi ini. Seluruh file diperiksa lebih dulu, dan tidak ada yang berubah sampai Anda mengonfirmasi.",
+    "choose": "Pilih file cadangan",
+    "exportedOn": "Diekspor pada {{date}}",
+    "contains": "Berisi {{entries}} transaksi, {{transfers}} transfer, {{accounts}} akun, {{categories}} kategori, dan {{budgets}} anggaran.",
+    "modeMerge": "Gabungkan",
+    "modeReplace": "Ganti semua",
+    "mergeHint": "Menambahkan yang baru dan menyimpan semua data yang sudah ada di ponsel ini. Data yang sudah ada dilewati, dan akun serta kategori dengan nama sama digabungkan.",
+    "replaceHint": "Menghapus semua data di ponsel ini dan memulihkan cadangan persis seperti aslinya, termasuk pengaturan.",
+    "runMerge": "Gabungkan cadangan",
+    "runReplace": "Ganti semua data",
+    "confirmTitle": "Ganti semua data?",
+    "confirmBody": "Semua data di ponsel ini akan diganti dengan isi cadangan. Tindakan ini tidak bisa dibatalkan.",
+    "confirmReplace": "Ganti",
+    "done": "Impor selesai",
+    "addedSummary": "Menambahkan {{entries}} transaksi, {{transfers}} transfer, {{accounts}} akun, dan {{categories}} kategori.",
+    "replacedSummary": "Memulihkan {{entries}} transaksi, {{transfers}} transfer, {{accounts}} akun, dan {{categories}} kategori.",
+    "skippedSummary": "Melewati {{count}} data yang sudah ada di ponsel ini.",
+    "errors": {
+      "notABackup": "Ini bukan file cadangan dari Budget Tracker. Tidak ada yang berubah.",
+      "newerVersion": "Cadangan ini berasal dari versi aplikasi yang lebih baru. Perbarui aplikasi, lalu coba lagi.",
+      "invalid": "Cadangan ini rusak atau tidak lengkap ({{detail}}). Tidak ada yang berubah.",
+      "failed": "Impor terhenti dan tidak ada yang berubah: {{message}}"
+    }
+  },
+  "notifications": {
+    "channelReminders": "Pengingat",
+    "channelAlerts": "Peringatan anggaran dan saldo",
+    "dailyTitle": "Budget Tracker",
+    "dailyBody": "Saatnya mencatat pengeluaran hari ini.",
+    "dailyLowAccounts": "Mencapai batas peringatan: {{accounts}}.",
+    "backupTitle": "Cadangkan data Anda",
+    "backupBody": "Ekspor cadangan agar catatan Anda aman jika ganti atau reset ponsel.",
+    "budgetTitle": "Peringatan anggaran",
+    "balanceTitle": "Saldo menipis",
+    "balanceBody": "Saldo {{name}} {{balance}}, mencapai batas peringatannya {{line}}."
   }
 }

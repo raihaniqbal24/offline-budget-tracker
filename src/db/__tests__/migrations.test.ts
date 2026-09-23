@@ -67,11 +67,12 @@ describeDb("migrations", () => {
     await dropAllSchemaObjects(db);
     expect(await getSchemaVersion(db)).toBe(0);
     await expect(runMigrations(db)).resolves.toBe(LATEST_SCHEMA_VERSION);
+    // 4 integrity triggers from migration 1, plus one uid trigger per table from migration 2
     expect(
       await count(
         db,
         "SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'trigger'",
       ),
-    ).toBe(4);
+    ).toBe(13);
   });
 });

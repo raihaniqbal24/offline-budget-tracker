@@ -15,7 +15,14 @@ import {
   updateCategory,
   type CategoryInput,
 } from "../db/categoriesDao";
-import { checkBudgetAlerts, setBudgetLimit, type BudgetAlert, type BudgetTarget } from "../db/budgetsDao";
+import {
+  checkBudgetAlerts,
+  setBudgetLimit,
+  type BudgetAlert,
+  type BudgetTarget,
+} from "../db/budgetsDao";
+import { checkBalanceAlerts } from "../db/alertsDao";
+import { sendAlerts, syncReminders } from "../notifications/service";
 import {
   createEntry,
   deleteEntry,
@@ -38,7 +45,13 @@ import {
   type SplitPart,
 } from "../db/adjustmentsDao";
 import { monthKey, today, type ISODate } from "../lib/dates";
-import type { AccountWithBalance, Category, Entry, ID, Transfer } from "../types";
+import type {
+  AccountWithBalance,
+  Category,
+  Entry,
+  ID,
+  Transfer,
+} from "../types";
 
 /** How long the undo bar stays after a delete (decided: 5 seconds). */
 export const UNDO_WINDOW_MS = 5_000;
@@ -70,11 +83,23 @@ interface LedgerState {
   saveTransfer: (input: TransferInput, id?: ID) => Promise<ID>;
   deleteTransfer: (id: ID) => Promise<void>;
   /** Returns the new adjustment's id, or null when the balance already matched. */
-  reconcile: (accountId: ID, realBalance: number, onDate: ISODate) => Promise<ID | null>;
-  categorizeAdjustment: (id: ID, categoryId: ID, note: string | null) => Promise<void>;
+  reconcile: (
+    accountId: ID,
+    realBalance: number,
+    onDate: ISODate,
+  ) => Promise<ID | null>;
+  categorizeAdjustment: (
+    id: ID,
+    categoryId: ID,
+    note: string | null,
+  ) => Promise<void>;
   /** Returns the signed amount still unrecorded (0 when fully explained). */
   splitAdjustment: (id: ID, parts: SplitPart[]) => Promise<number>;
-  saveCategory: (input: CategoryInput, id?: ID, renamed?: boolean) => Promise<ID>;
+  saveCategory: (
+    input: CategoryInput,
+    id?: ID,
+    renamed?: boolean,
+  ) => Promise<ID>;
   setCategoryArchived: (id: ID, archived: boolean) => Promise<void>;
   moveCategory: (id: ID, direction: -1 | 1) => Promise<void>;
   /** Set (or remove, with null) a limit from the current month onward. */
@@ -101,25 +126,42 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
       listCategories(db),
       getSetting(db, "last_used_account_id"),
     ]);
-    // FR-7.6: budget warnings are checked whenever the app opens.
+    // FR-7.6 and FR-10.5: budget and balance alerts are checked whenever the app opens.
     const alerts = await checkBudgetAlerts(db, today());
-    set((s) => ({ accounts, categories, lastUsedAccountId, budgetAlerts: [...s.budgetAlerts, ...alerts] }));
+    const crossed = await checkBalanceAlerts(db, accounts);
+    set((s) => ({
+      accounts,
+      categories,
+      lastUsedAccountId,
+      budgetAlerts: [...s.budgetAlerts, ...alerts],
+    }));
+    void sendAlerts(db, alerts, crossed, { accounts, categories });
+    void syncReminders(db, accounts, true);
   },
 
   /**
-   * Recalculate balances for today's date, check budget warnings, and tell
-   * screens to re-query. Runs after every write and when the app returns to
-   * the foreground, so warnings are checked on save and on open (FR-7.6).
+   * Recalculate balances for today's date, check budget and balance alerts,
+   * and tell screens to re-query. Runs after every write and when the app
+   * returns to the foreground, so alerts are checked on save and on open
+   * (FR-7.6, FR-10.5).
    */
   refresh: async () => {
     const db = await getDb();
     const accounts = await listAccountsWithBalances(db, today());
     const alerts = await checkBudgetAlerts(db, today());
+    const crossed = await checkBalanceAlerts(db, accounts);
     set((s) => ({
       accounts,
       dataVersion: s.dataVersion + 1,
-      budgetAlerts: alerts.length > 0 ? [...s.budgetAlerts, ...alerts] : s.budgetAlerts,
+      budgetAlerts:
+        alerts.length > 0 ? [...s.budgetAlerts, ...alerts] : s.budgetAlerts,
     }));
+    // Phone notifications and the daily reminder text follow every save (FR-7.5, FR-10.2, FR-10.4).
+    void sendAlerts(db, alerts, crossed, {
+      accounts,
+      categories: get().categories,
+    });
+    void syncReminders(db, accounts);
   },
 
   saveAccount: async (input, id) => {
@@ -180,13 +222,20 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   deleteTransfer: async (id) => {
     const db = await getDb();
     const transfer = await deleteTransfer(db, id);
-    if (transfer) set({ undo: { kind: "transfer", transfer, token: ++undoCounter } });
+    if (transfer)
+      set({ undo: { kind: "transfer", transfer, token: ++undoCounter } });
     await get().refresh();
   },
 
   reconcile: async (accountId, realBalance, onDate) => {
     const db = await getDb();
-    const id = await reconcileAccount(db, accountId, realBalance, onDate, today());
+    const id = await reconcileAccount(
+      db,
+      accountId,
+      realBalance,
+      onDate,
+      today(),
+    );
     await get().refresh();
     return id;
   },
@@ -251,7 +300,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     if (get().undo?.token === token) set({ undo: null });
   },
 
-  dismissBudgetAlert: () => set((s) => ({ budgetAlerts: s.budgetAlerts.slice(1) })),
+  dismissBudgetAlert: () =>
+    set((s) => ({ budgetAlerts: s.budgetAlerts.slice(1) })),
 }));
 
 /*

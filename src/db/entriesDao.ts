@@ -104,17 +104,18 @@ export async function deleteEntry(
   return entry;
 }
 
-/** Puts a deleted entry back exactly as it was, with the same id and timestamps. */
+/** Puts a deleted entry back exactly as it was, with the same id, uid and timestamps. */
 export async function restoreEntry(
   db: SQLiteDatabase,
   entry: Entry,
 ): Promise<void> {
   await db.runAsync(
     `INSERT INTO entries
-       (id, type, amount, currency_code, account_id, category_id, occurred_on, note,
+       (id, uid, type, amount, currency_code, account_id, category_id, occurred_on, note,
         recurring_rule_id, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     entry.id,
+    entry.uid,
     entry.type,
     entry.amount,
     entry.currencyCode,
@@ -158,8 +159,17 @@ function mapDetails(row: EntryDetailsRow): EntryWithDetails {
 }
 
 /** Newest first, with category and account details for list rows. */
-export async function listEntries(db: SQLiteDatabase, options: ListEntriesOptions): Promise<EntryWithDetails[]> {
-  const { limit, offset = 0, accountId = null, range = null, type = null } = options;
+export async function listEntries(
+  db: SQLiteDatabase,
+  options: ListEntriesOptions,
+): Promise<EntryWithDetails[]> {
+  const {
+    limit,
+    offset = 0,
+    accountId = null,
+    range = null,
+    type = null,
+  } = options;
   const rows = await db.getAllAsync<EntryDetailsRow>(
     `${DETAILS_SELECT}
       WHERE (? IS NULL OR e.account_id = ?)
@@ -188,7 +198,7 @@ export async function listEntriesByIds(
   if (ids.length === 0) return [];
   const rows = await db.getAllAsync<EntryDetailsRow>(
     `${DETAILS_SELECT} WHERE e.id IN (${ids.map(() => "?").join(", ")})`,
-    ...ids
+    ...ids,
   );
   return rows.map(mapDetails);
 }

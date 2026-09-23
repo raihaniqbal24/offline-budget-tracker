@@ -3,6 +3,7 @@ import { dropAllSchemaObjects } from "./db/devReset";
 import { runMigrations } from "./db/migrations";
 import { getSetting } from "./db/settingsDao";
 import { initI18n } from "./i18n";
+import { configureNotifications } from "./notifications";
 import { useLedgerStore } from "./store/ledgerStore";
 import { useSettingsStore } from "./store/settingsStore";
 
@@ -15,8 +16,8 @@ let startup: Promise<void> | null = null;
  *
  * Calls made while a start-up is running share it, so React running the
  * start-up effect twice in development can't migrate the database twice.
- * Later phases add: recurring-entry generation (phase 5) and budget and
- * balance alert checks on app open (phases 3 and 4).
+ * Loading the ledger also checks budget and balance alerts and schedules
+ * reminders. Phase 5 adds recurring-entry generation here.
  */
 export function bootstrap(): Promise<void> {
   if (!startup) {
@@ -34,6 +35,7 @@ async function run(): Promise<void> {
   const language = (await getSetting(db, "language")) ?? "system";
 
   await initI18n(language);
+  await configureNotifications(); // channel names are translated
   useSettingsStore.getState().hydrate({ language, schemaVersion });
   await useLedgerStore.getState().load();
 }

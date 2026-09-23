@@ -37,7 +37,30 @@
     "languageEn": "English",
     "languageId": "Bahasa Indonesia",
     "data": "Data",
-    "schemaVersion": "Database version"
+    "schemaVersion": "Database version",
+    "notifications": "Notifications",
+    "dailyReminder": "Daily reminder",
+    "dailyReminderHint": "A reminder to record the day's spending. It also names any account at or below its alert line.",
+    "time": "Time",
+    "backupReminder": "Weekly backup reminder",
+    "backupReminderHint": "A reminder to export a backup, on the day and time you choose.",
+    "alerts": "Budget and balance alerts",
+    "alertsHint": "A notification when spending reaches 75%, 90% or 100% of a limit, or an account drops to its alert line.",
+    "permissionDenied": "Notifications are turned off for this app in Android settings. Warnings inside the app still work.",
+    "openSystemSettings": "Open Android settings",
+    "backup": "Backup",
+    "lastBackup": "Last exported: {{date}}",
+    "neverBackedUp": "No backup exported yet.",
+    "exportBackup": "Full backup (JSON)",
+    "exportBackupHint": "Everything in the app. Use it to restore on this phone or move to a new one.",
+    "exportCsv": "Entries (CSV)",
+    "exportCsvHint": "Your entries as a spreadsheet file, for Excel or Google Sheets.",
+    "share": "Share",
+    "saveToFolder": "Save to folder",
+    "saved": "Saved.",
+    "exportFailed": "Couldn't export: {{message}}",
+    "importBackup": "Import a backup",
+    "importBackupHint": "Restore from a JSON backup, or merge one into what's already here."
   },
   "category": {
     "builtin": {
@@ -296,5 +319,43 @@
     "income": "Income {{amount}}",
     "transfers": "Including {{count}} transfers · fees {{fees}}",
     "noResults": "Nothing matches these filters."
+  },
+  "import": {
+    "title": "Import backup",
+    "intro": "Choose a JSON backup exported from this app. The whole file is checked first, and nothing changes until you confirm.",
+    "choose": "Choose backup file",
+    "exportedOn": "Exported on {{date}}",
+    "contains": "Contains {{entries}} entries, {{transfers}} transfers, {{accounts}} accounts, {{categories}} categories and {{budgets}} budgets.",
+    "modeMerge": "Merge",
+    "modeReplace": "Replace all",
+    "mergeHint": "Adds what's new and keeps everything already on this phone. Records already here are skipped, and accounts and categories with the same name are combined.",
+    "replaceHint": "Deletes everything on this phone and restores the backup exactly, including settings.",
+    "runMerge": "Merge backup",
+    "runReplace": "Replace all data",
+    "confirmTitle": "Replace all data?",
+    "confirmBody": "Everything on this phone will be replaced by the backup. This can't be undone.",
+    "confirmReplace": "Replace",
+    "done": "Import finished",
+    "addedSummary": "Added {{entries}} entries, {{transfers}} transfers, {{accounts}} accounts and {{categories}} categories.",
+    "replacedSummary": "Restored {{entries}} entries, {{transfers}} transfers, {{accounts}} accounts and {{categories}} categories.",
+    "skippedSummary": "Skipped {{count}} records that were already on this phone.",
+    "errors": {
+      "notABackup": "This isn't a backup file from Budget Tracker. Nothing was changed.",
+      "newerVersion": "This backup comes from a newer version of the app. Update the app, then try again.",
+      "invalid": "This backup is damaged or incomplete ({{detail}}). Nothing was changed.",
+      "failed": "The import stopped and nothing was changed: {{message}}"
+    }
+  },
+  "notifications": {
+    "channelReminders": "Reminders",
+    "channelAlerts": "Budget and balance alerts",
+    "dailyTitle": "Budget Tracker",
+    "dailyBody": "Time to record today's spending.",
+    "dailyLowAccounts": "At or below alert line: {{accounts}}.",
+    "backupTitle": "Back up your data",
+    "backupBody": "Export a backup so your records are safe if you change or reset your phone.",
+    "budgetTitle": "Budget warning",
+    "balanceTitle": "Low balance",
+    "balanceBody": "{{name}} is at {{balance}}, at or below its alert line of {{line}}."
   }
 }

@@ -1,4 +1,11 @@
-import { formatDate, formatDayHeader, formatMonthYear, monthInitial, weekdayInitial } from "../dateLabels";
+import {
+  formatDate,
+  formatDayHeader,
+  formatMonthYear,
+  monthInitial,
+  weekdayInitial,
+  weekdayShortName,
+} from "../dateLabels";
 
 const TODAY = "2026-09-21"; // a Monday
 
@@ -25,5 +32,10 @@ describe("date labels", () => {
     expect(weekdayInitial("2026-09-21", "en")).toBe("M"); // Monday
     expect(weekdayInitial("2026-09-23", "id")).toBe("R"); // Rabu
     expect(monthInitial("2026-09", "en")).toBe("S");
+  });
+
+  it("names weekdays Monday-first", () => {
+    expect(weekdayShortName(1, "en")).toBe("Mon");
+    expect(weekdayShortName(7, "id")).toBe("Min");
   });
 });

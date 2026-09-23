@@ -24,29 +24,8 @@ interface DateNames {
 
 const NAMES: Record<AppLanguage, DateNames> = {
   en: {
-    monthInitials: [
-      "J",
-      "F",
-      "M",
-      "A",
-      "M",
-      "J",
-      "J",
-      "A",
-      "S",
-      "O",
-      "N",
-      "D",
-    ],
-    weekdayInitials: [
-      "M",
-      "T",
-      "W",
-      "T",
-      "F",
-      "S",
-      "S",
-    ],
+    monthInitials: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+    weekdayInitials: ["M", "T", "W", "T", "F", "S", "S"],
     monthsShort: [
       "Jan",
       "Feb",
@@ -81,29 +60,8 @@ const NAMES: Record<AppLanguage, DateNames> = {
     tomorrow: "Tomorrow",
   },
   id: {
-    monthInitials: [
-      "J",
-      "F",
-      "M",
-      "A",
-      "M",
-      "J",
-      "J",
-      "A",
-      "S",
-      "O",
-      "N",
-      "D",
-    ],
-    weekdayInitials: [
-      "S",
-      "S",
-      "R",
-      "K",
-      "J",
-      "S",
-      "M",
-    ],
+    monthInitials: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+    weekdayInitials: ["S", "S", "R", "K", "J", "S", "M"],
     monthsShort: [
       "Jan",
       "Feb",
@@ -159,8 +117,8 @@ export function formatDate(
   const sameYear = value.slice(0, 4) === options.todayDate.slice(0, 4);
   const base = `${d} ${names.monthsShort[m - 1]}${sameYear ? "" : ` ${y}`}`;
   return options.weekday
-  ? `${names.weekdaysShort[weekdayIndex(value)]}, ${base}`
-  : base;
+    ? `${names.weekdaysShort[weekdayIndex(value)]}, ${base}`
+    : base;
 }
 
 /** List headers: "Today", "Yesterday", "Tomorrow", otherwise "Mon, 21 Sep". */
@@ -190,4 +148,12 @@ export function weekdayInitial(value: ISODate, lang: AppLanguage): string {
 /** Single-letter month for the Year chart axis, from "YYYY-MM". */
 export function monthInitial(monthKey: string, lang: AppLanguage): string {
   return NAMES[lang].monthInitials[Number(monthKey.slice(5, 7)) - 1];
+}
+
+/** Short weekday name for 1 = Monday ... 7 = Sunday: "Mon" / "Sen". */
+export function weekdayShortName(
+  mondayFirst: number,
+  lang: AppLanguage,
+): string {
+  return NAMES[lang].weekdaysShort[(mondayFirst - 1 + 7) % 7];
 }

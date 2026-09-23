@@ -26,4 +26,5 @@ export type RootStackParamList = {
   Budgets: undefined;
   BudgetForm: { scope: BudgetScope; categoryId?: number; accountId?: number };
   Search: undefined;
+  Import: undefined;
 };

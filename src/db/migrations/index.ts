@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import * as m001 from "./001_initial";
+import * as m002 from "./002_record_uids";
 
 /**
  * Ordered list of migrations. Migration N (1-based) moves the database from
@@ -10,6 +11,7 @@ type Migration = (db: SQLiteDatabase) => Promise<void>;
 
 const MIGRATIONS: Migration[] = [
   m001.up, // 1: initial SRS data model
+  m002.up, // 2: globally unique record ids for backup merge (phase 4)
 ];
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS.length;

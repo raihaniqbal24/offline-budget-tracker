@@ -41,6 +41,7 @@ export interface CategoryRow {
 
 export interface EntryRow {
   id: ID;
+  uid: string;
   type: EntryType;
   amount: number;
   currency_code: CurrencyCode;
@@ -54,6 +55,7 @@ export interface EntryRow {
 
 export interface TransferRow {
   id: ID;
+  uid: string;
   from_account_id: ID;
   to_account_id: ID;
   amount: number;
@@ -96,6 +98,7 @@ export function mapCategory(row: CategoryRow): Category {
 export function mapEntry(row: EntryRow): Entry {
   return {
     id: row.id,
+    uid: row.uid,
     type: row.type,
     amount: row.amount,
     currencyCode: row.currency_code,
@@ -111,6 +114,7 @@ export function mapEntry(row: EntryRow): Entry {
 export function mapTransfer(row: TransferRow): Transfer {
   return {
     id: row.id,
+    uid: row.uid,
     fromAccountId: row.from_account_id,
     toAccountId: row.to_account_id,
     amount: row.amount,

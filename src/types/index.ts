@@ -46,6 +46,8 @@ export type EntryType = "expense" | "income" | "adjustment";
 
 export interface Entry {
   id: ID;
+  /** Globally unique across phones and installs; used by backup merge. */
+  uid: string;
   type: EntryType;
   amount: number;
   currencyCode: CurrencyCode;
@@ -61,6 +63,8 @@ export type FeePaidBy = "sender" | "recipient";
 
 export interface Transfer {
   id: ID;
+  /** Globally unique across phones and installs; used by backup merge. */
+  uid: string;
   fromAccountId: ID;
   toAccountId: ID;
   amount: number;
@@ -157,6 +161,10 @@ export interface SettingsMap {
   backup_reminder_time: string; // "HH:mm"
   notification_permission_asked: boolean;
   last_used_account_id: ID | null;
+  /** Budget and balance alert notifications (phase 4). */
+  alerts_enabled: boolean;
+  /** UTC timestamp of the last export, or null. */
+  last_backup_at: string | null;
 }
 
 export type SettingKey = keyof SettingsMap;

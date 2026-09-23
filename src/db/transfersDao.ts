@@ -22,11 +22,14 @@ export interface TransferWithDetails extends Transfer {
 
 /** Throws a short code the form can translate. */
 export function validateTransfer(input: TransferInput): void {
-  if (input.fromAccountId === input.toAccountId) throw new Error("same_account");
+  if (input.fromAccountId === input.toAccountId)
+    throw new Error("same_account");
   if (!isValidEntryAmount(input.amount)) throw new Error("invalid_amount");
-  if (!Number.isSafeInteger(input.fee) || input.fee < 0) throw new Error("invalid_fee");
+  if (!Number.isSafeInteger(input.fee) || input.fee < 0)
+    throw new Error("invalid_fee");
   // FR-5.4: the recipient receives amount minus fee, which can't go below zero.
-  if (input.feePaidBy === "recipient" && input.fee > input.amount) throw new Error("fee_exceeds_amount");
+  if (input.feePaidBy === "recipient" && input.fee > input.amount)
+    throw new Error("fee_exceeds_amount");
   if (!isValidISODate(input.occurredOn)) throw new Error("invalid_date");
 }
 
@@ -40,7 +43,10 @@ function cleanNote(note: string | null): string | null {
  * come from v_account_movements; the fee counts as spending under Transfer
  * fees through v_cashflow (FR-5.3 to FR-5.5).
  */
-export async function createTransfer(db: SQLiteDatabase, input: TransferInput): Promise<ID> {
+export async function createTransfer(
+  db: SQLiteDatabase,
+  input: TransferInput,
+): Promise<ID> {
   validateTransfer(input);
   const result = await db.runAsync(
     `INSERT INTO transfers (from_account_id, to_account_id, amount, fee, fee_paid_by, occurred_on, note)
@@ -51,13 +57,17 @@ export async function createTransfer(db: SQLiteDatabase, input: TransferInput): 
     input.fee,
     input.fee > 0 ? input.feePaidBy : "sender",
     input.occurredOn,
-    cleanNote(input.note)
+    cleanNote(input.note),
   );
   return result.lastInsertRowId;
 }
 
 /** FR-5.7: editing the single record updates both balances. */
-export async function updateTransfer(db: SQLiteDatabase, id: ID, input: TransferInput): Promise<void> {
+export async function updateTransfer(
+  db: SQLiteDatabase,
+  id: ID,
+  input: TransferInput,
+): Promise<void> {
   validateTransfer(input);
   await db.runAsync(
     `UPDATE transfers
@@ -71,29 +81,42 @@ export async function updateTransfer(db: SQLiteDatabase, id: ID, input: Transfer
     input.fee > 0 ? input.feePaidBy : "sender",
     input.occurredOn,
     cleanNote(input.note),
-    id
+    id,
   );
 }
 
-export async function getTransfer(db: SQLiteDatabase, id: ID): Promise<Transfer | null> {
-  const row = await db.getFirstAsync<TransferRow>("SELECT * FROM transfers WHERE id = ?", id);
+export async function getTransfer(
+  db: SQLiteDatabase,
+  id: ID,
+): Promise<Transfer | null> {
+  const row = await db.getFirstAsync<TransferRow>(
+    "SELECT * FROM transfers WHERE id = ?",
+    id,
+  );
   return row ? mapTransfer(row) : null;
 }
 
-export async function deleteTransfer(db: SQLiteDatabase, id: ID): Promise<Transfer | null> {
+export async function deleteTransfer(
+  db: SQLiteDatabase,
+  id: ID,
+): Promise<Transfer | null> {
   const transfer = await getTransfer(db, id);
   if (!transfer) return null;
   await db.runAsync("DELETE FROM transfers WHERE id = ?", id);
   return transfer;
 }
 
-export async function restoreTransfer(db: SQLiteDatabase, t: Transfer): Promise<void> {
+export async function restoreTransfer(
+  db: SQLiteDatabase,
+  t: Transfer,
+): Promise<void> {
   await db.runAsync(
     `INSERT INTO transfers
-       (id, from_account_id, to_account_id, amount, fee, fee_paid_by, currency_code, occurred_on,
+       (id, uid, from_account_id, to_account_id, amount, fee, fee_paid_by, currency_code, occurred_on,
         note, recurring_rule_id, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     t.id,
+    t.uid,
     t.fromAccountId,
     t.toAccountId,
     t.amount,
@@ -103,7 +126,7 @@ export async function restoreTransfer(db: SQLiteDatabase, t: Transfer): Promise<
     t.occurredOn,
     t.note,
     t.recurringRuleId,
-    t.createdAt
+    t.createdAt,
   );
 }
 
@@ -115,13 +138,22 @@ const DETAILS_SELECT = `SELECT t.*, fa.name AS from_name, ta.name AS to_name
 type TransferDetailsRow = TransferRow & { from_name: string; to_name: string };
 
 function mapDetails(row: TransferDetailsRow): TransferWithDetails {
-  return { ...mapTransfer(row), fromAccountName: row.from_name, toAccountName: row.to_name };
+  return {
+    ...mapTransfer(row),
+    fromAccountName: row.from_name,
+    toAccountName: row.to_name,
+  };
 }
 
 /** FR-5.6: newest first, optionally for one account (either side) and a date range. */
 export async function listTransfers(
   db: SQLiteDatabase,
-  options: { limit: number; offset?: number; accountId?: ID | null; range?: DateRange | null }
+  options: {
+    limit: number;
+    offset?: number;
+    accountId?: ID | null;
+    range?: DateRange | null;
+  },
 ): Promise<TransferWithDetails[]> {
   const { limit, offset = 0, accountId = null, range = null } = options;
   const rows = await db.getAllAsync<TransferDetailsRow>(
@@ -137,23 +169,28 @@ export async function listTransfers(
     range?.start ?? null,
     range?.end ?? null,
     limit,
-    offset
+    offset,
   );
   return rows.map(mapDetails);
 }
 
 /** Transfers with account names for a set of ids (order not guaranteed). */
-export async function listTransfersByIds(db: SQLiteDatabase, ids: ID[]): Promise<TransferWithDetails[]> {
+export async function listTransfersByIds(
+  db: SQLiteDatabase,
+  ids: ID[],
+): Promise<TransferWithDetails[]> {
   if (ids.length === 0) return [];
   const rows = await db.getAllAsync<TransferDetailsRow>(
     `${DETAILS_SELECT} WHERE t.id IN (${ids.map(() => "?").join(", ")})`,
-    ...ids
+    ...ids,
   );
   return rows.map(mapDetails);
 }
 
 /** What a transfer does to each side, for the form's preview line. */
-export function transferEffect(input: Pick<TransferInput, "amount" | "fee" | "feePaidBy">): {
+export function transferEffect(
+  input: Pick<TransferInput, "amount" | "fee" | "feePaidBy">,
+): {
   fromDelta: number;
   toDelta: number;
 } {
