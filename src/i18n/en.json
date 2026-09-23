@@ -124,7 +124,10 @@
     "alertLineHint": "The account is flagged when its balance reaches this amount or lower.",
     "archive": "Archive account",
     "restore": "Restore account",
-    "archiveHint": "Archived accounts leave the pickers and the total, but keep their history."
+    "archiveHint": "Archived accounts leave the pickers and the total, but keep their history.",
+    "alertLineNone": "Current balance {{balance}}. No alert line set, so this account is never flagged.",
+    "alertLineAbove": "Current balance {{balance}}, above the line. The flag and the notification come when it reaches the line.",
+    "alertLineBelow": "Current balance {{balance}}, at or below the line. This account is flagged."
   },
   "entries": {
     "upcoming": "Upcoming",

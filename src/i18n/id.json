@@ -124,7 +124,10 @@
     "alertLineHint": "Akun ditandai saat saldonya mencapai jumlah ini atau lebih rendah.",
     "archive": "Arsipkan akun",
     "restore": "Pulihkan akun",
-    "archiveHint": "Akun yang diarsipkan hilang dari pilihan dan total, tetapi riwayatnya tetap tersimpan."
+    "archiveHint": "Akun yang diarsipkan hilang dari pilihan dan total, tetapi riwayatnya tetap tersimpan.",
+    "alertLineNone": "Saldo saat ini {{balance}}. Batas peringatan belum diatur, jadi akun ini tidak pernah ditandai.",
+    "alertLineAbove": "Saldo saat ini {{balance}}, di atas batas. Tanda dan notifikasi muncul saat saldo mencapai batas.",
+    "alertLineBelow": "Saldo saat ini {{balance}}, mencapai batas. Akun ini ditandai."
   },
   "entries": {
     "upcoming": "Mendatang",
