@@ -2,7 +2,10 @@ import { create } from "zustand";
 import { getDb } from "../db/client";
 import { getSetting, setSetting } from "../db/settingsDao";
 import { applyLanguage } from "../i18n";
-import { requestNotificationPermission } from "../notifications";
+import {
+  notificationsAvailable,
+  requestNotificationPermission,
+} from "../notifications";
 import { syncReminders } from "../notifications/service";
 import type { LanguageSetting, SettingKey, SettingsMap } from "../types";
 import { useLedgerStore } from "./ledgerStore";
@@ -109,6 +112,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setNotificationEnabled: async (key, enabled) => {
     const db = await getDb();
     if (enabled) {
+      if (!notificationsAvailable) return false; // Expo Go: nothing to schedule
       await setSetting(db, "notification_permission_asked", true);
       const allowed = await requestNotificationPermission();
       if (!allowed) {

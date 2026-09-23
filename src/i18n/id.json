@@ -60,7 +60,8 @@
     "saved": "Tersimpan.",
     "exportFailed": "Gagal mengekspor: {{message}}",
     "importBackup": "Impor cadangan",
-    "importBackupHint": "Pulihkan dari cadangan JSON, atau gabungkan dengan data yang sudah ada."
+    "importBackupHint": "Pulihkan dari cadangan JSON, atau gabungkan dengan data yang sudah ada.",
+    "notificationsUnavailable": "Notifikasi tidak berfungsi di Expo Go, karena Expo menghapus dukungan notifikasi dari aplikasi tersebut. Notifikasi berfungsi di development build atau aplikasi yang sudah dipasang. Peringatan di dalam aplikasi berfungsi di mana saja."
   },
   "category": {
     "builtin": {

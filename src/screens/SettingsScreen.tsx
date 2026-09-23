@@ -21,6 +21,7 @@ import {
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { toISODate, today } from "../lib/dates";
 import { formatDate, weekdayShortName } from "../lib/dateLabels";
+import { notificationsAvailable } from "../notifications";
 import { formatTime, parseTime } from "../notifications/content";
 import { useSettingsStore } from "../store/settingsStore";
 import { colors, radius, spacing, typography } from "../theme";
@@ -132,7 +133,14 @@ export default function SettingsScreen() {
       <Text style={[typography.label, styles.sectionTitle]}>
         {t("settings.notifications")}
       </Text>
-      {s.permissionDenied ? (
+      {!notificationsAvailable ? (
+        <View style={styles.warning}>
+          <Text style={typography.body}>
+            {t("settings.notificationsUnavailable")}
+          </Text>
+        </View>
+      ) : null}
+      {notificationsAvailable && s.permissionDenied ? (
         <View style={styles.warning}>
           <Text style={typography.body}>{t("settings.permissionDenied")}</Text>
           <Button
@@ -287,6 +295,7 @@ function ToggleRow({
         <Switch
           value={value}
           onValueChange={onChange}
+          disabled={!notificationsAvailable}
           trackColor={{ true: colors.primary, false: colors.border }}
           thumbColor={colors.surface}
           accessibilityLabel={label}

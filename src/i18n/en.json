@@ -60,7 +60,8 @@
     "saved": "Saved.",
     "exportFailed": "Couldn't export: {{message}}",
     "importBackup": "Import a backup",
-    "importBackupHint": "Restore from a JSON backup, or merge one into what's already here."
+    "importBackupHint": "Restore from a JSON backup, or merge one into what's already here.",
+    "notificationsUnavailable": "Notifications don't work in Expo Go, because Expo removed notification support from it. They work in a development build or the installed app. Warnings inside the app work everywhere."
   },
   "category": {
     "builtin": {

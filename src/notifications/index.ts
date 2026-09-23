@@ -3,8 +3,35 @@
  * Every call is wrapped so a notification problem can never stop an entry
  * from saving; in-app flags keep working either way (FR-10.6).
  */
-import * as Notifications from "expo-notifications";
+import Constants, { ExecutionEnvironment } from "expo-constants";
+import type * as NotificationsModule from "expo-notifications";
 import i18n from "../i18n";
+
+/**
+ * Expo Go can't do notifications on Android: since SDK 55 the library throws
+ * as soon as it loads there, because push notifications were removed from
+ * Expo Go. This app only uses local notifications, but the library is the
+ * same one, so in Expo Go we never load it and the rest of the app runs
+ * normally. A development build has it, and everything works.
+ */
+export const notificationsAvailable =
+  Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
+
+let loaded: typeof NotificationsModule | null = null;
+
+function notifications(): typeof NotificationsModule | null {
+  if (!notificationsAvailable) return null;
+  if (!loaded) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      loaded = require("expo-notifications") as typeof NotificationsModule;
+    } catch (error) {
+      if (__DEV__) console.warn("expo-notifications is unavailable:", error);
+      return null;
+    }
+  }
+  return loaded;
+}
 
 export const REMINDER_CHANNEL = "reminders";
 export const ALERT_CHANNEL = "alerts";
@@ -22,6 +49,8 @@ async function safely<T>(task: () => Promise<T>, fallback: T): Promise<T> {
 
 /** Show notifications while the app is open too, and create the Android channels. */
 export async function configureNotifications(): Promise<void> {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await safely(async () => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -43,6 +72,8 @@ export async function configureNotifications(): Promise<void> {
 }
 
 export async function hasNotificationPermission(): Promise<boolean> {
+  const Notifications = notifications();
+  if (!Notifications) return false;
   return safely(
     async () => (await Notifications.getPermissionsAsync()).granted === true,
     false,
@@ -55,6 +86,8 @@ export async function hasNotificationPermission(): Promise<boolean> {
  * Android won't show the prompt again.
  */
 export async function requestNotificationPermission(): Promise<boolean> {
+  const Notifications = notifications();
+  if (!Notifications) return false;
   return safely(async () => {
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) return true;
@@ -71,6 +104,8 @@ export async function scheduleDaily(
   hour: number,
   minute: number,
 ) {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await safely(async () => {
     await Notifications.cancelScheduledNotificationAsync(id);
     await Notifications.scheduleNotificationAsync({
@@ -95,6 +130,8 @@ export async function scheduleWeekly(
   hour: number,
   minute: number,
 ) {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await safely(async () => {
     await Notifications.cancelScheduledNotificationAsync(id);
     await Notifications.scheduleNotificationAsync({
@@ -112,6 +149,8 @@ export async function scheduleWeekly(
 }
 
 export async function cancelScheduled(id: string) {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await safely(
     () => Notifications.cancelScheduledNotificationAsync(id),
     undefined,
@@ -120,6 +159,8 @@ export async function cancelScheduled(id: string) {
 
 /** Show an alert now, on the alerts channel. */
 export async function notifyNow(title: string, body: string) {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await safely(
     () =>
       Notifications.scheduleNotificationAsync({
