@@ -32,7 +32,7 @@ import BudgetFormScreen from "../screens/BudgetFormScreen";
 import SearchScreen from "../screens/SearchScreen";
 import ImportScreen from "../screens/ImportScreen";
 import UndoSnackbar from "../components/UndoSnackbar";
-import BudgetToast from "../components/BudgetToast";
+import AlertToast from "../components/AlertToast";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -220,7 +220,7 @@ export default function AppNavigator() {
         </Stack.Navigator>
       </NavigationContainer>
       <UndoSnackbar />
-      <BudgetToast />
+      <AlertToast />
     </View>
   );
 }

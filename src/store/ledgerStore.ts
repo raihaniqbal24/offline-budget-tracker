@@ -61,6 +61,11 @@ type UndoState =
   | { kind: "transfer"; transfer: Transfer; token: number };
 // token changes on every delete, so an old timer can't dismiss a newer undo.
 
+/** Something to tell the user right after a save (FR-7.5, FR-10.3). */
+export type AppAlert =
+  | { kind: "budget"; budget: BudgetAlert }
+  | { kind: "balance"; account: AccountWithBalance };
+
 interface LedgerState {
   accounts: AccountWithBalance[];
   categories: Category[];
@@ -71,8 +76,8 @@ interface LedgerState {
    */
   dataVersion: number;
   undo: UndoState | null;
-  /** Budget levels newly reached, shown one at a time after a save (FR-7.5). */
-  budgetAlerts: BudgetAlert[];
+  /** Budget levels reached and balances crossed, shown one at a time after a save (FR-7.5). */
+  alerts: AppAlert[];
 
   load: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -106,10 +111,18 @@ interface LedgerState {
   setBudget: (target: BudgetTarget, amount: number | null) => Promise<void>;
   undoDelete: () => Promise<void>;
   dismissUndo: (token: number) => void;
-  dismissBudgetAlert: () => void;
+  dismissAlert: () => void;
 }
 
 let undoCounter = 0;
+
+/** In-app messages always show, even when phone notifications are off. */
+function toAppAlerts(budgets: BudgetAlert[], crossed: AccountWithBalance[]): AppAlert[] {
+  return [
+    ...budgets.map((budget): AppAlert => ({ kind: "budget", budget })),
+    ...crossed.map((account): AppAlert => ({ kind: "balance", account })),
+  ];
+}
 
 export const useLedgerStore = create<LedgerState>()((set, get) => ({
   accounts: [],
@@ -117,7 +130,7 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   lastUsedAccountId: null,
   dataVersion: 0,
   undo: null,
-  budgetAlerts: [],
+  alerts: [],
 
   load: async () => {
     const db = await getDb();
@@ -133,7 +146,7 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
       accounts,
       categories,
       lastUsedAccountId,
-      budgetAlerts: [...s.budgetAlerts, ...alerts],
+      alerts: [...s.alerts, ...toAppAlerts(alerts, crossed)],
     }));
     void sendAlerts(db, alerts, crossed, { accounts, categories });
     void syncReminders(db, accounts, true);
@@ -150,11 +163,12 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     const accounts = await listAccountsWithBalances(db, today());
     const alerts = await checkBudgetAlerts(db, today());
     const crossed = await checkBalanceAlerts(db, accounts);
+    const fresh = toAppAlerts(alerts, crossed);
     set((s) => ({
       accounts,
       dataVersion: s.dataVersion + 1,
-      budgetAlerts:
-        alerts.length > 0 ? [...s.budgetAlerts, ...alerts] : s.budgetAlerts,
+      alerts:
+        fresh.length > 0 ? [...s.alerts, ...fresh] : s.alerts,
     }));
     // Phone notifications and the daily reminder text follow every save (FR-7.5, FR-10.2, FR-10.4).
     void sendAlerts(db, alerts, crossed, {
@@ -300,8 +314,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     if (get().undo?.token === token) set({ undo: null });
   },
 
-  dismissBudgetAlert: () =>
-    set((s) => ({ budgetAlerts: s.budgetAlerts.slice(1) })),
+  dismissAlert: () =>
+    set((s) => ({ alerts: s.alerts.slice(1) })),
 }));
 
 /*

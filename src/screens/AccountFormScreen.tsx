@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useAppLanguage } from "../i18n/useAppLanguage";
-import { formatNumber, parseAmount } from "../lib/money";
+import { formatNumber, formatRupiah, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
 import { colors, radius, spacing, typography } from "../theme";
 import type { AccountType } from "../types";
@@ -37,7 +37,7 @@ export default function AccountFormScreen({ route, navigation }: Props) {
     (existing?.openingBalance ?? 0) < 0,
   );
   const [alertText, setAlertText] = useState(
-    existing?.alertLine != null 
+    existing?.alertLine != null
       ? formatNumber(Math.abs(existing.alertLine), lang)
       : "",
   );
@@ -155,6 +155,15 @@ export default function AccountFormScreen({ route, navigation }: Props) {
           placeholder={t("accountForm.alertLinePlaceholder")}
         />
         <Text style={typography.caption}>{t("accountForm.alertLineHint")}</Text>
+        {existing ? (
+          <Text style={[typography.caption, existing.isBelowAlertLine && styles.flagged]}>
+            {existing.alertLine === null
+              ? t("accountForm.alertLineNone", { balance: formatRupiah(existing.balance, lang) })
+              : existing.isBelowAlertLine
+                ? t("accountForm.alertLineBelow", { balance: formatRupiah(existing.balance, lang) })
+                : t("accountForm.alertLineAbove", { balance: formatRupiah(existing.balance, lang) })}
+          </Text>
+        ) : null}
 
         {existing && !existing.archived ? (
           <View style={styles.archiveBox}>
@@ -195,18 +204,9 @@ export default function AccountFormScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.md,
-    gap: spacing.sm,
-    paddingBottom: spacing.xl,
-  },
-  label: {
-    marginTop: spacing.md,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
+  label: { marginTop: spacing.md },
   textInput: {
     minHeight: 52,
     paddingHorizontal: spacing.md,
@@ -217,22 +217,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
-  inputError: {
-    borderColor: colors.expense,
-  },
-  wrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  archiveBox: {
-    marginTop: spacing.xl,
-    gap: spacing.sm,
-  },
-  error: {
-    fontSize: 13,
-    color: colors.expense,
-  },
+  inputError: { borderColor: colors.expense },
+  wrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  archiveBox: { marginTop: spacing.xl, gap: spacing.sm },
+  error: { fontSize: 13, color: colors.expense },
+  flagged: { color: colors.alert },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,

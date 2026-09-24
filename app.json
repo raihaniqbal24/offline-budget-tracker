@@ -27,6 +27,11 @@
       "expo-localization",
       "@react-native-community/datetimepicker",
       "expo-build-properties"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3604a6bc-6cb8-4ab3-96d7-5a02d946f592"
+      }
+    }
   }
 }

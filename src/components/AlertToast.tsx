@@ -12,18 +12,19 @@ import { budgetLabel } from "./budgetLabel";
 const SHOW_MS = 6_000;
 
 /**
- * In-app budget warning (FR-7.5, decided: a message after saving). Shows the
- * next newly reached level; tap to dismiss, or it goes after a few seconds.
- * Sits at the top so it never covers the undo bar.
+ * In-app message after a save: a budget level reached (FR-7.5) or an account
+ * that dropped to its alert line (FR-10.3). These always show, whether or not
+ * phone notifications are allowed. Sits at the top so it never covers the
+ * undo bar; tap to dismiss, or it goes after a few seconds.
  */
-export default function BudgetToast() {
+export default function AlertToast() {
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const insets = useSafeAreaInsets();
-  const alert = useLedgerStore((s) => s.budgetAlerts[0]);
+  const alert = useLedgerStore((s) => s.alerts[0]);
   const accounts = useLedgerStore((s) => s.accounts);
   const categories = useLedgerStore((s) => s.categories);
-  const dismiss = useLedgerStore((s) => s.dismissBudgetAlert);
+  const dismiss = useLedgerStore((s) => s.dismissAlert);
 
   useEffect(() => {
     if (!alert) return;
@@ -33,27 +34,40 @@ export default function BudgetToast() {
 
   if (!alert) return null;
 
-  const name = budgetLabel(alert, accounts, categories, t);
-  const values = {
-    name,
-    percent: alert.percent,
-    spent: formatRupiah(alert.spent, lang),
-    limit: formatRupiah(alert.limit, lang),
-  };
-  const message = alert.level === 100 ? t("budgets.alertReached", values) : t("budgets.alertLevel", values);
+  let message: string;
+  let accent: string;
+  let icon: "alert" | "alert-octagon" | "alert-circle";
+
+  if (alert.kind === "budget") {
+    const { budget } = alert;
+    const values = {
+      name: budgetLabel(budget, accounts, categories, t),
+      percent: budget.percent,
+      spent: formatRupiah(budget.spent, lang),
+      limit: formatRupiah(budget.limit, lang),
+    };
+    message = budget.level === 100 ? t("budgets.alertReached", values) : t("budgets.alertLevel", values);
+    accent = budgetColor(budget.percent);
+    icon = budget.level === 100 ? "alert-octagon" : "alert";
+  } else {
+    const { account } = alert;
+    message = t("notifications.balanceBody", {
+      name: account.name,
+      balance: formatRupiah(account.balance, lang),
+      line: formatRupiah(account.alertLine ?? 0, lang),
+    });
+    accent = colors.alert;
+    icon = "alert-circle";
+  }
 
   return (
     <Pressable
       onPress={dismiss}
-      style={[styles.toast, { top: insets.top + spacing.sm, borderLeftColor: budgetColor(alert.percent) }]}
+      style={[styles.toast, { top: insets.top + spacing.sm, borderLeftColor: accent }]}
       accessibilityRole="alert"
       accessibilityLiveRegion="assertive"
     >
-      <MaterialCommunityIcons
-        name={alert.level === 100 ? "alert-octagon" : "alert"}
-        size={22}
-        color={budgetColor(alert.percent)}
-      />
+      <MaterialCommunityIcons name={icon} size={22} color={accent} />
       <View style={styles.body}>
         <Text style={styles.text}>{message}</Text>
       </View>
