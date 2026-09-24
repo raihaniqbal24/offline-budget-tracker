@@ -24,9 +24,11 @@ export default function UndoSnackbar() {
   return (
     <View
       style={[styles.bar, { bottom: insets.bottom + 72 }]}
-      accessibilityLiveRegion="polite"
+      accessibilityLiveRegion="assertive"
     >
-      <Text style={styles.text}>{undo.kind === "entry" ? t("entries.deleted") : t("transfers.deleted")}</Text>
+      <Text style={styles.text}>
+        {undo.kind === "entry" ? t("entries.deleted") : t("transfers.deleted")}
+      </Text>
       <Pressable onPress={undoDelete} accessibilityRole="button" hitSlop={12}>
         <Text style={styles.action}>{t("common.undo")}</Text>
       </Pressable>
@@ -48,13 +50,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text,
     elevation: 6,
   },
-  text: {
-    color: colors.surface,
-    fontSize: 15,
-  },
-  action: {
-    color: "#7FD3BE",
-    fontSize: 15,
-    fontWeight: "700",
-  },
+  text: { color: colors.surface, fontSize: 15 },
+  action: { color: "#7FD3BE", fontSize: 15, fontWeight: "700" },
 });

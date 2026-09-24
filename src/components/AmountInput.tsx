@@ -106,9 +106,7 @@ export default function AmountInput({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    gap: spacing.sm,
-  },
+  wrapper: { gap: spacing.sm },
   field: {
     flexDirection: "row",
     alignItems: "center",
@@ -120,69 +118,32 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  fieldError: {
-    borderColor: colors.expense,
-  },
+  fieldError: { borderColor: colors.expense },
   sign: {
     width: 36,
-    height: 36,
+    minHeight: 36,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.background,
   },
-  signText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: colors.income,
-  },
-  signNegative: {
-    color: colors.expense,
-  },
-  currency: {
-    fontSize: 16,
-    color: colors.textMuted,
-    fontWeight: "600",
-  },
-  currencyLarge: {
-    fontSize: 22,
-    color: colors.textMuted,
-    fontWeight: "600",
-  },
-  input: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-  },
-  suffixRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
+  signText: { fontSize: 20, fontWeight: "700", color: colors.income },
+  signNegative: { color: colors.expense },
+  currency: { fontSize: 16, color: colors.textMuted, fontWeight: "600" },
+  currencyLarge: { fontSize: 22, color: colors.textMuted, fontWeight: "600" },
+  input: { flex: 1, paddingVertical: spacing.sm },
+  suffixRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   suffix: {
     minWidth: 52,
-    height: 36,
+    minHeight: 36,
     borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primarySoft,
   },
-  suffixPressed: {
-    opacity: 0.7,
-  },
-  suffixText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-  previewBox: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  preview: {
-    color: colors.primary,
-  },
-  error: {
-    fontSize: 13,
-    color: colors.expense,
-  },
+  suffixPressed: { opacity: 0.7 },
+  suffixText: { fontSize: 15, fontWeight: "600", color: colors.primary },
+  previewBox: { flex: 1, alignItems: "flex-end" },
+  preview: { color: colors.primary },
+  error: { fontSize: 13, color: colors.expense },
 });

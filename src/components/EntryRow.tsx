@@ -34,6 +34,18 @@ function EntryRow({ entry, lang, isUpcoming, onPress }: Props) {
       onPress={() => onPress(entry.id)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       accessibilityRole="button"
+      // One sentence, so a screen reader says "Food, minus Rp 25,000, Cash"
+      // instead of reading the icon, label and amount as separate items.
+      accessible
+      accessibilityLabel={[
+        label,
+        formatSignedRupiah(amount, lang),
+        entry.accountName,
+        entry.note,
+        isUpcoming ? t("entries.upcoming") : null,
+      ]
+        .filter(Boolean)
+        .join(", ")}
     >
       <CategoryIcon icon={entry.categoryIcon} color={entry.categoryColor} />
       <View style={styles.middle}>
@@ -52,6 +64,8 @@ function EntryRow({ entry, lang, isUpcoming, onPress }: Props) {
             typography.amount,
             { color: amount < 0 ? colors.expense : colors.income },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
         >
           {formatSignedRupiah(amount, lang)}
         </Text>
@@ -76,16 +90,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     backgroundColor: colors.surface,
   },
-  pressed: {
-    backgroundColor: colors.primarySoft,
-  },
-  middle: {
-    flex: 1,
-    gap: 2,
-  },
-  right: {
-    alignItems: "flex-end",
-    gap: 2,
-    maxWidth: "45%",
-  },
+  pressed: { backgroundColor: colors.primarySoft },
+  middle: { flex: 1, gap: 2 },
+  right: { alignItems: "flex-end", gap: 2, maxWidth: "45%" },
 });

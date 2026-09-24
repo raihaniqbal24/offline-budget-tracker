@@ -16,15 +16,37 @@ interface Props {
 /** A transfer as from → to, amount and fee (FR-5.6). */
 function TransferRow({ transfer, lang, isUpcoming, onPress }: Props) {
   const { t } = useTranslation();
-  const payer = transfer.feePaidBy === "sender" ? t("transfers.payerSender") : t("transfers.payerRecipient");
+  const payer =
+    transfer.feePaidBy === "sender"
+      ? t("transfers.payerSender")
+      : t("transfers.payerRecipient");
   return (
     <Pressable
       onPress={() => onPress(transfer.id)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       accessibilityRole="button"
+      accessible
+      accessibilityLabel={[
+        `${transfer.fromAccountName} → ${transfer.toAccountName}`,
+        formatRupiah(transfer.amount, lang),
+        transfer.fee > 0
+          ? t("transfers.feeCaption", {
+              amount: formatRupiah(transfer.fee, lang),
+              payer,
+            })
+          : null,
+        transfer.note,
+        isUpcoming ? t("entries.upcoming") : null,
+      ]
+        .filter(Boolean)
+        .join(", ")}
     >
       <View style={styles.iconCircle}>
-        <MaterialCommunityIcons name="bank-transfer" size={20} color={colors.transfer} />
+        <MaterialCommunityIcons
+          name="bank-transfer"
+          size={20}
+          color={colors.transfer}
+        />
       </View>
       <View style={styles.middle}>
         <Text style={typography.body} numberOfLines={1}>
@@ -32,15 +54,26 @@ function TransferRow({ transfer, lang, isUpcoming, onPress }: Props) {
         </Text>
         {transfer.note || isUpcoming ? (
           <Text style={typography.caption} numberOfLines={1}>
-            {[isUpcoming ? t("entries.upcoming") : null, transfer.note].filter(Boolean).join(" · ")}
+            {[isUpcoming ? t("entries.upcoming") : null, transfer.note]
+              .filter(Boolean)
+              .join(" · ")}
           </Text>
         ) : null}
       </View>
       <View style={styles.right}>
-        <Text style={[typography.amount, { color: colors.transfer }]}>{formatRupiah(transfer.amount, lang)}</Text>
+        <Text
+          style={[typography.amount, { color: colors.transfer }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {formatRupiah(transfer.amount, lang)}
+        </Text>
         {transfer.fee > 0 ? (
           <Text style={typography.caption}>
-            {t("transfers.feeCaption", { amount: formatRupiah(transfer.fee, lang), payer })}
+            {t("transfers.feeCaption", {
+              amount: formatRupiah(transfer.fee, lang),
+              payer,
+            })}
           </Text>
         ) : null}
       </View>
@@ -63,6 +96,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 40,
     height: 40,
+    flexShrink: 0,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

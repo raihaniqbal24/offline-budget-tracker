@@ -10,6 +10,12 @@
       "distribution": "internal",
       "android": { "buildType": "apk" }
     },
-    "production": {}
-  }
+    "release": {
+      "distribution": "internal",
+      "channel": "release",
+      "env": { "APP_VARIANT": "release" },
+      "android": { "buildType": "apk" }
+    }
+  },
+  "submit": { "production": {} }
 }

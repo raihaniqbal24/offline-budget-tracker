@@ -1,5 +1,12 @@
 import { useMemo, useState, type ComponentProps } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -23,13 +30,20 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
   const categories = useLedgerStore((s) => s.categories);
   const saveCategory = useLedgerStore((s) => s.saveCategory);
   const setArchived = useLedgerStore((s) => s.setCategoryArchived);
-  const existing = useMemo(() => categories.find((c) => c.id === categoryId), [categories, categoryId]);
+  const existing = useMemo(
+    () => categories.find((c) => c.id === categoryId),
+    [categories, categoryId],
+  );
 
   const originalLabel = existing ? categoryLabel(existing) : "";
   const [name, setName] = useState(originalLabel);
-  const [type, setType] = useState<CategoryType>(existing?.type ?? route.params?.type ?? "expense");
+  const [type, setType] = useState<CategoryType>(
+    existing?.type ?? route.params?.type ?? "expense",
+  );
   const [icon, setIcon] = useState<string>(existing?.icon ?? CATEGORY_ICONS[0]);
-  const [color, setColor] = useState<string>(existing?.color ?? CATEGORY_COLORS[0]);
+  const [color, setColor] = useState<string>(
+    existing?.color ?? CATEGORY_COLORS[0],
+  );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -41,18 +55,28 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
       (c) =>
         c.id !== categoryId &&
         c.type === type &&
-        [c.name, categoryLabel(c)].some((n) => n.trim().toLowerCase() === trimmed.toLowerCase())
+        [c.name, categoryLabel(c)].some(
+          (n) => n.trim().toLowerCase() === trimmed.toLowerCase(),
+        ),
     );
     if (clash) return setError(t("categories.duplicate"));
 
     setError(null);
     setSaving(true);
     try {
-      await saveCategory({ name: trimmed, type, icon, color }, categoryId, trimmed !== originalLabel);
+      await saveCategory(
+        { name: trimmed, type, icon, color },
+        categoryId,
+        trimmed !== originalLabel,
+      );
       navigation.goBack();
     } catch (e) {
       const code = (e as Error).message;
-      setError(code === "duplicate_name" ? t("categories.duplicate") : t("errors.saveFailed", { message: code }));
+      setError(
+        code === "duplicate_name"
+          ? t("categories.duplicate")
+          : t("errors.saveFailed", { message: code }),
+      );
       setSaving(false);
     }
   };
@@ -65,7 +89,10 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.preview}>
           <CategoryIcon icon={icon} color={color} size={56} />
           <Text style={typography.title} numberOfLines={1}>
@@ -84,7 +111,9 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
           />
         ) : null}
 
-        <Text style={[typography.label, styles.label]}>{t("categories.name")}</Text>
+        <Text style={[typography.label, styles.label]}>
+          {t("categories.name")}
+        </Text>
         <TextInput
           value={name}
           onChangeText={setName}
@@ -96,32 +125,56 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Text style={[typography.label, styles.label]}>{t("categories.icon")}</Text>
+        <Text style={[typography.label, styles.label]}>
+          {t("categories.icon")}
+        </Text>
         <View style={styles.grid}>
           {CATEGORY_ICONS.map((name) => (
             <Pressable
               key={name}
               onPress={() => setIcon(name)}
-              style={[styles.iconCell, icon === name && { borderColor: color, backgroundColor: `${color}22` }]}
+              style={[
+                styles.iconCell,
+                icon === name && {
+                  borderColor: color,
+                  backgroundColor: `${color}22`,
+                },
+              ]}
               accessibilityRole="button"
               accessibilityState={{ selected: icon === name }}
             >
-              <MaterialCommunityIcons name={name as IconName} size={24} color={icon === name ? color : colors.textMuted} />
+              <MaterialCommunityIcons
+                name={name as IconName}
+                size={24}
+                color={icon === name ? color : colors.textMuted}
+              />
             </Pressable>
           ))}
         </View>
 
-        <Text style={[typography.label, styles.label]}>{t("categories.color")}</Text>
+        <Text style={[typography.label, styles.label]}>
+          {t("categories.color")}
+        </Text>
         <View style={styles.grid}>
           {CATEGORY_COLORS.map((c) => (
             <Pressable
               key={c}
               onPress={() => setColor(c)}
-              style={[styles.swatch, { backgroundColor: c }, color === c && styles.swatchSelected]}
+              style={[
+                styles.swatch,
+                { backgroundColor: c },
+                color === c && styles.swatchSelected,
+              ]}
               accessibilityRole="button"
               accessibilityState={{ selected: color === c }}
             >
-              {color === c ? <MaterialCommunityIcons name="check" size={20} color="#FFFFFF" /> : null}
+              {color === c ? (
+                <MaterialCommunityIcons
+                  name="check"
+                  size={20}
+                  color="#FFFFFF"
+                />
+              ) : null}
             </Pressable>
           ))}
         </View>
@@ -129,11 +182,17 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
         {existing ? (
           <View style={styles.archiveBox}>
             <Button
-              label={existing.archived ? t("categories.restore") : t("categories.archive")}
+              label={
+                existing.archived
+                  ? t("categories.restore")
+                  : t("categories.archive")
+              }
               variant="secondary"
               onPress={toggleArchived}
             />
-            <Text style={typography.caption}>{t("categories.archiveHint")}</Text>
+            <Text style={typography.caption}>
+              {t("categories.archiveHint")}
+            </Text>
           </View>
         ) : null}
       </ScrollView>
@@ -148,7 +207,11 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
-  preview: { alignItems: "center", gap: spacing.sm, paddingVertical: spacing.md },
+  preview: {
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
   label: { marginTop: spacing.md },
   textInput: {
     minHeight: 52,
@@ -166,6 +229,7 @@ const styles = StyleSheet.create({
   iconCell: {
     width: 48,
     height: 48,
+    flexShrink: 0,
     borderRadius: radius.md,
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -173,7 +237,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  swatch: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  swatch: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   swatchSelected: { borderWidth: 3, borderColor: colors.text },
   archiveBox: { marginTop: spacing.xl, gap: spacing.sm },
   footer: {

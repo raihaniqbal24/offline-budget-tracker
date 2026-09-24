@@ -89,7 +89,20 @@ export default function GoalDetailScreen({ route, navigation }: Props) {
         <Text style={typography.amountLarge}>
           {formatRupiah(goal.saved, lang)}
         </Text>
-        <View style={styles.track}>
+        <View
+          style={styles.track}
+          accessible
+          accessibilityRole="progressbar"
+          accessibilityValue={{
+            min: 0,
+            max: 100,
+            now: progress.percent,
+            text: t("goals.savedOf", {
+              saved: formatRupiah(goal.saved, lang),
+              target: formatRupiah(goal.targetAmount, lang),
+            }),
+          }}
+        >
           <View
             style={[
               styles.fill,
