@@ -43,6 +43,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ...(config.plugins ?? []),
     // Decided: Android 13 (API level 33) and later.
     ["expo-build-properties", { android: { minSdkVersion: 33 } }],
-    ["expo-notifications", { color: "#0E6B57" }],
+    ["expo-notifications", { icon: "./assets/notification-icon.png", color: "#0E6B57" }],
   ],
 });
