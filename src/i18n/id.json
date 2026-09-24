@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Budget Tracker"
+    "name": "Finance Tracker"
   },
   "tabs": {
     "home": "Beranda",
@@ -357,7 +357,7 @@
   "notifications": {
     "channelReminders": "Pengingat",
     "channelAlerts": "Peringatan anggaran dan saldo",
-    "dailyTitle": "Budget Tracker",
+    "dailyTitle": "Finance Tracker",
     "dailyBody": "Saatnya mencatat pengeluaran hari ini.",
     "dailyLowAccounts": "Mencapai batas peringatan: {{accounts}}.",
     "backupTitle": "Cadangkan data Anda",

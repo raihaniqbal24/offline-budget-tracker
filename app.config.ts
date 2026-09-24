@@ -12,12 +12,14 @@ const isRelease = process.env.APP_VARIANT === "release";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? "Budget Tracker",
+  // The name under the icon and in the app switcher.
+  name: "Finance Tracker",
+  // The slug ties the project to its EAS build history: leave it alone.
   slug: config.slug ?? "budget-tracker",
   android: {
     ...config.android,
-    // Change before sharing the APK: this id can't change once people install it.
-    package: config.android?.package ?? "com.example.budgettracker",
+    // Permanent: changing it after anyone installs makes it a different app.
+    package: "com.raihaniqbal24.financetracker",
     // NFR-5: never copy the database to a Google account.
     allowBackup: false,
     permissions: ["android.permission.POST_NOTIFICATIONS"],

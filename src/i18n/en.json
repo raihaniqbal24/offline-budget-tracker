@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Budget Tracker"
+    "name": "Finance Tracker"
   },
   "tabs": {
     "home": "Home",
@@ -357,7 +357,7 @@
   "notifications": {
     "channelReminders": "Reminders",
     "channelAlerts": "Budget and balance alerts",
-    "dailyTitle": "Budget Tracker",
+    "dailyTitle": "Finance Tracker",
     "dailyBody": "Time to record today's spending.",
     "dailyLowAccounts": "At or below alert line: {{accounts}}.",
     "backupTitle": "Back up your data",
