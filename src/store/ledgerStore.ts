@@ -44,6 +44,26 @@ import {
   splitAdjustment,
   type SplitPart,
 } from "../db/adjustmentsDao";
+import {
+  confirmPendingEntry,
+  countPendingEntries,
+  createRule,
+  generatePendingEntries,
+  setRuleArchived,
+  skipPendingEntry,
+  updateRule,
+  type RecurringInput,
+} from "../db/recurringDao";
+import {
+  addMovement,
+  createGoal,
+  deleteMovement,
+  getTotalInGoals,
+  setGoalArchived,
+  updateGoal,
+  type GoalInput,
+  type MovementInput,
+} from "../db/goalsDao";
 import { monthKey, today, type ISODate } from "../lib/dates";
 import type {
   AccountWithBalance,
@@ -76,8 +96,12 @@ interface LedgerState {
    */
   dataVersion: number;
   undo: UndoState | null;
-  /** Budget levels reached and balances crossed, shown one at a time after a save (FR-7.5). */
+  /** Budget levels reached and balances crossed, shown one at a time after a save. */
   alerts: AppAlert[];
+  /** FR-11.3: how many recurring occurrences are waiting to be confirmed. */
+  pendingCount: number;
+  /** FR-12.5: money held in manual goals, kept apart from account balances. */
+  totalInGoals: number;
 
   load: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -109,6 +133,17 @@ interface LedgerState {
   moveCategory: (id: ID, direction: -1 | 1) => Promise<void>;
   /** Set (or remove, with null) a limit from the current month onward. */
   setBudget: (target: BudgetTarget, amount: number | null) => Promise<void>;
+  saveRule: (input: RecurringInput, id?: ID) => Promise<ID>;
+  setRuleArchived: (id: ID, archived: boolean) => Promise<void>;
+  confirmPending: (
+    pendingId: ID,
+    overrides?: { amount?: number; note?: string | null },
+  ) => Promise<void>;
+  skipPending: (pendingId: ID) => Promise<void>;
+  saveGoal: (input: GoalInput, id?: ID) => Promise<ID>;
+  setGoalArchived: (id: ID, archived: boolean) => Promise<void>;
+  addGoalMovement: (input: MovementInput) => Promise<ID>;
+  deleteGoalMovement: (id: ID) => Promise<void>;
   undoDelete: () => Promise<void>;
   dismissUndo: (token: number) => void;
   dismissAlert: () => void;
@@ -117,7 +152,10 @@ interface LedgerState {
 let undoCounter = 0;
 
 /** In-app messages always show, even when phone notifications are off. */
-function toAppAlerts(budgets: BudgetAlert[], crossed: AccountWithBalance[]): AppAlert[] {
+function toAppAlerts(
+  budgets: BudgetAlert[],
+  crossed: AccountWithBalance[],
+): AppAlert[] {
   return [
     ...budgets.map((budget): AppAlert => ({ kind: "budget", budget })),
     ...crossed.map((account): AppAlert => ({ kind: "balance", account })),
@@ -131,9 +169,13 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
   dataVersion: 0,
   undo: null,
   alerts: [],
+  pendingCount: 0,
+  totalInGoals: 0,
 
   load: async () => {
     const db = await getDb();
+    // FR-11.2: due occurrences, including any missed while the app was closed.
+    await generatePendingEntries(db, today());
     const [accounts, categories, lastUsedAccountId] = await Promise.all([
       listAccountsWithBalances(db, today()),
       listCategories(db),
@@ -142,11 +184,15 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     // FR-7.6 and FR-10.5: budget and balance alerts are checked whenever the app opens.
     const alerts = await checkBudgetAlerts(db, today());
     const crossed = await checkBalanceAlerts(db, accounts);
+    const pendingCount = await countPendingEntries(db);
+    const totalInGoals = await getTotalInGoals(db, today());
     set((s) => ({
       accounts,
       categories,
       lastUsedAccountId,
       alerts: [...s.alerts, ...toAppAlerts(alerts, crossed)],
+      pendingCount,
+      totalInGoals,
     }));
     void sendAlerts(db, alerts, crossed, { accounts, categories });
     void syncReminders(db, accounts, true);
@@ -164,11 +210,14 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     const alerts = await checkBudgetAlerts(db, today());
     const crossed = await checkBalanceAlerts(db, accounts);
     const fresh = toAppAlerts(alerts, crossed);
+    const pendingCount = await countPendingEntries(db);
+    const totalInGoals = await getTotalInGoals(db, today());
     set((s) => ({
       accounts,
       dataVersion: s.dataVersion + 1,
-      alerts:
-        fresh.length > 0 ? [...s.alerts, ...fresh] : s.alerts,
+      alerts: fresh.length > 0 ? [...s.alerts, ...fresh] : s.alerts,
+      pendingCount,
+      totalInGoals,
     }));
     // Phone notifications and the daily reminder text follow every save (FR-7.5, FR-10.2, FR-10.4).
     void sendAlerts(db, alerts, crossed, {
@@ -300,6 +349,65 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     await get().refresh();
   },
 
+  saveRule: async (input, id) => {
+    const db = await getDb();
+    const ruleId =
+      id === undefined
+        ? await createRule(db, input)
+        : (await updateRule(db, id, input), id);
+    // A new or changed rule may already have occurrences due (FR-11.2, FR-11.7).
+    await generatePendingEntries(db, today());
+    await get().refresh();
+    return ruleId;
+  },
+
+  setRuleArchived: async (id, archived) => {
+    const db = await getDb();
+    await setRuleArchived(db, id, archived);
+    await get().refresh();
+  },
+
+  confirmPending: async (pendingId, overrides) => {
+    const db = await getDb();
+    await confirmPendingEntry(db, pendingId, overrides);
+    await get().refresh();
+  },
+
+  skipPending: async (pendingId) => {
+    const db = await getDb();
+    await skipPendingEntry(db, pendingId);
+    await get().refresh();
+  },
+
+  saveGoal: async (input, id) => {
+    const db = await getDb();
+    const goalId =
+      id === undefined
+        ? await createGoal(db, input)
+        : (await updateGoal(db, id, input), id);
+    await get().refresh();
+    return goalId;
+  },
+
+  setGoalArchived: async (id, archived) => {
+    const db = await getDb();
+    await setGoalArchived(db, id, archived);
+    await get().refresh();
+  },
+
+  addGoalMovement: async (input) => {
+    const db = await getDb();
+    const id = await addMovement(db, input, today());
+    await get().refresh();
+    return id;
+  },
+
+  deleteGoalMovement: async (id) => {
+    const db = await getDb();
+    await deleteMovement(db, id);
+    await get().refresh();
+  },
+
   undoDelete: async () => {
     const pending = get().undo;
     if (!pending) return;
@@ -314,8 +422,7 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     if (get().undo?.token === token) set({ undo: null });
   },
 
-  dismissAlert: () =>
-    set((s) => ({ alerts: s.alerts.slice(1) })),
+  dismissAlert: () => set((s) => ({ alerts: s.alerts.slice(1) })),
 }));
 
 /*

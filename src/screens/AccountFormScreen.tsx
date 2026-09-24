@@ -156,12 +156,23 @@ export default function AccountFormScreen({ route, navigation }: Props) {
         />
         <Text style={typography.caption}>{t("accountForm.alertLineHint")}</Text>
         {existing ? (
-          <Text style={[typography.caption, existing.isBelowAlertLine && styles.flagged]}>
+          <Text
+            style={[
+              typography.caption,
+              existing.isBelowAlertLine && styles.flagged,
+            ]}
+          >
             {existing.alertLine === null
-              ? t("accountForm.alertLineNone", { balance: formatRupiah(existing.balance, lang) })
+              ? t("accountForm.alertLineNone", {
+                  balance: formatRupiah(existing.balance, lang),
+                })
               : existing.isBelowAlertLine
-                ? t("accountForm.alertLineBelow", { balance: formatRupiah(existing.balance, lang) })
-                : t("accountForm.alertLineAbove", { balance: formatRupiah(existing.balance, lang) })}
+                ? t("accountForm.alertLineBelow", {
+                    balance: formatRupiah(existing.balance, lang),
+                  })
+                : t("accountForm.alertLineAbove", {
+                    balance: formatRupiah(existing.balance, lang),
+                  })}
           </Text>
         ) : null}
 
@@ -170,7 +181,9 @@ export default function AccountFormScreen({ route, navigation }: Props) {
             <Button
               label={t("reconcile.title")}
               variant="secondary"
-              onPress={() => navigation.navigate("Reconcile", { accountId: existing.id })}
+              onPress={() =>
+                navigation.navigate("Reconcile", { accountId: existing.id })
+              }
             />
             <Text style={typography.caption}>{t("reconcile.hint")}</Text>
           </View>

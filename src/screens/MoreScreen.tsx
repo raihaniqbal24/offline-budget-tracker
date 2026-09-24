@@ -8,8 +8,7 @@ import { colors, radius, spacing, typography } from "../theme";
 import type { RootStackParamList } from "../navigation/types";
 
 /**
- * Hub for everything that isn't a daily screen. Later phases add rows for
- * goals, recurring rules and backup.
+ * Hub for everything that isn't a daily screen.
  */
 export default function MoreScreen() {
   const { t } = useTranslation();
@@ -28,6 +27,18 @@ export default function MoreScreen() {
           icon="chart-box-outline"
           label={t("more.budgets")}
           onPress={() => navigation.navigate("Budgets")}
+          divider
+        />
+        <Row
+          icon="calendar-sync-outline"
+          label={t("more.recurring")}
+          onPress={() => navigation.navigate("Recurring")}
+          divider
+        />
+        <Row
+          icon="piggy-bank-outline"
+          label={t("more.goals")}
+          onPress={() => navigation.navigate("Goals")}
           divider
         />
         <Row
@@ -66,25 +77,28 @@ function Row({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.row, divider && styles.rowDivider, pressed && styles.rowPressed]}
+      style={({ pressed }) => [
+        styles.row,
+        divider && styles.rowDivider,
+        pressed && styles.rowPressed,
+      ]}
       onPress={onPress}
       accessibilityRole="button"
     >
       <MaterialCommunityIcons name={icon} size={22} color={colors.primary} />
       <Text style={[typography.body, styles.rowLabel]}>{label}</Text>
-      <MaterialCommunityIcons name="chevron-right" size={22} color={colors.textMuted} />
+      <MaterialCommunityIcons
+        name="chevron-right"
+        size={22}
+        color={colors.textMuted}
+      />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.md,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.md },
   group: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -103,10 +117,6 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-  rowPressed: {
-    backgroundColor: colors.primarySoft,
-  },
-  rowLabel: {
-    flex: 1,
-  },
+  rowPressed: { backgroundColor: colors.primarySoft },
+  rowLabel: { flex: 1 },
 });

@@ -28,7 +28,9 @@
     "transfers": "Transfer",
     "budgets": "Anggaran",
     "categories": "Kategori",
-    "search": "Cari dan saring"
+    "search": "Cari dan saring",
+    "recurring": "Berulang",
+    "goals": "Target tabungan"
   },
   "settings": {
     "title": "Pengaturan",
@@ -94,7 +96,9 @@
     "transfer": "Transfer",
     "budgets": "Anggaran bulan ini",
     "manage": "Kelola",
-    "setLimits": "Atur batas"
+    "setLimits": "Atur batas",
+    "pending": "{{count}} transaksi berulang menunggu konfirmasi",
+    "savedInGoals": "Tersimpan di target: {{amount}}"
   },
   "accounts": {
     "add": "Tambah akun",
@@ -361,5 +365,101 @@
     "budgetTitle": "Peringatan anggaran",
     "balanceTitle": "Saldo menipis",
     "balanceBody": "Saldo {{name}} {{balance}}, mencapai batas peringatannya {{line}}."
+  },
+  "recurring": {
+    "title": "Berulang",
+    "new": "Aturan berulang baru",
+    "edit": "Ubah aturan berulang",
+    "add": "Tambah aturan berulang",
+    "types": {
+      "expense": "Pengeluaran",
+      "income": "Pemasukan",
+      "transfer": "Transfer"
+    },
+    "every": {
+      "daily": "Setiap hari",
+      "weekly": "Setiap minggu",
+      "monthly": "Setiap bulan",
+      "yearly": "Setiap tahun"
+    },
+    "frequency": "Seberapa sering",
+    "startDate": "Tanggal pertama",
+    "startHint": "Kejadian mulai tanggal ini menunggu konfirmasi Anda. Tanggal yang lebih awal juga menyusulkan kejadian yang sudah jatuh tempo.",
+    "endDate": "Tanggal terakhir",
+    "noEnd": "Tanpa tanggal akhir",
+    "clearEnd": "Hapus tanggal akhir",
+    "since": "sejak {{date}}",
+    "until": "sampai {{date}}",
+    "pendingCount": "{{count}} menunggu konfirmasi",
+    "archive": "Arsipkan aturan",
+    "restore": "Pulihkan aturan",
+    "archiveHint": "Aturan yang diarsipkan berhenti membuat kejadian baru. Transaksi yang sudah dikonfirmasi tetap seperti semula.",
+    "showArchived": "Tampilkan aturan yang diarsipkan ({{count}})",
+    "hideArchived": "Sembunyikan aturan yang diarsipkan",
+    "emptyTitle": "Belum ada aturan berulang",
+    "emptyBody": "Tambahkan sewa, gaji, atau langganan sekali saja, dan aplikasi akan mengingatkan setiap kali jatuh tempo.",
+    "errors": {
+      "endBeforeStart": "Tanggal terakhir tidak boleh sebelum tanggal pertama."
+    }
+  },
+  "pending": {
+    "title": "Menunggu konfirmasi",
+    "confirmTitle": "Konfirmasi transaksi",
+    "intro": "Ini jatuh tempo dari aturan berulang Anda. Tidak ada saldo yang berubah sampai Anda mengonfirmasi.",
+    "due": "Jatuh tempo {{date}}",
+    "willBeDated": "Akan bertanggal {{date}}",
+    "amountHint": "Ubah jumlahnya jika kali ini berbeda. Aturannya tetap memakai jumlah aslinya.",
+    "confirm": "Konfirmasi",
+    "skip": "Lewati yang ini",
+    "skipHint": "Melewati tidak mengubah saldo, dan kejadian ini tidak akan muncul lagi.",
+    "gone": "Kejadian ini sudah ditangani.",
+    "emptyTitle": "Tidak ada yang menunggu",
+    "emptyBody": "Kejadian dari aturan berulang Anda akan muncul di sini saat jatuh tempo."
+  },
+  "goals": {
+    "title": "Target tabungan",
+    "new": "Target baru",
+    "edit": "Ubah target",
+    "add": "Tambah target",
+    "detailTitle": "Target",
+    "name": "Nama",
+    "namePlaceholder": "mis. Umrah, Dana darurat",
+    "nameRequired": "Masukkan nama.",
+    "target": "Jumlah target",
+    "targetDate": "Tanggal target (opsional)",
+    "noTargetDate": "Tanpa tanggal target",
+    "clearTargetDate": "Hapus tanggal target",
+    "measure": "Cara mengukur kemajuan",
+    "measureManual": "Uang yang saya sisihkan",
+    "measureLinked": "Saldo sebuah akun",
+    "manualHint": "Anda memindahkan uang ke target sendiri. Uang itu keluar dari saldo akun, tetapi tetap ada di total Anda.",
+    "linkedHint": "Target mengikuti saldo satu akun, jadi tidak ada yang perlu dipindahkan manual.",
+    "measureLocked": "Ini tidak bisa diubah karena target sudah berisi uang. Keluarkan semuanya dulu, atau buat target baru.",
+    "chooseAccount": "Pilih akun yang diikuti.",
+    "savedOf": "{{saved}} dari {{target}}",
+    "remaining": "kurang {{amount}}",
+    "byDate": "sampai {{date}}",
+    "reached": "target tercapai",
+    "monthlyNeeded": "{{amount}} per bulan selama {{months}} bulan",
+    "overdue": "tanggal target sudah lewat",
+    "linkedTo": "Mengikuti {{account}}",
+    "currentlySaved": "Di target ini sekarang: {{amount}}",
+    "contribute": "Tambah uang",
+    "release": "Ambil uang",
+    "fromWhichAccount": "Dari akun mana",
+    "toWhichAccount": "Ke akun mana",
+    "fromAccount": "Dari {{account}}",
+    "toAccount": "Ke {{account}}",
+    "notSpending": "Ini memindahkan uang, bukan pengeluaran, jadi total Anda tidak berubah.",
+    "releaseTooMuch": "Jumlahnya melebihi isi target ini.",
+    "history": "Riwayat",
+    "archive": "Arsipkan target",
+    "restore": "Pulihkan target",
+    "archiveHint": "Target yang diarsipkan tetap menyimpan riwayat dan uangnya. Keluarkan uangnya dulu jika ingin kembali ke akun.",
+    "showArchived": "Tampilkan target yang diarsipkan ({{count}})",
+    "hideArchived": "Sembunyikan target yang diarsipkan",
+    "separateNote": "Uang di target ditampilkan terpisah dari saldo akun. Total gabungan Anda tidak berubah saat memindahkannya.",
+    "emptyTitle": "Belum ada target",
+    "emptyBody": "Tentukan targetnya, lalu ikuti sebuah akun atau sisihkan uang sendiri."
   }
 }

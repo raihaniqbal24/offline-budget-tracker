@@ -28,7 +28,9 @@
     "transfers": "Transfers",
     "budgets": "Budgets",
     "categories": "Categories",
-    "search": "Search and filter"
+    "search": "Search and filter",
+    "recurring": "Recurring",
+    "goals": "Savings goals"
   },
   "settings": {
     "title": "Settings",
@@ -94,7 +96,9 @@
     "transfer": "Transfer",
     "budgets": "Budgets this month",
     "manage": "Manage",
-    "setLimits": "Set limits"
+    "setLimits": "Set limits",
+    "pending": "{{count}} recurring entries to confirm",
+    "savedInGoals": "Saved in goals: {{amount}}"
   },
   "accounts": {
     "add": "Add account",
@@ -361,5 +365,101 @@
     "budgetTitle": "Budget warning",
     "balanceTitle": "Low balance",
     "balanceBody": "{{name}} is at {{balance}}, at or below its alert line of {{line}}."
+  },
+  "recurring": {
+    "title": "Recurring",
+    "new": "New recurring rule",
+    "edit": "Edit recurring rule",
+    "add": "Add recurring rule",
+    "types": {
+      "expense": "Expense",
+      "income": "Income",
+      "transfer": "Transfer"
+    },
+    "every": {
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthly": "Every month",
+      "yearly": "Every year"
+    },
+    "frequency": "How often",
+    "startDate": "First date",
+    "startHint": "Occurrences from this date on wait for your confirmation. An earlier date also catches up on the ones already due.",
+    "endDate": "Last date",
+    "noEnd": "No end date",
+    "clearEnd": "Remove end date",
+    "since": "since {{date}}",
+    "until": "until {{date}}",
+    "pendingCount": "{{count}} waiting to be confirmed",
+    "archive": "Archive rule",
+    "restore": "Restore rule",
+    "archiveHint": "An archived rule stops creating occurrences. Entries you already confirmed stay as they are.",
+    "showArchived": "Show archived rules ({{count}})",
+    "hideArchived": "Hide archived rules",
+    "emptyTitle": "No recurring rules yet",
+    "emptyBody": "Add rent, salary or a subscription once, and the app will remind you each time it is due.",
+    "errors": {
+      "endBeforeStart": "The last date can't be before the first date."
+    }
+  },
+  "pending": {
+    "title": "Waiting to confirm",
+    "confirmTitle": "Confirm entry",
+    "intro": "These are due from your recurring rules. Nothing changes a balance until you confirm it.",
+    "due": "Due {{date}}",
+    "willBeDated": "Will be dated {{date}}",
+    "amountHint": "Change the amount if this time is different. The rule keeps its own amount.",
+    "confirm": "Confirm",
+    "skip": "Skip this one",
+    "skipHint": "Skipping leaves balances untouched, and this occurrence won't come back.",
+    "gone": "This occurrence has already been handled.",
+    "emptyTitle": "Nothing waiting",
+    "emptyBody": "Occurrences from your recurring rules will appear here when they come due."
+  },
+  "goals": {
+    "title": "Savings goals",
+    "new": "New goal",
+    "edit": "Edit goal",
+    "add": "Add goal",
+    "detailTitle": "Goal",
+    "name": "Name",
+    "namePlaceholder": "e.g. Umrah, Emergency fund",
+    "nameRequired": "Enter a name.",
+    "target": "Target amount",
+    "targetDate": "Target date (optional)",
+    "noTargetDate": "No target date",
+    "clearTargetDate": "Remove target date",
+    "measure": "How progress is measured",
+    "measureManual": "Money I set aside",
+    "measureLinked": "An account's balance",
+    "manualHint": "You move money into the goal yourself. It leaves the account's balance but stays in your total.",
+    "linkedHint": "The goal follows the balance of one account, so there is nothing to move by hand.",
+    "measureLocked": "This can't change now that the goal holds money. Release it all first, or make a new goal.",
+    "chooseAccount": "Choose the account to follow.",
+    "savedOf": "{{saved}} of {{target}}",
+    "remaining": "{{amount}} to go",
+    "byDate": "by {{date}}",
+    "reached": "target reached",
+    "monthlyNeeded": "{{amount}} per month for {{months}} months",
+    "overdue": "the target date has passed",
+    "linkedTo": "Follows {{account}}",
+    "currentlySaved": "In this goal now: {{amount}}",
+    "contribute": "Add money",
+    "release": "Take money out",
+    "fromWhichAccount": "From which account",
+    "toWhichAccount": "To which account",
+    "fromAccount": "From {{account}}",
+    "toAccount": "To {{account}}",
+    "notSpending": "This moves money, it isn't spending, so your totals don't change.",
+    "releaseTooMuch": "That's more than this goal holds.",
+    "history": "History",
+    "archive": "Archive goal",
+    "restore": "Restore goal",
+    "archiveHint": "An archived goal keeps its history and its money. Release the money first if you want it back in an account.",
+    "showArchived": "Show archived goals ({{count}})",
+    "hideArchived": "Hide archived goals",
+    "separateNote": "Money in goals is shown apart from your account balances. Your combined total never changes when you move it.",
+    "emptyTitle": "No goals yet",
+    "emptyBody": "Set a target, then either follow an account or set money aside yourself."
   }
 }

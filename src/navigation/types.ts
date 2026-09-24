@@ -1,5 +1,9 @@
 import type { NavigatorScreenParams } from "@react-navigation/native";
-import type { BudgetScope, CategoryType } from "../types";
+import type {
+  BudgetScope,
+  CategoryType,
+  GoalMovementDirection,
+} from "../types";
 
 export type TabParamList = {
   Home: undefined;
@@ -27,4 +31,12 @@ export type RootStackParamList = {
   BudgetForm: { scope: BudgetScope; categoryId?: number; accountId?: number };
   Search: undefined;
   Import: undefined;
+  Recurring: undefined;
+  RecurringForm: { ruleId?: number } | undefined;
+  Pending: undefined;
+  PendingConfirm: { pendingId: number };
+  Goals: undefined;
+  GoalForm: { goalId?: number } | undefined;
+  GoalDetail: { goalId: number };
+  GoalMovement: { goalId: number; direction: GoalMovementDirection };
 };

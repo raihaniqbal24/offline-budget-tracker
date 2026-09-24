@@ -34,6 +34,8 @@ export default function HomeScreen() {
   const accounts = useLedgerStore((s) => s.accounts);
   const categories = useLedgerStore((s) => s.categories);
   const dataVersion = useLedgerStore((s) => s.dataVersion);
+  const pendingCount = useLedgerStore((s) => s.pendingCount);
+  const totalInGoals = useLedgerStore((s) => s.totalInGoals);
   const active = useMemo(() => activeAccounts(accounts), [accounts]);
   const total = useMemo(
     () => active.reduce((sum, a) => sum + a.balance, 0),
@@ -71,8 +73,10 @@ export default function HomeScreen() {
   // FR-7.4: limits on archived accounts or categories are hidden.
   const visibleBudgets = budgets.filter(
     (b) =>
-      (b.scope !== "account" || accounts.some((a) => a.id === b.accountId && !a.archived)) &&
-      (b.scope !== "category" || categories.some((c) => c.id === b.categoryId && !c.archived))
+      (b.scope !== "account" ||
+        accounts.some((a) => a.id === b.accountId && !a.archived)) &&
+      (b.scope !== "category" ||
+        categories.some((c) => c.id === b.categoryId && !c.archived)),
   );
 
   if (active.length === 0) {
@@ -92,11 +96,51 @@ export default function HomeScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
+        {pendingCount > 0 ? (
+          <Pressable
+            onPress={() => navigation.navigate("Pending")}
+            style={({ pressed }) => [
+              styles.pendingCard,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={22}
+              color={colors.primary}
+            />
+            <Text style={[typography.body, styles.flex]}>
+              {t("home.pending", { count: pendingCount })}
+            </Text>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={22}
+              color={colors.textMuted}
+            />
+          </Pressable>
+        ) : null}
+
         <View style={styles.card}>
           <Text style={typography.label}>{t("home.totalInAccounts")}</Text>
           <Text style={[typography.amountLarge, total < 0 && styles.negative]}>
             {formatRupiah(total, lang)}
           </Text>
+
+          {totalInGoals > 0 ? (
+            <View style={styles.goalsRow}>
+              <MaterialCommunityIcons
+                name="piggy-bank-outline"
+                size={16}
+                color={colors.textMuted}
+              />
+              <Text style={typography.caption}>
+                {t("home.savedInGoals", {
+                  amount: formatRupiah(totalInGoals, lang),
+                })}
+              </Text>
+            </View>
+          ) : null}
 
           <Text style={[typography.label, styles.monthLabel]}>
             {formatMonthYear(todayDate, lang)}
@@ -121,9 +165,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={typography.title}>
-            {t("home.accounts")}
-          </Text>
+          <Text style={typography.title}>{t("home.accounts")}</Text>
           {active.length >= 2 ? (
             <Pressable
               onPress={() => navigation.navigate("TransferForm")}
@@ -136,9 +178,7 @@ export default function HomeScreen() {
                 size={18}
                 color={colors.primary}
               />
-              <Text style={styles.link}>
-                {t("home.transfer")}
-              </Text>
+              <Text style={styles.link}>{t("home.transfer")}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -188,7 +228,11 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <Text style={typography.title}>{t("home.budgets")}</Text>
           <Pressable onPress={() => navigation.navigate("Budgets")} hitSlop={8}>
-            <Text style={styles.link}>{visibleBudgets.length > 0 ? t("home.manage") : t("home.setLimits")}</Text>
+            <Text style={styles.link}>
+              {visibleBudgets.length > 0
+                ? t("home.manage")
+                : t("home.setLimits")}
+            </Text>
           </Pressable>
         </View>
         {visibleBudgets.length > 0 ? (
@@ -270,18 +314,9 @@ function Stat({
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    justifyContent: "center",
-  },
-  content: {
-    padding: spacing.md,
-    paddingBottom: 96,
-    gap: spacing.md,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  centered: { justifyContent: "center" },
+  content: { padding: spacing.md, paddingBottom: 96, gap: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -290,28 +325,22 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
-  negative: {
-    color: colors.expense,
-  },
-  monthLabel: {
-    marginTop: spacing.md,
-  },
-  statsRow: {
+  negative: { color: colors.expense },
+  pendingCard: {
     flexDirection: "row",
-    gap: spacing.sm,
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
   },
-  stat: {
-    flex: 1,
-    gap: 2,
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-  accountStrip: {
-    gap: spacing.sm,
-  },
+  flex: { flex: 1 },
+  goalsRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  monthLabel: { marginTop: spacing.md },
+  statsRow: { flexDirection: "row", gap: spacing.sm },
+  stat: { flex: 1, gap: 2 },
+  statValue: { fontSize: 15, fontWeight: "600", fontVariant: ["tabular-nums"] },
+  accountStrip: { gap: spacing.sm },
   accountCard: {
     width: 160,
     padding: spacing.md,
@@ -326,27 +355,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
   },
-  pressed: {
-    opacity: 0.8,
-  },
+  pressed: { opacity: 0.8 },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  link: {
-    color: colors.primary,
-    fontWeight: "600",
-  },
-  inlineAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  emptyRecent: {
-    textAlign: "center",
-    paddingVertical: spacing.lg,
-  },
+  link: { color: colors.primary, fontWeight: "600" },
+  inlineAction: { flexDirection: "row", alignItems: "center", gap: 4 },
+  emptyRecent: { textAlign: "center", paddingVertical: spacing.lg },
   list: {
     borderRadius: radius.md,
     overflow: "hidden",

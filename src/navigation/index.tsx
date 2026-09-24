@@ -31,6 +31,14 @@ import BudgetsScreen from "../screens/BudgetsScreen";
 import BudgetFormScreen from "../screens/BudgetFormScreen";
 import SearchScreen from "../screens/SearchScreen";
 import ImportScreen from "../screens/ImportScreen";
+import RecurringScreen from "../screens/RecurringScreen";
+import RecurringFormScreen from "../screens/RecurringFormScreen";
+import PendingScreen from "../screens/PendingScreen";
+import PendingConfirmScreen from "../screens/PendingConfirmScreen";
+import GoalsScreen from "../screens/GoalsScreen";
+import GoalFormScreen from "../screens/GoalFormScreen";
+import GoalDetailScreen from "../screens/GoalDetailScreen";
+import GoalMovementScreen from "../screens/GoalMovementScreen";
 import UndoSnackbar from "../components/UndoSnackbar";
 import AlertToast from "../components/AlertToast";
 
@@ -216,6 +224,57 @@ export default function AppNavigator() {
             name="Import"
             component={ImportScreen}
             options={{ title: t("import.title") }}
+          />
+          <Stack.Screen
+            name="Recurring"
+            component={RecurringScreen}
+            options={{ title: t("recurring.title") }}
+          />
+          <Stack.Screen
+            name="RecurringForm"
+            component={RecurringFormScreen}
+            options={({ route }) => ({
+              title: route.params?.ruleId
+                ? t("recurring.edit")
+                : t("recurring.new"),
+            })}
+          />
+          <Stack.Screen
+            name="Pending"
+            component={PendingScreen}
+            options={{ title: t("pending.title") }}
+          />
+          <Stack.Screen
+            name="PendingConfirm"
+            component={PendingConfirmScreen}
+            options={{ title: t("pending.confirmTitle") }}
+          />
+          <Stack.Screen
+            name="Goals"
+            component={GoalsScreen}
+            options={{ title: t("goals.title") }}
+          />
+          <Stack.Screen
+            name="GoalForm"
+            component={GoalFormScreen}
+            options={({ route }) => ({
+              title: route.params?.goalId ? t("goals.edit") : t("goals.new"),
+            })}
+          />
+          <Stack.Screen
+            name="GoalDetail"
+            component={GoalDetailScreen}
+            options={{ title: t("goals.detailTitle") }}
+          />
+          <Stack.Screen
+            name="GoalMovement"
+            component={GoalMovementScreen}
+            options={({ route }) => ({
+              title:
+                route.params.direction === "contribution"
+                  ? t("goals.contribute")
+                  : t("goals.release"),
+            })}
           />
         </Stack.Navigator>
       </NavigationContainer>
