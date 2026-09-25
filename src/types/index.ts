@@ -165,6 +165,8 @@ export interface SettingsMap {
   alerts_enabled: boolean;
   /** UTC timestamp of the last export, or null. */
   last_backup_at: string | null;
+  /** FR-13.1: ask for the phone's screen lock to open the app. */
+  app_lock_enabled: boolean;
 }
 
 export type SettingKey = keyof SettingsMap;

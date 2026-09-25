@@ -73,11 +73,13 @@ export default function SettingsScreen() {
       if (done && target === "folder")
         setStatus({ kind, text: t("settings.saved") });
     } catch (e) {
+      const code = String((e as Error).message ?? e);
       setStatus({
         kind,
-        text: t("settings.exportFailed", {
-          message: String((e as Error).message ?? e),
-        }),
+        text:
+          code === "auth_required"
+            ? t("settings.exportLocked")
+            : t("settings.exportFailed", { message: code }),
         error: true,
       });
     } finally {
@@ -129,6 +131,24 @@ export default function SettingsScreen() {
         })}
       </View>
 
+      {/* Privacy (FR-13) */}
+      <Text style={[typography.label, styles.sectionTitle]}>
+        {t("settings.privacy")}
+      </Text>
+      <View style={styles.group}>
+        <ToggleRow
+          label={t("settings.appLock")}
+          hint={
+            s.deviceLockAvailable
+              ? t("settings.appLockHint")
+              : t("settings.appLockNoDeviceLock")
+          }
+          value={s.appLockEnabled}
+          disabled={!s.deviceLockAvailable}
+          onChange={(v) => s.setAppLock(v)}
+        />
+      </View>
+
       {/* Notifications (FR-9.7, FR-10) */}
       <Text style={[typography.label, styles.sectionTitle]}>
         {t("settings.notifications")}
@@ -153,6 +173,7 @@ export default function SettingsScreen() {
       <View style={styles.group}>
         <ToggleRow
           label={t("settings.dailyReminder")}
+          disabled={!notificationsAvailable}
           hint={t("settings.dailyReminderHint")}
           value={s.dailyReminderEnabled}
           onChange={(v) =>
@@ -175,6 +196,7 @@ export default function SettingsScreen() {
         <ToggleRow
           divider
           label={t("settings.backupReminder")}
+          disabled={!notificationsAvailable}
           hint={t("settings.backupReminderHint")}
           value={s.backupReminderEnabled}
           onChange={(v) =>
@@ -211,6 +233,7 @@ export default function SettingsScreen() {
         <ToggleRow
           divider
           label={t("settings.alerts")}
+          disabled={!notificationsAvailable}
           hint={t("settings.alertsHint")}
           value={s.alertsEnabled}
           onChange={(v) => s.setNotificationEnabled("alerts_enabled", v)}
@@ -223,6 +246,9 @@ export default function SettingsScreen() {
       </Text>
       <View style={[styles.group, styles.padded]}>
         <Text style={typography.caption}>{lastBackup}</Text>
+        <Text style={typography.caption}>
+          {t("settings.backupNotEncrypted")}
+        </Text>
 
         <ExportBlock
           title={t("settings.exportBackup")}
@@ -276,6 +302,7 @@ function ToggleRow({
   value,
   onChange,
   divider,
+  disabled,
   children,
 }: {
   label: string;
@@ -283,6 +310,7 @@ function ToggleRow({
   value: boolean;
   onChange: (value: boolean) => void;
   divider?: boolean;
+  disabled?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -295,7 +323,7 @@ function ToggleRow({
         <Switch
           value={value}
           onValueChange={onChange}
-          disabled={!notificationsAvailable}
+          disabled={disabled ?? !notificationsAvailable}
           trackColor={{ true: colors.primary, false: colors.border }}
           thumbColor={colors.surface}
           accessibilityLabel={label}

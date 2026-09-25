@@ -6,6 +6,8 @@ import {
   notificationsAvailable,
   requestNotificationPermission,
 } from "../notifications";
+import { hasDeviceLock, setScreenProtection } from "../security/deviceLock";
+import { updateWidget } from "../widget/update";
 import { syncReminders } from "../notifications/service";
 import type { LanguageSetting, SettingKey, SettingsMap } from "../types";
 import { useLedgerStore } from "./ledgerStore";
@@ -30,6 +32,10 @@ interface SettingsState extends NotificationSettings {
   lastBackupAt: string | null;
   /** The user said no to notifications; in-app flags still work (FR-10.6). */
   permissionDenied: boolean;
+  /** FR-13.1 */
+  appLockEnabled: boolean;
+  /** FR-13.4: the switch needs a screen lock on the phone. */
+  deviceLockAvailable: boolean;
 
   hydrate: (values: {
     language: LanguageSetting;
@@ -52,6 +58,8 @@ interface SettingsState extends NotificationSettings {
     >,
   ) => Promise<void>;
   markBackupDone: () => Promise<void>;
+  /** Returns false when the phone has no screen lock to use. */
+  setAppLock: (enabled: boolean) => Promise<boolean>;
 }
 
 const FIELD: Record<NotificationSettingKey, keyof NotificationSettings> = {
@@ -76,6 +84,8 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   schemaVersion: 0,
   lastBackupAt: null,
   permissionDenied: false,
+  appLockEnabled: false,
+  deviceLockAvailable: false,
   dailyReminderEnabled: false,
   dailyReminderTime: "20:00",
   backupReminderEnabled: false,
@@ -98,7 +108,11 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
       backupReminderWeekday: await read("backup_reminder_weekday", 7),
       backupReminderTime: await read("backup_reminder_time", "19:00"),
       alertsEnabled: await read("alerts_enabled", false),
+      appLockEnabled: await read("app_lock_enabled", false),
+      deviceLockAvailable: await hasDeviceLock(),
     });
+    // FR-13.5: the recents preview, screenshots and recording follow the switch.
+    await setScreenProtection(await read("app_lock_enabled", false));
   },
 
   setLanguage: async (language) => {
@@ -107,6 +121,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
     await applyLanguage(language);
     set({ language });
     await resync(); // reminder text follows the language
+    await updateWidget(db, useSettingsStore.getState().appLockEnabled); // FR-14.7
   },
 
   setNotificationEnabled: async (key, enabled) => {
@@ -141,6 +156,20 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
       await setSetting(db, "backup_reminder_time", changes.backupReminderTime);
     set(changes);
     await resync();
+  },
+
+  setAppLock: async (enabled) => {
+    if (enabled && !(await hasDeviceLock())) {
+      set({ deviceLockAvailable: false });
+      return false;
+    }
+    const db = await getDb();
+    await setSetting(db, "app_lock_enabled", enabled);
+    await setScreenProtection(enabled);
+    set({ appLockEnabled: enabled, deviceLockAvailable: true });
+    // FR-14.4: the home screen must stop showing amounts straight away.
+    await updateWidget(db, enabled);
+    return true;
   },
 
   markBackupDone: async () => {

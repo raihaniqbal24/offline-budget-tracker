@@ -4,6 +4,8 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { bootstrap, resetLocalDatabaseForDevelopment } from "./src/bootstrap";
 import AppNavigator from "./src/navigation";
+import LockGate from "./src/components/LockGate";
+import "./src/widget/register";
 import Button from "./src/components/Button";
 import { colors, spacing, typography } from "./src/theme";
 
@@ -84,7 +86,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <AppNavigator />
+      <LockGate>
+        <AppNavigator />
+      </LockGate>
     </SafeAreaProvider>
   );
 }
@@ -98,12 +102,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors.background,
   },
-  detail: {
-    textAlign: "center",
-  },
-  devBox: {
-    alignSelf: "stretch",
-    marginTop: spacing.lg,
-    gap: spacing.sm,
-  },
+  detail: { textAlign: "center" },
+  devBox: { alignSelf: "stretch", marginTop: spacing.lg, gap: spacing.sm },
 });

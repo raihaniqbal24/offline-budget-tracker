@@ -63,7 +63,13 @@
     "exportFailed": "Couldn't export: {{message}}",
     "importBackup": "Import a backup",
     "importBackupHint": "Restore from a JSON backup, or merge one into what's already here.",
-    "notificationsUnavailable": "Notifications don't work in Expo Go, because Expo removed notification support from it. They work in a development build or the installed app. Warnings inside the app work everywhere."
+    "notificationsUnavailable": "Notifications don't work in Expo Go, because Expo removed notification support from it. They work in a development build or the installed app. Warnings inside the app work everywhere.",
+    "privacy": "Privacy",
+    "appLock": "App lock",
+    "appLockHint": "Ask for the phone's screen lock every time the app is opened, and before exporting a backup. The app never stores your PIN or fingerprint.",
+    "appLockNoDeviceLock": "Set a screen lock on the phone first, in Android settings, then this can be turned on.",
+    "backupNotEncrypted": "Backup files are not encrypted. Anyone who opens the exported file can read it.",
+    "exportLocked": "The export was cancelled because the phone's lock wasn't confirmed."
   },
   "category": {
     "builtin": {
@@ -461,5 +467,13 @@
     "separateNote": "Money in goals is shown apart from your account balances. Your combined total never changes when you move it.",
     "emptyTitle": "No goals yet",
     "emptyBody": "Set a target, then either follow an account or set money aside yourself."
+  },
+  "lock": {
+    "title": "Finance Tracker is locked",
+    "body": "Confirm your screen lock to continue.",
+    "failed": "Not confirmed. Try again to continue.",
+    "unlock": "Unlock",
+    "promptOpen": "Unlock Finance Tracker",
+    "promptExport": "Confirm to export your data"
   }
 }

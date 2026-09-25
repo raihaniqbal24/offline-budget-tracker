@@ -1,4 +1,11 @@
 import { render, screen } from "@testing-library/react-native";
+
+// The icon set loads real fonts (expo-font -> expo-asset), which these tests
+// don't need and which isn't installed in every environment. A plain stub
+// keeps the test about labels and roles.
+jest.mock("@expo/vector-icons", () => ({
+  MaterialCommunityIcons: "MaterialCommunityIcons",
+}));
 import { initI18n } from "../../i18n";
 import BudgetBar from "../BudgetBar";
 import EntryRow from "../EntryRow";
