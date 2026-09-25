@@ -4,6 +4,7 @@ import {
   widgetView,
   type WidgetSummary,
 } from "../summary";
+import { filledSegments } from "../BalanceWidget";
 
 const TODAY = "2026-09-21";
 
@@ -84,5 +85,17 @@ describe("widget summary (FR-14)", () => {
     expect(widgetView(emptySummary("en", TODAY), TODAY).balanceText).toBe(
       "Rp 0",
     );
+  });
+});
+
+describe("progress segments", () => {
+  // The bar is ten fixed blocks, because widget layouts take no percentages.
+  it("fills a block for every tenth, and never rounds a small amount away", () => {
+    expect(filledSegments(0)).toBe(0);
+    expect(filledSegments(1)).toBe(1); // spending something always shows
+    expect(filledSegments(37)).toBe(4);
+    expect(filledSegments(75)).toBe(8);
+    expect(filledSegments(100)).toBe(10);
+    expect(filledSegments(140)).toBe(10); // capped
   });
 });

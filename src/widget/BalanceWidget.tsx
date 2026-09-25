@@ -1,12 +1,16 @@
-import { FlexWidget, SvgWidget, TextWidget } from "react-native-android-widget";
+import { FlexWidget, TextWidget } from "react-native-android-widget";
 import type { ISODate } from "../lib/dates";
 import { widgetView, type WidgetSummary } from "./summary";
 
 /**
- * The home screen widget (FR-14.1). Read-only, one size, resizable, and it
- * opens the app when tapped (FR-14.5). Colours are literals rather than the
- * app's theme tokens because this renders outside React Native's styling;
- * phase 2 gives it a dark variant.
+ * The home screen widget (FR-14.1). Read-only, resizable, and it opens the
+ * app when tapped (FR-14.5).
+ *
+ * Two constraints shape this layout. Widget styles take no percentage
+ * widths, so the progress bar is drawn as ten fixed segments rather than a
+ * proportional fill. And a widget cell clips rather than scrolls, so every
+ * line is capped to one line and truncated, which stops a long amount from
+ * pushing the layout past the right edge.
  */
 const LIGHT = {
   background: "#FFFFFF",
@@ -14,30 +18,30 @@ const LIGHT = {
   muted: "#6B7B76",
   primary: "#0E6B57",
   track: "#E6EFEC",
+  warn: "#D9822B",
+  over: "#B3261E",
 } as const;
 
-/** A rounded track with the filled portion on top, in a 100x8 viewBox. */
-function progressBarSvg(percent: number, track: string): string {
-  const fill =
-    percent >= 100 ? "#B3261E" : percent >= 75 ? "#D9822B" : LIGHT.primary;
-  const width = Math.max(percent, 2);
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 8" preserveAspectRatio="none">` +
-    `<rect x="0" y="0" width="100" height="8" rx="4" fill="${track}"/>` +
-    `<rect x="0" y="0" width="${width}" height="8" rx="4" fill="${fill}"/>` +
-    `</svg>`
-  );
+const SEGMENTS = 10;
+const SEGMENT_WIDTH = 10;
+const SEGMENT_GAP = 3;
+
+/** How many of the ten blocks are filled: anything above zero lights at least one. */
+export function filledSegments(percent: number): number {
+  if (percent <= 0) return 0;
+  return Math.min(SEGMENTS, Math.max(1, Math.round((percent / 100) * SEGMENTS)));
 }
 
-export function BalanceWidget({
-  summary,
-  todayDate,
-}: {
-  summary: WidgetSummary;
-  todayDate: ISODate;
-}) {
+export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; todayDate: ISODate }) {
   const view = widgetView(summary, todayDate);
   const theme = LIGHT;
+  const filled = view.percent === null ? 0 : filledSegments(view.percent);
+  const fillColour =
+    view.percent !== null && view.percent >= 100
+      ? theme.over
+      : view.percent !== null && view.percent >= 75
+        ? theme.warn
+        : theme.primary;
 
   return (
     <FlexWidget
@@ -47,51 +51,70 @@ export function BalanceWidget({
         width: "match_parent",
         flexDirection: "column",
         justifyContent: "center",
-        paddingHorizontal: 16,
-        paddingVertical: 14,
+        alignItems: "flex-start",
+        paddingHorizontal: 14,
+        paddingVertical: 12,
         backgroundColor: theme.background,
         borderRadius: 24,
       }}
     >
       <TextWidget
         text={view.balanceLabel}
-        style={{ fontSize: 12, color: theme.muted }}
+        maxLines={1}
+        truncate="END"
+        style={{ fontSize: 12, color: theme.muted, width: "match_parent" }}
       />
       <TextWidget
         text={view.balanceText}
-        style={{ fontSize: 24, fontWeight: "700", color: theme.text }}
+        maxLines={1}
+        truncate="END"
+        style={{ fontSize: 22, fontWeight: "700", color: theme.text, width: "match_parent" }}
       />
 
-      <FlexWidget style={{ height: 12, width: "match_parent" }} />
+      <FlexWidget style={{ height: 10, width: "match_parent" }} />
 
       <TextWidget
         text={view.spentLabel}
-        style={{ fontSize: 12, color: theme.muted }}
+        maxLines={1}
+        truncate="END"
+        style={{ fontSize: 12, color: theme.muted, width: "match_parent" }}
       />
-      {view.noLimitText ? (
-        <TextWidget
-          text={view.noLimitText}
-          style={{ fontSize: 13, color: theme.muted }}
-        />
-      ) : (
-        <TextWidget
-          text={view.spentText}
-          style={{ fontSize: 15, fontWeight: "600", color: theme.text }}
-        />
-      )}
+      <TextWidget
+        text={view.noLimitText ?? view.spentText}
+        maxLines={1}
+        truncate="END"
+        style={{
+          fontSize: view.noLimitText ? 13 : 15,
+          fontWeight: view.noLimitText ? "400" : "600",
+          color: view.noLimitText ? theme.muted : theme.text,
+          width: "match_parent",
+        }}
+      />
 
       {view.percent !== null ? (
-        // Drawn as SVG: widget layouts take no percentage widths, and an SVG
-        // scales with the widget when it is resized.
-        <SvgWidget
-          svg={progressBarSvg(view.percent, theme.track)}
-          style={{ height: 8, width: "match_parent", marginTop: 6 }}
-        />
+        <FlexWidget
+          style={{ flexDirection: "row", alignItems: "center", width: "wrap_content", marginTop: 7 }}
+        >
+          {Array.from({ length: SEGMENTS }, (_, i) => (
+            <FlexWidget
+              key={i}
+              style={{
+                width: SEGMENT_WIDTH,
+                height: 8,
+                borderRadius: 3,
+                marginRight: i === SEGMENTS - 1 ? 0 : SEGMENT_GAP,
+                backgroundColor: i < filled ? fillColour : theme.track,
+              }}
+            />
+          ))}
+        </FlexWidget>
       ) : null}
 
       <TextWidget
         text={view.asOfText}
-        style={{ fontSize: 10, color: theme.muted, marginTop: 8 }}
+        maxLines={1}
+        truncate="END"
+        style={{ fontSize: 10, color: theme.muted, marginTop: 8, width: "match_parent" }}
       />
     </FlexWidget>
   );
