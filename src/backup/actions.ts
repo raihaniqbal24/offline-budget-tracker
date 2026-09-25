@@ -3,6 +3,7 @@ import { getDb } from "../db/client";
 import { listEntries } from "../db/entriesDao";
 import { categoryLabel } from "../i18n";
 import { today } from "../lib/dates";
+import { authenticate } from "../security/deviceLock";
 import { useSettingsStore } from "../store/settingsStore";
 import { exportBackup } from "./backupDao";
 import { backupFileName, entriesToCsv } from "./csv";
@@ -43,6 +44,13 @@ export async function exportFile(
   kind: ExportKind,
   target: ExportTarget,
 ): Promise<boolean> {
+  // FR-13.8: with the app lock on, an export asks for the phone's lock first.
+  if (
+    useSettingsStore.getState().appLockEnabled &&
+    !(await authenticate("export"))
+  ) {
+    throw new Error("auth_required");
+  }
   const { name, content, mime } = await build(kind);
   if (target === "share") {
     await shareFile(name, content, mime);

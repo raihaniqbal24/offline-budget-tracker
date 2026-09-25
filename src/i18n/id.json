@@ -63,7 +63,13 @@
     "exportFailed": "Gagal mengekspor: {{message}}",
     "importBackup": "Impor cadangan",
     "importBackupHint": "Pulihkan dari cadangan JSON, atau gabungkan dengan data yang sudah ada.",
-    "notificationsUnavailable": "Notifikasi tidak berfungsi di Expo Go, karena Expo menghapus dukungan notifikasi dari aplikasi tersebut. Notifikasi berfungsi di development build atau aplikasi yang sudah dipasang. Peringatan di dalam aplikasi berfungsi di mana saja."
+    "notificationsUnavailable": "Notifikasi tidak berfungsi di Expo Go, karena Expo menghapus dukungan notifikasi dari aplikasi tersebut. Notifikasi berfungsi di development build atau aplikasi yang sudah dipasang. Peringatan di dalam aplikasi berfungsi di mana saja.",
+    "privacy": "Privasi",
+    "appLock": "Kunci aplikasi",
+    "appLockHint": "Minta kunci layar ponsel setiap kali aplikasi dibuka, dan sebelum mengekspor cadangan. Aplikasi tidak pernah menyimpan PIN atau sidik jari Anda.",
+    "appLockNoDeviceLock": "Atur dulu kunci layar di pengaturan Android, lalu ini bisa diaktifkan.",
+    "backupNotEncrypted": "File cadangan tidak dienkripsi. Siapa pun yang membuka file hasil ekspor bisa membacanya.",
+    "exportLocked": "Ekspor dibatalkan karena kunci ponsel tidak dikonfirmasi."
   },
   "category": {
     "builtin": {
@@ -461,5 +467,13 @@
     "separateNote": "Uang di target ditampilkan terpisah dari saldo akun. Total gabungan Anda tidak berubah saat memindahkannya.",
     "emptyTitle": "Belum ada target",
     "emptyBody": "Tentukan targetnya, lalu ikuti sebuah akun atau sisihkan uang sendiri."
+  },
+  "lock": {
+    "title": "Finance Tracker terkunci",
+    "body": "Konfirmasi kunci layar Anda untuk melanjutkan.",
+    "failed": "Belum dikonfirmasi. Coba lagi untuk melanjutkan.",
+    "unlock": "Buka kunci",
+    "promptOpen": "Buka kunci Finance Tracker",
+    "promptExport": "Konfirmasi untuk mengekspor data Anda"
   }
 }

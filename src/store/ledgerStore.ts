@@ -23,6 +23,7 @@ import {
 } from "../db/budgetsDao";
 import { checkBalanceAlerts } from "../db/alertsDao";
 import { sendAlerts, syncReminders } from "../notifications/service";
+import { updateWidget } from "../widget/update";
 import {
   createEntry,
   deleteEntry,
@@ -72,6 +73,7 @@ import type {
   ID,
   Transfer,
 } from "../types";
+import { useSettingsStore } from "./settingsStore";
 
 /** How long the undo bar stays after a delete (decided: 5 seconds). */
 export const UNDO_WINDOW_MS = 5_000;
@@ -196,6 +198,7 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
     }));
     void sendAlerts(db, alerts, crossed, { accounts, categories });
     void syncReminders(db, accounts, true);
+    void updateWidget(db, useSettingsStore.getState().appLockEnabled);
   },
 
   /**
@@ -225,6 +228,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
       categories: get().categories,
     });
     void syncReminders(db, accounts);
+    // FR-14.6: the widget follows every change to balances or month spending.
+    void updateWidget(db, useSettingsStore.getState().appLockEnabled);
   },
 
   saveAccount: async (input, id) => {

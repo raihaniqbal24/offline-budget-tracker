@@ -13,6 +13,7 @@ const decoders: { [K in SettingKey]: (raw: string) => SettingsMap[K] } = {
   last_used_account_id: (v) => (v === "" ? null : Number(v)),
   alerts_enabled: (v) => v === "1",
   last_backup_at: (v) => (v === "" ? null : v),
+  app_lock_enabled: (v) => v === "1",
 };
 
 function encode(value: unknown): string {
