@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { TrendBar } from "../lib/summary";
-import { colors, spacing } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 interface Props {
   bars: TrendBar[];
@@ -12,10 +13,20 @@ interface Props {
 }
 
 /** Spending per day or per month (FR-3.5), drawn with plain views. */
-export default function TrendBars({ bars, labelFor, highlightKey, height = 120 }: Props) {
+export default function TrendBars({
+  bars,
+  labelFor,
+  highlightKey,
+  height = 120,
+}: Props) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const max = Math.max(1, ...bars.map((b) => b.value));
   return (
-    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
       <View style={[styles.plot, { height }]}>
         {bars.map((bar) => (
           <View key={bar.key} style={styles.slot}>
@@ -23,8 +34,12 @@ export default function TrendBars({ bars, labelFor, highlightKey, height = 120 }
               style={[
                 styles.bar,
                 {
-                  height: bar.value > 0 ? Math.max(2, (bar.value / max) * height) : 0,
-                  backgroundColor: bar.key === highlightKey ? colors.primary : colors.primarySoft,
+                  height:
+                    bar.value > 0 ? Math.max(2, (bar.value / max) * height) : 0,
+                  backgroundColor:
+                    bar.key === highlightKey
+                      ? colors.primary
+                      : colors.primarySoft,
                 },
               ]}
             />
@@ -42,12 +57,12 @@ export default function TrendBars({ bars, labelFor, highlightKey, height = 120 }
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   plot: {
     flexDirection: "row",
     alignItems: "flex-end",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
   slot: {
     flex: 1,
@@ -55,19 +70,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingHorizontal: 1,
   },
-  bar: {
-    width: "80%",
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
-  },
-  axis: {
-    flexDirection: "row",
-    marginTop: spacing.xs,
-  },
-  label: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 10,
-    color: colors.textMuted,
-  },
-});
+  bar: { width: "80%", borderTopLeftRadius: 3, borderTopRightRadius: 3 },
+  axis: { flexDirection: "row", marginTop: spacing.xs },
+  label: { flex: 1, textAlign: "center", fontSize: 10, color: c.textMuted },
+}));

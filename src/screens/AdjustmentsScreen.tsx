@@ -7,7 +7,8 @@ import { listEntries, type EntryWithDetails } from "../db/entriesDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { today } from "../lib/dates";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, spacing } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
@@ -16,6 +17,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "Adjustments">;
 
 /** Unrecorded adjustments in a period, opened from the summary breakdown (FR-3.6). */
 export default function AdjustmentsScreen({ route, navigation }: Props) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const { start, end, accountId = null } = route.params;
@@ -26,7 +29,12 @@ export default function AdjustmentsScreen({ route, navigation }: Props) {
     let cancelled = false;
     (async () => {
       const db = await getDb();
-      const result = await listEntries(db, { limit: 500, range: { start, end }, accountId, type: "adjustment" });
+      const result = await listEntries(db, {
+        limit: 500,
+        range: { start, end },
+        accountId,
+        type: "adjustment",
+      });
       if (!cancelled) setRows(result);
     })();
     return () => {
@@ -34,7 +42,8 @@ export default function AdjustmentsScreen({ route, navigation }: Props) {
     };
   }, [start, end, accountId, dataVersion]);
 
-  if (rows === null) return <ActivityIndicator style={styles.loader} color={colors.primary} />;
+  if (rows === null)
+    return <ActivityIndicator style={styles.loader} color={colors.primary} />;
 
   const todayDate = today();
   return (
@@ -52,14 +61,23 @@ export default function AdjustmentsScreen({ route, navigation }: Props) {
       )}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       contentContainerStyle={rows.length === 0 ? styles.empty : undefined}
-      ListEmptyComponent={<EmptyState icon="check-circle-outline" title={t("adjustment.noneLeft")} />}
+      ListEmptyComponent={
+        <EmptyState
+          icon="check-circle-outline"
+          title={t("adjustment.noneLeft")}
+        />
+      }
     />
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginLeft: 72 },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: c.border,
+    marginLeft: 72,
+  },
   empty: { flexGrow: 1, justifyContent: "center" },
-});
+}));

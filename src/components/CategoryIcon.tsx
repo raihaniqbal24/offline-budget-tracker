@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
 import { StyleSheet, View } from "react-native";
+import { useCategoryColor } from "../theme/ThemeProvider";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
@@ -14,6 +15,8 @@ export default function CategoryIcon({
   color: string;
   size?: number;
 }) {
+  // FR-15.5: the user's colour, lightened only as far as a dark card needs.
+  const adjusted = useCategoryColor()(color);
   return (
     <View
       style={[
@@ -22,22 +25,19 @@ export default function CategoryIcon({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: `${color}22`,
+          backgroundColor: `${adjusted}22`,
         },
       ]}
     >
       <MaterialCommunityIcons
         name={icon as IconName}
         size={size * 0.5}
-        color={color}
+        color={adjusted}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  circle: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  circle: { alignItems: "center", justifyContent: "center" },
 });

@@ -7,6 +7,7 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { listAccountsWithBalances } from "../db/accountsDao";
 import { getBudgetProgress } from "../db/budgetsDao";
 import { currentLanguage } from "../i18n";
+import { resolveTheme } from "../theme/ThemeProvider";
 import { monthKey, today, type ISODate } from "../lib/dates";
 import { writeSummary } from "./storage";
 import { SUMMARY_VERSION, WIDGET_NAME, type WidgetSummary } from "./summary";
@@ -15,7 +16,7 @@ import { SUMMARY_VERSION, WIDGET_NAME, type WidgetSummary } from "./summary";
 export async function buildSummary(
   db: SQLiteDatabase,
   todayDate: ISODate,
-  options: { masked: boolean; language: "en" | "id" },
+  options: { masked: boolean; language: "en" | "id"; theme: "light" | "dark" },
 ): Promise<WidgetSummary> {
   const month = monthKey(todayDate);
   const accounts = await listAccountsWithBalances(db, todayDate);
@@ -29,6 +30,7 @@ export async function buildSummary(
   return {
     version: SUMMARY_VERSION,
     language: options.language,
+    theme: options.theme,
     masked: options.masked,
     month,
     updatedOn: todayDate,
@@ -63,9 +65,20 @@ export async function updateWidget(
   masked: boolean,
 ): Promise<void> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Appearance } =
+      require("react-native") as typeof import("react-native");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useSettingsStore } =
+      require("../store/settingsStore") as typeof import("../store/settingsStore");
+    const theme = resolveTheme(
+      useSettingsStore.getState().theme,
+      Appearance.getColorScheme(),
+    );
     const summary = await buildSummary(db, today(), {
       masked,
       language: currentLanguage(),
+      theme,
     });
     await writeSummary(summary);
     // eslint-disable-next-line @typescript-eslint/no-require-imports

@@ -9,6 +9,7 @@ import {
 import { hasDeviceLock, setScreenProtection } from "../security/deviceLock";
 import { updateWidget } from "../widget/update";
 import { syncReminders } from "../notifications/service";
+import type { ThemeSetting } from "../theme/ThemeProvider";
 import type { LanguageSetting, SettingKey, SettingsMap } from "../types";
 import { useLedgerStore } from "./ledgerStore";
 
@@ -36,6 +37,8 @@ interface SettingsState extends NotificationSettings {
   appLockEnabled: boolean;
   /** FR-13.4: the switch needs a screen lock on the phone. */
   deviceLockAvailable: boolean;
+  /** FR-15.1 */
+  theme: ThemeSetting;
 
   hydrate: (values: {
     language: LanguageSetting;
@@ -60,6 +63,7 @@ interface SettingsState extends NotificationSettings {
   markBackupDone: () => Promise<void>;
   /** Returns false when the phone has no screen lock to use. */
   setAppLock: (enabled: boolean) => Promise<boolean>;
+  setTheme: (theme: ThemeSetting) => Promise<void>;
 }
 
 const FIELD: Record<NotificationSettingKey, keyof NotificationSettings> = {
@@ -86,6 +90,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   permissionDenied: false,
   appLockEnabled: false,
   deviceLockAvailable: false,
+  theme: "system",
   dailyReminderEnabled: false,
   dailyReminderTime: "20:00",
   backupReminderEnabled: false,
@@ -109,6 +114,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
       backupReminderTime: await read("backup_reminder_time", "19:00"),
       alertsEnabled: await read("alerts_enabled", false),
       appLockEnabled: await read("app_lock_enabled", false),
+      theme: await read("theme", "system"),
       deviceLockAvailable: await hasDeviceLock(),
     });
     // FR-13.5: the recents preview, screenshots and recording follow the switch.
@@ -170,6 +176,16 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
     // FR-14.4: the home screen must stop showing amounts straight away.
     await updateWidget(db, enabled);
     return true;
+  },
+
+  setTheme: async (theme) => {
+    await setSetting(await getDb(), "theme", theme);
+    set({ theme });
+    // FR-15.6: the widget follows the same choice.
+    await updateWidget(
+      await getDb(),
+      useSettingsStore.getState().appLockEnabled,
+    );
   },
 
   markBackupDone: async () => {

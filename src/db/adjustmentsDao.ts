@@ -14,7 +14,7 @@ import { SQL_NOW } from "./rows";
 
 async function unrecordedCategoryId(db: SQLiteDatabase): Promise<ID> {
   const row = await db.getFirstAsync<{ id: ID }>(
-    "SELECT id FROM categories WHERE builtin_key = 'unrecorded'"
+    "SELECT id FROM categories WHERE builtin_key = 'unrecorded'",
   );
   if (!row) throw new Error("missing_unrecorded_category");
   return row.id;
@@ -36,7 +36,9 @@ export async function reconcileAccount(
   if (!Number.isSafeInteger(realBalance)) throw new Error("invalid_amount");
   if (!isValidISODate(onDate)) throw new Error("invalid_date");
   if (onDate > today) throw new Error("future_date");
-  const account = (await listAccountsWithBalances(db, onDate)).find((a) => a.id === accountId);
+  const account = (await listAccountsWithBalances(db, onDate)).find(
+    (a) => a.id === accountId,
+  );
   if (!account) throw new Error("account_not_found");
 
   const difference = realBalance - account.balance;
@@ -55,7 +57,8 @@ export async function reconcileAccount(
 
 async function getAdjustment(db: SQLiteDatabase, id: ID): Promise<Entry> {
   const entry = await getEntry(db, id);
-  if (!entry || entry.type !== "adjustment") throw new Error("adjustment_not_found");
+  if (!entry || entry.type !== "adjustment")
+    throw new Error("adjustment_not_found");
   return entry;
 }
 
@@ -72,7 +75,7 @@ export async function categorizeAdjustment(
   db: SQLiteDatabase,
   id: ID,
   categoryId: ID,
-  note: string | null
+  note: string | null,
 ): Promise<void> {
   const adjustment = await getAdjustment(db, id);
   const trimmed = note?.trim() ?? "";
@@ -84,7 +87,7 @@ export async function categorizeAdjustment(
     Math.abs(adjustment.amount),
     categoryId,
     trimmed.length > 0 ? trimmed : null,
-    id
+    id,
   );
 }
 
@@ -101,10 +104,15 @@ export interface SplitPart {
  * (NFR-6), so a failure part-way leaves everything as it was.
  * Returns the remaining signed amount (0 when fully explained).
  */
-export async function splitAdjustment(db: SQLiteDatabase, id: ID, parts: SplitPart[]): Promise<number> {
+export async function splitAdjustment(
+  db: SQLiteDatabase,
+  id: ID,
+  parts: SplitPart[],
+): Promise<number> {
   const adjustment = await getAdjustment(db, id);
   if (parts.length === 0) throw new Error("no_parts");
-  if (parts.some((p) => !isValidEntryAmount(p.amount))) throw new Error("invalid_amount");
+  if (parts.some((p) => !isValidEntryAmount(p.amount)))
+    throw new Error("invalid_amount");
 
   const total = parts.reduce((sum, p) => sum + p.amount, 0);
   const available = Math.abs(adjustment.amount);
@@ -126,7 +134,7 @@ export async function splitAdjustment(db: SQLiteDatabase, id: ID, parts: SplitPa
         adjustment.accountId,
         part.categoryId,
         adjustment.occurredOn,
-        trimmed.length > 0 ? trimmed : null
+        trimmed.length > 0 ? trimmed : null,
       );
     }
     if (remaining === 0) {
@@ -135,7 +143,7 @@ export async function splitAdjustment(db: SQLiteDatabase, id: ID, parts: SplitPa
       await db.runAsync(
         `UPDATE entries SET amount = ?, updated_at = ${SQL_NOW} WHERE id = ?`,
         remaining,
-        id
+        id,
       );
     }
   });

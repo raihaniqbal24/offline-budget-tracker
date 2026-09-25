@@ -1,12 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { getDb } from "../db/client";
-import { getPeriodTotals, listEntries, type EntryWithDetails, type PeriodTotals } from "../db/entriesDao";
-import { getCategoryBreakdown, getSpendingTrend, hasActivity, type CategorySlice } from "../db/summariesDao";
+import {
+  getPeriodTotals,
+  listEntries,
+  type EntryWithDetails,
+  type PeriodTotals,
+} from "../db/entriesDao";
+import {
+  getCategoryBreakdown,
+  getSpendingTrend,
+  hasActivity,
+  type CategorySlice,
+} from "../db/summariesDao";
 import { getBudgetProgress, type BudgetProgress } from "../db/budgetsDao";
 import { categoryLabel } from "../i18n";
 import { useAppLanguage } from "../i18n/useAppLanguage";
@@ -32,7 +49,8 @@ import {
   type TrendBar,
 } from "../lib/summary";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import BudgetBar from "../components/BudgetBar";
@@ -64,6 +82,8 @@ const PERIODS: PeriodType[] = ["day", "week", "month", "year"];
  * include transfer fees and unrecorded adjustments.
  */
 export default function SummaryScreen() {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -84,14 +104,28 @@ export default function SummaryScreen() {
     (async () => {
       const db = await getDb();
       const previous = getPeriodRange(type, shiftPeriod(type, anchor, -1));
-      const [totals, prevTotals, prevActive, breakdown, trendData, dayEntries, budgets] = await Promise.all([
+      const [
+        totals,
+        prevTotals,
+        prevActive,
+        breakdown,
+        trendData,
+        dayEntries,
+        budgets,
+      ] = await Promise.all([
         getPeriodTotals(db, range, todayDate, accountId),
         getPeriodTotals(db, previous, todayDate, accountId),
         hasActivity(db, previous, todayDate, accountId),
         getCategoryBreakdown(db, range, todayDate, accountId),
         type === "day"
           ? Promise.resolve(new Map<string, number>())
-          : getSpendingTrend(db, range, todayDate, type === "year" ? "month" : "day", accountId),
+          : getSpendingTrend(
+              db,
+              range,
+              todayDate,
+              type === "year" ? "month" : "day",
+              accountId,
+            ),
         type === "day" && range.start <= todayDate
           ? listEntries(db, { limit: 500, range, accountId })
           : Promise.resolve([] as EntryWithDetails[]),
@@ -103,12 +137,19 @@ export default function SummaryScreen() {
       if (cancelled) return;
       setData({
         totals,
-        comparison: prevActive ? compareWithPrevious(totals.spending, prevTotals.spending) : null,
+        comparison: prevActive
+          ? compareWithPrevious(totals.spending, prevTotals.spending)
+          : null,
         breakdown,
         trend: buildTrend(type, range, trendData),
         dayEntries,
         // With an account filter, only that account's own limit applies.
-        budgets: accountId === null ? budgets : budgets.filter((b) => b.scope === "account" && b.accountId === accountId),
+        budgets:
+          accountId === null
+            ? budgets
+            : budgets.filter(
+                (b) => b.scope === "account" && b.accountId === accountId,
+              ),
       });
     })();
     return () => {
@@ -123,7 +164,8 @@ export default function SummaryScreen() {
 
   const isCurrent = isCurrentPeriod(type, anchor, todayDate);
   const canGoNext = canGoToNextPeriod(type, anchor, todayDate);
-  const isEmpty = data !== null && data.totals.spending === 0 && data.totals.income === 0;
+  const isEmpty =
+    data !== null && data.totals.spending === 0 && data.totals.income === 0;
 
   const axisLabel = (bar: TrendBar, index: number): string | null => {
     if (type === "year") return monthInitial(bar.key, lang);
@@ -147,7 +189,11 @@ export default function SummaryScreen() {
           accessibilityRole="button"
           accessibilityLabel={t("summary.previous")}
         >
-          <MaterialCommunityIcons name="chevron-left" size={30} color={colors.primary} />
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={30}
+            color={colors.primary}
+          />
         </Pressable>
         <Text style={[typography.title, styles.navLabel]} numberOfLines={1}>
           {periodLabel(type, range, todayDate, lang)}
@@ -160,21 +206,42 @@ export default function SummaryScreen() {
           accessibilityLabel={t("summary.next")}
           accessibilityState={{ disabled: !canGoNext }}
         >
-          <MaterialCommunityIcons name="chevron-right" size={30} color={canGoNext ? colors.primary : colors.border} />
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={30}
+            color={canGoNext ? colors.primary : colors.border}
+          />
         </Pressable>
       </View>
       {!isCurrent ? (
-        <Pressable onPress={() => setAnchor(todayDate)} style={styles.todayLink} hitSlop={8}>
+        <Pressable
+          onPress={() => setAnchor(todayDate)}
+          style={styles.todayLink}
+          hitSlop={8}
+        >
           <Text style={styles.link}>{t("summary.backToToday")}</Text>
         </Pressable>
       ) : null}
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-        <Chip label={t("summary.allAccounts")} selected={accountId === null} onPress={() => setAccountId(null)} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chips}
+      >
+        <Chip
+          label={t("summary.allAccounts")}
+          selected={accountId === null}
+          onPress={() => setAccountId(null)}
+        />
         {accounts
           .filter((a) => !a.archived || a.id === accountId)
           .map((a) => (
-            <Chip key={a.id} label={a.name} selected={accountId === a.id} onPress={() => setAccountId(a.id)} />
+            <Chip
+              key={a.id}
+              label={a.name}
+              selected={accountId === a.id}
+              onPress={() => setAccountId(a.id)}
+            />
           ))}
       </ScrollView>
 
@@ -187,10 +254,16 @@ export default function SummaryScreen() {
             <Text style={[typography.amountLarge, { color: colors.expense }]}>
               {formatRupiah(data.totals.spending, lang)}
             </Text>
-            {data.comparison ? <ComparisonLine comparison={data.comparison} type={type} /> : null}
+            {data.comparison ? (
+              <ComparisonLine comparison={data.comparison} type={type} />
+            ) : null}
 
             <View style={styles.statsRow}>
-              <Stat label={t("summary.income")} value={formatRupiah(data.totals.income, lang)} color={colors.income} />
+              <Stat
+                label={t("summary.income")}
+                value={formatRupiah(data.totals.income, lang)}
+                color={colors.income}
+              />
               <Stat
                 label={t("summary.net")}
                 value={formatSignedRupiah(data.totals.net, lang)}
@@ -199,7 +272,10 @@ export default function SummaryScreen() {
               {type !== "day" ? (
                 <Stat
                   label={t("summary.averagePerDay")}
-                  value={formatRupiah(averagePerDay(data.totals.spending, range, todayDate), lang)}
+                  value={formatRupiah(
+                    averagePerDay(data.totals.spending, range, todayDate),
+                    lang,
+                  )}
                   color={colors.text}
                 />
               ) : null}
@@ -246,7 +322,11 @@ export default function SummaryScreen() {
                 <View style={styles.card}>
                   <Text style={typography.title}>{t("summary.breakdown")}</Text>
                   <StackedBar
-                    slices={data.breakdown.map((s) => ({ key: s.categoryId, value: s.amount, color: s.color }))}
+                    slices={data.breakdown.map((s) => ({
+                      key: s.categoryId,
+                      value: s.amount,
+                      color: s.color,
+                    }))}
                   />
                   {data.breakdown.map((slice) => (
                     <BreakdownRow
@@ -259,7 +339,8 @@ export default function SummaryScreen() {
                           ? () =>
                               navigation.navigate("Adjustments", {
                                 start: range.start,
-                                end: range.end < todayDate ? range.end : todayDate,
+                                end:
+                                  range.end < todayDate ? range.end : todayDate,
                                 accountId,
                               })
                           : undefined
@@ -268,7 +349,9 @@ export default function SummaryScreen() {
                   ))}
                 </View>
               ) : (
-                <Text style={[typography.label, styles.centerText]}>{t("summary.noSpending")}</Text>
+                <Text style={[typography.label, styles.centerText]}>
+                  {t("summary.noSpending")}
+                </Text>
               )}
 
               {type !== "day" ? (
@@ -277,7 +360,9 @@ export default function SummaryScreen() {
                   <TrendBars
                     bars={data.trend}
                     labelFor={axisLabel}
-                    highlightKey={type === "year" ? todayDate.slice(0, 7) : todayDate}
+                    highlightKey={
+                      type === "year" ? todayDate.slice(0, 7) : todayDate
+                    }
                   />
                 </View>
               ) : (
@@ -306,16 +391,34 @@ export default function SummaryScreen() {
   );
 }
 
-function ComparisonLine({ comparison, type }: { comparison: Comparison; type: PeriodType }) {
+function ComparisonLine({
+  comparison,
+  type,
+}: {
+  comparison: Comparison;
+  type: PeriodType;
+}) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const up = comparison.change > 0;
-  const color = comparison.change === 0 ? colors.textMuted : up ? colors.expense : colors.income;
-  const pct = comparison.percent === null ? "" : ` (${comparison.percent > 0 ? "+" : ""}${comparison.percent}%)`;
+  const color =
+    comparison.change === 0
+      ? colors.textMuted
+      : up
+        ? colors.expense
+        : colors.income;
+  const pct =
+    comparison.percent === null
+      ? ""
+      : ` (${comparison.percent > 0 ? "+" : ""}${comparison.percent}%)`;
   return (
     <View style={styles.comparison}>
       <MaterialCommunityIcons
-        name={comparison.change === 0 ? "minus" : up ? "arrow-up" : "arrow-down"}
+        name={
+          comparison.change === 0 ? "minus" : up ? "arrow-up" : "arrow-down"
+        }
         size={16}
         color={color}
       />
@@ -327,11 +430,25 @@ function ComparisonLine({ comparison, type }: { comparison: Comparison; type: Pe
   );
 }
 
-function Stat({ label, value, color }: { label: string; value: string; color: string }) {
+function Stat({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color: string;
+}) {
+  const { typography } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.stat}>
       <Text style={typography.caption}>{label}</Text>
-      <Text style={[styles.statValue, { color }]} numberOfLines={1} adjustsFontSizeToFit>
+      <Text
+        style={[styles.statValue, { color }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {value}
       </Text>
     </View>
@@ -349,6 +466,8 @@ function BreakdownRow({
   amount: string;
   onPress?: () => void;
 }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const content = (
     <>
       <CategoryIcon icon={slice.icon} color={slice.color} size={32} />
@@ -357,18 +476,33 @@ function BreakdownRow({
           {categoryLabel(slice)}
         </Text>
         <View style={styles.shareTrack}>
-          <View style={[styles.shareFill, { width: `${share}%`, backgroundColor: slice.color }]} />
+          <View
+            style={[
+              styles.shareFill,
+              { width: `${share}%`, backgroundColor: slice.color },
+            ]}
+          />
         </View>
       </View>
       <View style={styles.rowRight}>
         <Text style={typography.amount}>{amount}</Text>
         <Text style={typography.caption}>{share}%</Text>
       </View>
-      {onPress ? <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} /> : null}
+      {onPress ? (
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={20}
+          color={colors.textMuted}
+        />
+      ) : null}
     </>
   );
   return onPress ? (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.pressed]} accessibilityRole="button">
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
       {content}
     </Pressable>
   ) : (
@@ -376,103 +510,56 @@ function BreakdownRow({
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    paddingBottom: spacing.xl,
-  },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
+  content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   navRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  navLabel: {
-    flex: 1,
-    textAlign: "center",
-  },
-  todayLink: {
-    alignSelf: "center",
-    marginTop: -spacing.sm,
-  },
-  link: {
-    color: colors.primary,
-    fontWeight: "600",
-  },
-  chips: {
-    gap: spacing.sm,
-  },
-  loader: {
-    marginTop: spacing.xl,
-  },
+  navLabel: { flex: 1, textAlign: "center" },
+  todayLink: { alignSelf: "center", marginTop: -spacing.sm },
+  link: { color: c.primary, fontWeight: "600" },
+  chips: { gap: spacing.sm },
+  loader: { marginTop: spacing.xl },
   card: {
     padding: spacing.md,
     gap: spacing.sm,
     borderRadius: radius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  comparison: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  stat: {
-    flex: 1,
-    gap: 2,
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
+  comparison: { flexDirection: "row", alignItems: "center", gap: 4 },
+  statsRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
+  stat: { flex: 1, gap: 2 },
+  statValue: { fontSize: 15, fontWeight: "600", fontVariant: ["tabular-nums"] },
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     paddingVertical: spacing.xs,
   },
-  pressed: {
-    opacity: 0.7,
-  },
-  rowMiddle: {
-    flex: 1,
-    gap: 4,
-  },
-  rowRight: {
-    alignItems: "flex-end",
-  },
+  pressed: { opacity: 0.7 },
+  rowMiddle: { flex: 1, gap: 4 },
+  rowRight: { alignItems: "flex-end" },
   shareTrack: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     overflow: "hidden",
   },
-  shareFill: {
-    height: 4,
-    borderRadius: 2,
-  },
-  centerText: {
-    textAlign: "center",
-  },
+  shareFill: { height: 4, borderRadius: 2 },
+  centerText: { textAlign: "center" },
   list: {
     borderRadius: radius.md,
     overflow: "hidden",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   divider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
-});
+}));

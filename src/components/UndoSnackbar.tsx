@@ -3,10 +3,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { UNDO_WINDOW_MS, useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 /** App-wide bar offering undo for 5 seconds after an entry or transfer is deleted (FR-2.7). */
 export default function UndoSnackbar() {
+  const styles = useStyles();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const undo = useLedgerStore((s) => s.undo);
@@ -36,7 +38,7 @@ export default function UndoSnackbar() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   bar: {
     position: "absolute",
     left: spacing.md,
@@ -47,9 +49,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     minHeight: 48,
     borderRadius: radius.md,
-    backgroundColor: colors.text,
+    backgroundColor: c.inverseSurface,
     elevation: 6,
   },
-  text: { color: colors.surface, fontSize: 15 },
-  action: { color: "#7FD3BE", fontSize: 15, fontWeight: "700" },
-});
+  text: { color: c.inverseText, fontSize: 15 },
+  action: { color: c.inverseAccent, fontSize: 15, fontWeight: "700" },
+}));

@@ -69,7 +69,11 @@
     "appLockHint": "Minta kunci layar ponsel setiap kali aplikasi dibuka, dan sebelum mengekspor cadangan. Aplikasi tidak pernah menyimpan PIN atau sidik jari Anda.",
     "appLockNoDeviceLock": "Atur dulu kunci layar di pengaturan Android, lalu ini bisa diaktifkan.",
     "backupNotEncrypted": "File cadangan tidak dienkripsi. Siapa pun yang membuka file hasil ekspor bisa membacanya.",
-    "exportLocked": "Ekspor dibatalkan karena kunci ponsel tidak dikonfirmasi."
+    "exportLocked": "Ekspor dibatalkan karena kunci ponsel tidak dikonfirmasi.",
+    "appearance": "Tampilan",
+    "themeSystem": "Ikuti ponsel",
+    "themeLight": "Terang",
+    "themeDark": "Gelap"
   },
   "category": {
     "builtin": {

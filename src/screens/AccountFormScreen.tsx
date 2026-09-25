@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { formatNumber, formatRupiah, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { AccountType } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS, ACCOUNT_TYPES } from "../components/accountTypes";
@@ -17,6 +18,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "AccountForm">;
 
 /** Create or edit an account (FR-1.1), and archive or restore it (FR-1.8). */
 export default function AccountFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const accountId = route.params?.accountId;
@@ -216,8 +219,8 @@ export default function AccountFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   label: { marginTop: spacing.md },
   textInput: {
@@ -225,20 +228,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
-  inputError: { borderColor: colors.expense },
+  inputError: { borderColor: c.expense },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   archiveBox: { marginTop: spacing.xl, gap: spacing.sm },
-  error: { fontSize: 13, color: colors.expense },
-  flagged: { color: colors.alert },
+  error: { fontSize: 13, color: c.expense },
+  flagged: { color: c.alert },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

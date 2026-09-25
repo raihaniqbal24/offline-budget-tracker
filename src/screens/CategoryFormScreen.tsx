@@ -12,7 +12,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { categoryLabel } from "../i18n";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { CategoryType } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
@@ -25,6 +26,8 @@ type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 /** Add or edit a category (FR-6.1, FR-6.2), and archive or restore it (FR-6.3). */
 export default function CategoryFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const categoryId = route.params?.categoryId;
   const categories = useLedgerStore((s) => s.categories);
@@ -204,8 +207,8 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   preview: {
     alignItems: "center",
@@ -218,13 +221,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
-  inputError: { borderColor: colors.expense },
-  error: { fontSize: 13, color: colors.expense },
+  inputError: { borderColor: c.expense },
+  error: { fontSize: 13, color: c.expense },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   iconCell: {
     width: 48,
@@ -232,8 +235,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -244,12 +247,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  swatchSelected: { borderWidth: 3, borderColor: colors.text },
+  swatchSelected: { borderWidth: 3, borderColor: c.text },
   archiveBox: { marginTop: spacing.xl, gap: spacing.sm },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

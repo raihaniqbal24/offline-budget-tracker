@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { formatRupiah, type AppLanguage } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { AccountWithBalance } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
@@ -18,6 +19,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 export default function AccountsScreen() {
+  const { typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -110,6 +113,8 @@ function AccountRow({
   first: boolean;
   onPress: () => void;
 }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   return (
     <Pressable
@@ -160,73 +165,36 @@ function AccountRow({
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    justifyContent: "center",
-  },
-  content: {
-    padding: spacing.md,
-  },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
+  centered: { justifyContent: "center" },
+  content: { padding: spacing.md },
   totalRow: {
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "space-between",
     marginBottom: spacing.md,
   },
-  amount: {
-    fontVariant: ["tabular-nums"],
-  },
-  negative: {
-    color: colors.expense,
-  },
+  amount: { fontVariant: ["tabular-nums"] },
+  negative: { color: c.expense },
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
   },
   rowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
-  pressed: {
-    backgroundColor: colors.primarySoft,
-  },
-  rowMiddle: {
-    flex: 1,
-    gap: 2,
-  },
-  rowRight: {
-    alignItems: "flex-end",
-    gap: 2,
-  },
-  muted: {
-    color: colors.textMuted,
-  },
-  flag: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  flagText: {
-    fontSize: 12,
-    color: colors.alert,
-  },
-  footer: {
-    marginTop: spacing.lg,
-    gap: spacing.md,
-  },
-  toggle: {
-    alignSelf: "center",
-    padding: spacing.sm,
-  },
-  link: {
-    color: colors.primary,
-    fontWeight: "600",
-  },
-});
+  pressed: { backgroundColor: c.primarySoft },
+  rowMiddle: { flex: 1, gap: 2 },
+  rowRight: { alignItems: "flex-end", gap: 2 },
+  muted: { color: c.textMuted },
+  flag: { flexDirection: "row", alignItems: "center", gap: 4 },
+  flagText: { fontSize: 12, color: c.alert },
+  footer: { marginTop: spacing.lg, gap: spacing.md },
+  toggle: { alignSelf: "center", padding: spacing.sm },
+  link: { color: c.primary, fontWeight: "600" },
+}));

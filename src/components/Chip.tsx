@@ -1,7 +1,8 @@
 import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { colors, radius, spacing } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -21,6 +22,8 @@ export default function Chip({
   icon,
   color,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -49,7 +52,7 @@ export default function Chip({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   chip: {
     flexDirection: "row",
     alignItems: "center",
@@ -58,23 +61,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
   },
-  selected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  label: {
-    fontSize: 14,
-    color: colors.text,
-    maxWidth: 160,
-  },
-  labelSelected: {
-    color: colors.onPrimary,
-    fontWeight: "600",
-  },
-});
+  selected: { backgroundColor: c.primary, borderColor: c.primary },
+  pressed: { opacity: 0.8 },
+  label: { fontSize: 14, color: c.text, maxWidth: 160 },
+  labelSelected: { color: c.onPrimary, fontWeight: "600" },
+}));

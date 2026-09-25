@@ -4,7 +4,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import type { TransferWithDetails } from "../db/transfersDao";
 import { formatRupiah, type AppLanguage } from "../lib/money";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 interface Props {
   transfer: TransferWithDetails;
@@ -15,6 +16,8 @@ interface Props {
 
 /** A transfer as from → to, amount and fee (FR-5.6). */
 function TransferRow({ transfer, lang, isUpcoming, onPress }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const payer =
     transfer.feePaidBy === "sender"
@@ -83,16 +86,16 @@ function TransferRow({ transfer, lang, isUpcoming, onPress }: Props) {
 
 export default memo(TransferRow);
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
   },
-  pressed: { backgroundColor: colors.primarySoft },
+  pressed: { backgroundColor: c.primarySoft },
   iconCircle: {
     width: 40,
     height: 40,
@@ -100,8 +103,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: `${colors.transfer}22`,
+    backgroundColor: `${c.transfer}22`,
   },
   middle: { flex: 1, gap: 2 },
   right: { alignItems: "flex-end", gap: 2 },
-});
+}));

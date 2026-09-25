@@ -18,7 +18,8 @@ import { useAppLanguage } from "../i18n/useAppLanguage";
 import { getPeriodRange, shiftPeriod, today, type ISODate } from "../lib/dates";
 import { formatDayHeader, formatMonthYear } from "../lib/dateLabels";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Chip from "../components/Chip";
@@ -33,6 +34,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 /** Transfers as from, to, amount and fee, filterable by account and month (FR-5.6). */
 export default function TransfersScreen() {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -200,14 +203,14 @@ export default function TransfersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   filters: {
     paddingVertical: spacing.sm,
     gap: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
   chips: { gap: spacing.sm, paddingHorizontal: spacing.md },
   monthRow: {
@@ -217,10 +220,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   monthLabel: { flex: 1, alignItems: "center" },
-  muted: { color: colors.textMuted },
+  muted: { color: c.textMuted },
   loader: { marginTop: spacing.xl },
   header: {
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
@@ -228,9 +231,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
+    backgroundColor: c.border,
     marginLeft: 72,
   },
   listContent: { paddingBottom: 96 },
   emptyContainer: { flexGrow: 1, justifyContent: "center" },
-});
+}));

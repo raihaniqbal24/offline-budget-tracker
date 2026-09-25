@@ -24,11 +24,19 @@ import { formatDate, weekdayShortName } from "../lib/dateLabels";
 import { notificationsAvailable } from "../notifications";
 import { formatTime, parseTime } from "../notifications/content";
 import { useSettingsStore } from "../store/settingsStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
+import type { ThemeSetting } from "../theme/ThemeProvider";
 import type { LanguageSetting } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
 import Chip from "../components/Chip";
+
+const THEME_OPTIONS: { value: ThemeSetting; labelKey: string }[] = [
+  { value: "system", labelKey: "settings.themeSystem" },
+  { value: "light", labelKey: "settings.themeLight" },
+  { value: "dark", labelKey: "settings.themeDark" },
+];
 
 const LANGUAGE_OPTIONS: { value: LanguageSetting; labelKey: string }[] = [
   { value: "system", labelKey: "settings.languageSystem" },
@@ -39,6 +47,8 @@ const LANGUAGE_OPTIONS: { value: LanguageSetting; labelKey: string }[] = [
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -97,6 +107,40 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      {/* Appearance (FR-15.1) */}
+      <Text style={[typography.label, styles.sectionTitle]}>
+        {t("settings.appearance")}
+      </Text>
+      <View style={styles.group} accessibilityRole="radiogroup">
+        {THEME_OPTIONS.map((option, index) => {
+          const selected = option.value === s.theme;
+          return (
+            <Pressable
+              key={option.value}
+              style={({ pressed }) => [
+                styles.row,
+                index > 0 && styles.rowDivider,
+                pressed && styles.rowPressed,
+              ]}
+              onPress={() => s.setTheme(option.value)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+            >
+              <Text style={[typography.body, styles.rowLabel]}>
+                {t(option.labelKey)}
+              </Text>
+              {selected && (
+                <MaterialCommunityIcons
+                  name="check"
+                  size={22}
+                  color={colors.primary}
+                />
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
+
       {/* Language */}
       <Text style={[typography.label, styles.sectionTitle]}>
         {t("settings.language")}
@@ -313,6 +357,8 @@ function ToggleRow({
   disabled?: boolean;
   children?: ReactNode;
 }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   return (
     <View style={[styles.toggleBox, divider && styles.rowDivider]}>
       <View style={styles.toggleRow}>
@@ -343,6 +389,8 @@ function TimeRow({
   value: string;
   onPress: () => void;
 }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -377,6 +425,8 @@ function ExportBlock({
   status: { text: string; error?: boolean } | null;
   onExport: (kind: ExportKind, target: ExportTarget) => void;
 }) {
+  const { typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   return (
     <View style={styles.block}>
@@ -409,15 +459,15 @@ function ExportBlock({
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   sectionTitle: { marginTop: spacing.md, marginLeft: spacing.xs },
   group: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   padded: { padding: spacing.md, gap: spacing.md },
@@ -429,9 +479,9 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
-  rowPressed: { backgroundColor: colors.primarySoft },
+  rowPressed: { backgroundColor: c.primarySoft },
   rowLabel: { flex: 1 },
   toggleBox: { padding: spacing.md, gap: spacing.sm },
   toggleRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
@@ -447,11 +497,11 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: "#FDF3E1",
+    backgroundColor: c.warningSurface,
     borderWidth: 1,
-    borderColor: colors.budget75,
+    borderColor: c.budget75,
   },
   block: { gap: spacing.xs },
   buttonRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.xs },
-  errorText: { color: colors.expense },
-});
+  errorText: { color: c.expense },
+}));

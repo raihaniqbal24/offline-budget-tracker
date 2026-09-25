@@ -4,13 +4,15 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 
 /**
  * Hub for everything that isn't a daily screen.
  */
 export default function MoreScreen() {
+  const styles = useStyles();
   const { t } = useTranslation();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -75,6 +77,8 @@ function Row({
   onPress: () => void;
   divider?: boolean;
 }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       style={({ pressed }) => [
@@ -96,14 +100,14 @@ function Row({
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md },
   group: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   row: {
@@ -115,8 +119,8 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
-  rowPressed: { backgroundColor: colors.primarySoft },
+  rowPressed: { backgroundColor: c.primarySoft },
   rowLabel: { flex: 1 },
-});
+}));

@@ -11,6 +11,7 @@ const TODAY = "2026-09-21";
 const base: WidgetSummary = {
   version: 1,
   language: "en",
+  theme: "light",
   masked: false,
   month: "2026-09",
   updatedOn: TODAY,
@@ -97,5 +98,13 @@ describe("progress segments", () => {
     expect(filledSegments(75)).toBe(8);
     expect(filledSegments(100)).toBe(10);
     expect(filledSegments(140)).toBe(10); // capped
+  });
+});
+
+describe("widget theme (FR-15.6)", () => {
+  it("keeps whichever theme the app resolved, and defaults to light", () => {
+    expect(parseSummary({ ...base, theme: "dark" })?.theme).toBe("dark");
+    const { theme: _dropped, ...withoutTheme } = base;
+    expect(parseSummary(withoutTheme)?.theme).toBe("light");
   });
 });

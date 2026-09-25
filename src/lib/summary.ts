@@ -21,13 +21,23 @@ export interface Comparison {
 }
 
 /** Change against the previous period as an amount and a percentage (FR-3.4). */
-export function compareWithPrevious(current: number, previous: number): Comparison {
+export function compareWithPrevious(
+  current: number,
+  previous: number,
+): Comparison {
   const change = current - previous;
-  return { change, percent: previous > 0 ? Math.round((change / previous) * 100) : null };
+  return {
+    change,
+    percent: previous > 0 ? Math.round((change / previous) * 100) : null,
+  };
 }
 
 /** Average spending per day; the current period divides by days elapsed (decided). */
-export function averagePerDay(spending: number, range: DateRange, todayDate: ISODate): number {
+export function averagePerDay(
+  spending: number,
+  range: DateRange,
+  todayDate: ISODate,
+): number {
   const days = daysForAverage(range, todayDate);
   return days > 0 ? Math.round(spending / days) : 0;
 }
@@ -41,14 +51,26 @@ export interface TrendBar {
  * One bar per day for Week and Month, one per month for Year (FR-3.5), with
  * zero for buckets that had no spending. Day view has no trend chart.
  */
-export function buildTrend(type: PeriodType, range: DateRange, data: Map<string, number>): TrendBar[] {
+export function buildTrend(
+  type: PeriodType,
+  range: DateRange,
+  data: Map<string, number>,
+): TrendBar[] {
   if (type === "day") return [];
-  const keys = type === "year" ? eachMonthOfYear(Number(range.start.slice(0, 4))) : eachDay(range);
+  const keys =
+    type === "year"
+      ? eachMonthOfYear(Number(range.start.slice(0, 4)))
+      : eachDay(range);
   return keys.map((key) => ({ key, value: data.get(key) ?? 0 }));
 }
 
 /** Heading between the period arrows: "Today", "15 Sep – 21 Sep", "September 2026", "2026". */
-export function periodLabel(type: PeriodType, range: DateRange, todayDate: ISODate, lang: AppLanguage): string {
+export function periodLabel(
+  type: PeriodType,
+  range: DateRange,
+  todayDate: ISODate,
+  lang: AppLanguage,
+): string {
   switch (type) {
     case "day":
       return formatDayHeader(range.start, todayDate, lang);

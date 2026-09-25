@@ -17,7 +17,8 @@ import { today } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
 import { formatNumber, isValidEntryAmount, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
@@ -30,6 +31,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "PendingConfirm">;
  * balance until this screen's Confirm.
  */
 export default function PendingConfirmScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const confirmPending = useLedgerStore((s) => s.confirmPending);
@@ -178,17 +181,17 @@ export default function PendingConfirmScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   card: {
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   label: { marginTop: spacing.md },
   textInput: {
@@ -196,16 +199,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
   skip: { marginTop: spacing.xl },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

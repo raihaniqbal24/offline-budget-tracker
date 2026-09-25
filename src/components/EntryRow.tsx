@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import type { EntryWithDetails } from "../db/entriesDao";
 import { categoryLabel } from "../i18n";
 import { formatSignedRupiah, type AppLanguage } from "../lib/money";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import CategoryIcon from "./CategoryIcon";
 
 interface Props {
@@ -22,6 +23,8 @@ export function signedAmount(
 }
 
 function EntryRow({ entry, lang, isUpcoming, onPress }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const amount = signedAmount(entry);
   const label = categoryLabel({
@@ -81,16 +84,16 @@ function EntryRow({ entry, lang, isUpcoming, onPress }: Props) {
 
 export default memo(EntryRow);
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
   },
-  pressed: { backgroundColor: colors.primarySoft },
+  pressed: { backgroundColor: c.primarySoft },
   middle: { flex: 1, gap: 2 },
   right: { alignItems: "flex-end", gap: 2, maxWidth: "45%" },
-});
+}));

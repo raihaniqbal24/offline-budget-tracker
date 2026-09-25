@@ -14,6 +14,7 @@ const decoders: { [K in SettingKey]: (raw: string) => SettingsMap[K] } = {
   alerts_enabled: (v) => v === "1",
   last_backup_at: (v) => (v === "" ? null : v),
   app_lock_enabled: (v) => v === "1",
+  theme: (v) => (v === "light" || v === "dark" ? v : "system"),
 };
 
 function encode(value: unknown): string {

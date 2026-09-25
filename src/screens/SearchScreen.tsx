@@ -30,7 +30,8 @@ import { parseISODate, toISODate, today, type ISODate } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
 import { formatRupiah, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
@@ -61,6 +62,8 @@ function toggle<T>(list: T[], value: T): T[] {
  * shows the count with spending and income kept separate (decided).
  */
 export default function SearchScreen({ navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const accounts = useLedgerStore((s) => s.accounts);
@@ -470,8 +473,8 @@ export default function SearchScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   header: { padding: spacing.md, gap: spacing.sm },
   searchBox: {
@@ -482,37 +485,37 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
   },
-  searchInput: { flex: 1, fontSize: 16, color: colors.text },
+  searchInput: { flex: 1, fontSize: 16, color: c.text },
   toolbar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   filterToggle: { flexDirection: "row", alignItems: "center", gap: 4 },
-  link: { color: colors.primary, fontWeight: "600" },
+  link: { color: c.primary, fontWeight: "600" },
   panel: {
     padding: spacing.md,
     gap: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   label: { marginTop: spacing.sm },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   chipRow: { gap: spacing.sm },
   rangeRow: { flexDirection: "row", gap: spacing.sm },
   flex: { flex: 1, gap: 4 },
-  error: { fontSize: 13, color: colors.expense },
+  error: { fontSize: 13, color: c.expense },
   summary: { gap: 2, paddingTop: spacing.sm },
   summaryRow: { flexDirection: "row", gap: spacing.md, flexWrap: "wrap" },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
+    backgroundColor: c.border,
     marginLeft: 72,
   },
   listContent: { paddingBottom: spacing.xl },
-});
+}));

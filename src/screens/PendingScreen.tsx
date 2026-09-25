@@ -18,7 +18,8 @@ import { today } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
 import { formatRupiah } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 
@@ -26,6 +27,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "Pending">;
 
 /** FR-11.3: occurrences waiting to be confirmed, oldest first. */
 export default function PendingScreen({ navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const dataVersion = useLedgerStore((s) => s.dataVersion);
@@ -124,16 +127,16 @@ export default function PendingScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   centered: { justifyContent: "center" },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   group: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   row: {
@@ -142,9 +145,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
-  pressed: { backgroundColor: colors.primarySoft },
+  pressed: { backgroundColor: c.primarySoft },
   rowMiddle: { flex: 1, gap: 2 },
-  due: { color: colors.primary, fontWeight: "600" },
-});
+  due: { color: c.primary, fontWeight: "600" },
+}));

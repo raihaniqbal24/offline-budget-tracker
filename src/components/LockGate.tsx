@@ -19,7 +19,8 @@ import {
   type Transition,
 } from "../security/lockPolicy";
 import { useSettingsStore } from "../store/settingsStore";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import Button from "./Button";
 
 /**
@@ -28,6 +29,8 @@ import Button from "./Button";
  * nothing else (FR-13.10).
  */
 export default function LockGate({ children }: { children: ReactNode }) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const enabled = useSettingsStore((s) => s.appLockEnabled);
   const [state, setState] = useState<LockState>(() => onStart(enabled).state);
@@ -90,15 +93,15 @@ export default function LockGate({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   screen: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
     padding: spacing.xl,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
   },
   body: { textAlign: "center" },
   button: { alignSelf: "stretch", marginTop: spacing.md },
-});
+}));

@@ -5,7 +5,8 @@ import {
   Text,
   type ViewStyle,
 } from "react-native";
-import { colors, radius, spacing } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 type Variant = "primary" | "secondary" | "danger";
 
@@ -26,6 +27,8 @@ export default function Button({
   loading,
   style,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const inactive = disabled || loading;
   return (
     <Pressable
@@ -60,7 +63,7 @@ export default function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   base: {
     minHeight: 48,
     borderRadius: radius.md,
@@ -68,34 +71,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: spacing.md,
   },
-  primary: {
-    backgroundColor: colors.primary,
-  },
+  primary: { backgroundColor: c.primary },
   secondary: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   danger: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: 1,
-    borderColor: colors.expense,
+    borderColor: c.expense,
   },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-  labelOnPrimary: {
-    color: colors.onPrimary,
-  },
-  labelDanger: {
-    color: colors.expense,
-  },
-});
+  pressed: { opacity: 0.85 },
+  disabled: { opacity: 0.5 },
+  label: { fontSize: 16, fontWeight: "600", color: c.primary },
+  labelOnPrimary: { color: c.onPrimary },
+  labelDanger: { color: c.expense },
+}));

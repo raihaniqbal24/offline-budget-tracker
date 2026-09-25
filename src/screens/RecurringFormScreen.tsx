@@ -25,7 +25,8 @@ import {
 import { formatDate } from "../lib/dateLabels";
 import { formatNumber, isValidEntryAmount, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { FeePaidBy, ID, RecurringType } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
@@ -50,6 +51,8 @@ const ERROR_KEYS: Record<string, string> = {
 
 /** Create or edit a recurring rule (FR-11.1). Changes apply to future occurrences only (FR-11.7). */
 export default function RecurringFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const ruleId = route.params?.ruleId;
@@ -369,8 +372,8 @@ export default function RecurringFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   label: { marginTop: spacing.md },
@@ -380,18 +383,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
   archiveBox: { marginTop: spacing.xl, gap: spacing.sm },
-  error: { fontSize: 13, color: colors.expense },
+  error: { fontSize: 13, color: c.expense },
   footer: {
     padding: spacing.md,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

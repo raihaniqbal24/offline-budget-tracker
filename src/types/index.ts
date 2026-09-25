@@ -167,6 +167,8 @@ export interface SettingsMap {
   last_backup_at: string | null;
   /** FR-13.1: ask for the phone's screen lock to open the app. */
   app_lock_enabled: boolean;
+  /** FR-15.1: "system", "light" or "dark". */
+  theme: "system" | "light" | "dark";
 }
 
 export type SettingKey = keyof SettingsMap;

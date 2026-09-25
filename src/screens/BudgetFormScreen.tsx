@@ -1,15 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { getDb } from "../db/client";
-import { getBudgetProgress, targetKey, type BudgetProgress, type BudgetTarget } from "../db/budgetsDao";
+import {
+  getBudgetProgress,
+  targetKey,
+  type BudgetProgress,
+  type BudgetTarget,
+} from "../db/budgetsDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { monthKey, today } from "../lib/dates";
 import { formatMonthYear } from "../lib/dateLabels";
 import { formatNumber, isValidEntryAmount, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import BudgetBar from "../components/BudgetBar";
@@ -20,6 +32,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "BudgetForm">;
 
 /** Set, change or remove one monthly limit from this month on (FR-7.1, FR-7.2). */
 export default function BudgetFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const accounts = useLedgerStore((s) => s.accounts);
@@ -32,12 +46,14 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
       categoryId: route.params.categoryId ?? null,
       accountId: route.params.accountId ?? null,
     }),
-    [route.params]
+    [route.params],
   );
   const todayDate = today();
   const month = monthKey(todayDate);
 
-  const [current, setCurrent] = useState<BudgetProgress | null | undefined>(undefined);
+  const [current, setCurrent] = useState<BudgetProgress | null | undefined>(
+    undefined,
+  );
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -46,7 +62,8 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
     let cancelled = false;
     (async () => {
       const rows = await getBudgetProgress(await getDb(), month, todayDate);
-      const found = rows.find((p) => targetKey(p) === targetKey(target)) ?? null;
+      const found =
+        rows.find((p) => targetKey(p) === targetKey(target)) ?? null;
       if (cancelled) return;
       setCurrent(found);
       if (found) setText(formatNumber(found.limit, lang));
@@ -58,14 +75,16 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, todayDate, target]);
 
-  if (current === undefined) return <ActivityIndicator style={styles.loader} color={colors.primary} />;
+  if (current === undefined)
+    return <ActivityIndicator style={styles.loader} color={colors.primary} />;
 
   const label = budgetLabel(target, accounts, categories, t);
 
   const save = async () => {
     const amount = parseAmount(text);
     if (amount === null) return setError(t("amount.invalid"));
-    if (!isValidEntryAmount(amount)) return setError(t("amount.mustBePositive"));
+    if (!isValidEntryAmount(amount))
+      return setError(t("amount.mustBePositive"));
     setError(null);
     setSaving(true);
     await setBudget(target, amount);
@@ -80,24 +99,51 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={typography.title}>{label}</Text>
-        <Text style={typography.caption}>{t(`budgets.scopeHint.${target.scope}`)}</Text>
-
-        {current ? (
-          <View style={styles.card}>
-            <BudgetBar label={t("budgets.thisMonth")} spent={current.spent} limit={current.limit} percent={current.percent} lang={lang} />
-          </View>
-        ) : null}
-
-        <Text style={[typography.label, styles.label]}>{t("budgets.monthlyLimit")}</Text>
-        <AmountInput value={text} onChangeText={setText} lang={lang} autoFocus={!current} large error={error} />
         <Text style={typography.caption}>
-          {t("budgets.appliesFrom", { month: formatMonthYear(`${month}-01`, lang) })}
+          {t(`budgets.scopeHint.${target.scope}`)}
         </Text>
 
         {current ? (
-          <Button label={t("budgets.remove")} variant="danger" onPress={remove} style={styles.remove} />
+          <View style={styles.card}>
+            <BudgetBar
+              label={t("budgets.thisMonth")}
+              spent={current.spent}
+              limit={current.limit}
+              percent={current.percent}
+              lang={lang}
+            />
+          </View>
+        ) : null}
+
+        <Text style={[typography.label, styles.label]}>
+          {t("budgets.monthlyLimit")}
+        </Text>
+        <AmountInput
+          value={text}
+          onChangeText={setText}
+          lang={lang}
+          autoFocus={!current}
+          large
+          error={error}
+        />
+        <Text style={typography.caption}>
+          {t("budgets.appliesFrom", {
+            month: formatMonthYear(`${month}-01`, lang),
+          })}
+        </Text>
+
+        {current ? (
+          <Button
+            label={t("budgets.remove")}
+            variant="danger"
+            onPress={remove}
+            style={styles.remove}
+          />
         ) : null}
       </ScrollView>
 
@@ -108,24 +154,24 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   card: {
     marginTop: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   label: { marginTop: spacing.md },
   remove: { marginTop: spacing.xl },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

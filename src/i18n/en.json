@@ -69,7 +69,11 @@
     "appLockHint": "Ask for the phone's screen lock every time the app is opened, and before exporting a backup. The app never stores your PIN or fingerprint.",
     "appLockNoDeviceLock": "Set a screen lock on the phone first, in Android settings, then this can be turned on.",
     "backupNotEncrypted": "Backup files are not encrypted. Anyone who opens the exported file can read it.",
-    "exportLocked": "The export was cancelled because the phone's lock wasn't confirmed."
+    "exportLocked": "The export was cancelled because the phone's lock wasn't confirmed.",
+    "appearance": "Appearance",
+    "themeSystem": "Same as phone",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "category": {
     "builtin": {

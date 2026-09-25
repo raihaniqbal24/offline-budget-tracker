@@ -8,10 +8,11 @@ export function budgetLabel(
   target: BudgetTarget,
   accounts: Pick<Account, "id" | "name">[],
   categories: Pick<Category, "id" | "name" | "i18nKey">[],
-  t: TFunction
+  t: TFunction,
 ): string {
   if (target.scope === "overall") return t("budgets.overall");
-  if (target.scope === "account") return accounts.find((a) => a.id === target.accountId)?.name ?? "";
+  if (target.scope === "account")
+    return accounts.find((a) => a.id === target.accountId)?.name ?? "";
   const category = categories.find((c) => c.id === target.categoryId);
   return category ? categoryLabel(category) : "";
 }
