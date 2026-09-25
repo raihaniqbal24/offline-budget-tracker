@@ -55,7 +55,7 @@ export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; 
         paddingHorizontal: 14,
         paddingVertical: 12,
         backgroundColor: theme.background,
-        borderRadius: 24,
+        borderRadius: 0,
       }}
     >
       <TextWidget
