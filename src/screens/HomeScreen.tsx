@@ -17,7 +17,8 @@ import { getPeriodRange, monthKey, today } from "../lib/dates";
 import { formatMonthYear } from "../lib/dateLabels";
 import { formatRupiah } from "../lib/money";
 import { activeAccounts, useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
@@ -28,6 +29,8 @@ import Fab from "../components/Fab";
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -299,6 +302,8 @@ function Stat({
   value: string;
   color: string;
 }) {
+  const { typography } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.stat}>
       <Text style={typography.caption}>{label}</Text>
@@ -313,26 +318,26 @@ function Stat({
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   centered: { justifyContent: "center" },
   content: { padding: spacing.md, paddingBottom: 96, gap: spacing.md },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.xs,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  negative: { color: colors.expense },
+  negative: { color: c.expense },
   pendingCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: c.primarySoft,
   },
   flex: { flex: 1 },
   goalsRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
@@ -346,9 +351,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   accountNameRow: {
     flexDirection: "row",
@@ -361,17 +366,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  link: { color: colors.primary, fontWeight: "600" },
+  link: { color: c.primary, fontWeight: "600" },
   inlineAction: { flexDirection: "row", alignItems: "center", gap: 4 },
   emptyRecent: { textAlign: "center", paddingVertical: spacing.lg },
   list: {
     borderRadius: radius.md,
     overflow: "hidden",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   divider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
-});
+}));

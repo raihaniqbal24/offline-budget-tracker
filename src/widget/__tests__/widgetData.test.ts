@@ -15,7 +15,11 @@ import { buildSummary } from "../update";
 import { widgetView } from "../summary";
 
 const TODAY = "2026-09-21";
-const opts = { masked: false, language: "en" as const };
+const opts = {
+  masked: false,
+  language: "en" as const,
+  theme: "light" as const,
+};
 
 describeDb("widget figures match the app (FR-14.1, FR-14.2)", () => {
   let db: SQLiteDatabase;
@@ -149,6 +153,7 @@ describeDb("widget figures match the app (FR-14.1, FR-14.2)", () => {
     const summary = await buildSummary(db, TODAY, {
       masked: true,
       language: "id",
+      theme: "dark",
     });
     expect(widgetView(summary, TODAY)).toMatchObject({
       balanceText: "••••••",

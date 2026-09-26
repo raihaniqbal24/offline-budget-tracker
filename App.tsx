@@ -5,9 +5,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { bootstrap, resetLocalDatabaseForDevelopment } from "./src/bootstrap";
 import AppNavigator from "./src/navigation";
 import LockGate from "./src/components/LockGate";
+import { ThemeProvider } from "./src/theme/ThemeProvider";
+import ThemedChrome from "./src/components/ThemedChrome";
 import "./src/widget/register";
 import Button from "./src/components/Button";
-import { colors, spacing, typography } from "./src/theme";
+import { LIGHT as colors, makeTypography, spacing } from "./src/theme";
+
+/** The loading and error screens draw before the theme provider mounts. */
+const typography = makeTypography(colors);
 
 type StartupState =
   | { status: "loading" }
@@ -86,9 +91,12 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <LockGate>
-        <AppNavigator />
-      </LockGate>
+      <ThemeProvider>
+        <ThemedChrome />
+        <LockGate>
+          <AppNavigator />
+        </LockGate>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

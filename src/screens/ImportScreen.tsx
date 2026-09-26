@@ -22,7 +22,8 @@ import { toISODate, today } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
 import { useLedgerStore } from "../store/ledgerStore";
 import { useSettingsStore } from "../store/settingsStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
 import Segmented from "../components/Segmented";
@@ -41,6 +42,8 @@ const ERROR_KEYS: Record<string, string> = {
  * until the user confirms, and the import runs as one transaction.
  */
 export default function ImportScreen({ navigation }: Props) {
+  const { typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const [file, setFile] = useState<{ name: string; backup: BackupFile } | null>(
@@ -220,18 +223,18 @@ export default function ImportScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   card: {
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  errorCard: { borderColor: colors.expense },
-  errorText: { color: colors.expense },
-  doneCard: { borderColor: colors.primary, gap: spacing.sm },
-});
+  errorCard: { borderColor: c.expense },
+  errorText: { color: c.expense },
+  doneCard: { borderColor: c.primary, gap: spacing.sm },
+}));

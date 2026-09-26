@@ -19,7 +19,8 @@ import {
   defaultAccountId,
   useLedgerStore,
 } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
@@ -42,6 +43,8 @@ const ERROR_KEYS: Record<string, string> = {
  * and it is never counted as spending.
  */
 export default function GoalMovementScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const { goalId, direction } = route.params;
@@ -236,8 +239,8 @@ export default function GoalMovementScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   label: { marginTop: spacing.md },
@@ -247,9 +250,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   previewRow: {
     flexDirection: "row",
@@ -261,15 +264,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
   footer: {
     padding: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-});
+}));

@@ -17,7 +17,8 @@ import { useAppLanguage } from "../i18n/useAppLanguage";
 import { today } from "../lib/dates";
 import { formatDayHeader } from "../lib/dateLabels";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import EmptyState from "../components/EmptyState";
 import EntryRow from "../components/EntryRow";
@@ -36,6 +37,8 @@ interface Section {
 
 /** All entries, newest first, grouped by day and loaded 100 at a time. */
 export default function EntriesScreen() {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const navigation = useNavigation<Nav>();
@@ -142,15 +145,16 @@ export default function EntriesScreen() {
 }
 
 function Separator() {
+  const styles = useStyles();
   return <View style={styles.separator} />;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   headerButton: { marginRight: spacing.md },
   loader: { marginTop: spacing.xl },
   header: {
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
@@ -158,9 +162,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
+    backgroundColor: c.border,
     marginLeft: 72,
   },
   listContent: { paddingBottom: 96 },
   emptyContainer: { flexGrow: 1, justifyContent: "center" },
-});
+}));

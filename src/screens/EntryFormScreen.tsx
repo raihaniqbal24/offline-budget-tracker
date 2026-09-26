@@ -20,7 +20,8 @@ import {
   defaultAccountId,
   useLedgerStore,
 } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
@@ -38,6 +39,8 @@ type FormType = "expense" | "income";
  * is focused on open, and account and date are pre-filled (FR-2.8).
  */
 export default function EntryFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const entryId = route.params?.entryId;
@@ -55,7 +58,7 @@ export default function EntryFormScreen({ route, navigation }: Props) {
   const [categoryId, setCategoryId] = useState<ID | null>(null);
   const [accountId, setAccountId] = useState<ID | null>(() =>
     defaultAccountId(accounts, lastUsedAccountId),
-);
+  );
   const [occurredOn, setOccurredOn] = useState(todayDate);
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -98,8 +101,8 @@ export default function EntryFormScreen({ route, navigation }: Props) {
       categories.filter(
         (c) =>
           c.type === type &&
-        c.builtinKey === null &&
-        (!c.archived || c.id === categoryId),
+          c.builtinKey === null &&
+          (!c.archived || c.id === categoryId),
       ),
     [categories, type, categoryId],
   );
@@ -262,54 +265,30 @@ export default function EntryFormScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  loader: {
-    marginTop: spacing.xl,
-  },
-  content: {
-    padding: spacing.md,
-    gap: spacing.sm,
-    paddingBottom: spacing.xl,
-  },
-  typeRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  label: {
-    marginTop: spacing.md,
-  },
-  wrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
+  loader: { marginTop: spacing.xl },
+  content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
+  typeRow: { flexDirection: "row", gap: spacing.sm, marginBottom: spacing.sm },
+  label: { marginTop: spacing.md },
+  wrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   textInput: {
     minHeight: 52,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
-  delete: {
-    marginTop: spacing.xl,
-  },
+  delete: { marginTop: spacing.xl },
   footer: {
     padding: spacing.md,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-  error: {
-    fontSize: 13,
-    color: colors.expense,
-  },
-});
+  error: { fontSize: 13, color: c.expense },
+}));

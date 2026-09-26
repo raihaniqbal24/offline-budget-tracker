@@ -13,6 +13,8 @@ export const SUMMARY_VERSION = 1;
 export interface WidgetSummary {
   version: number;
   language: AppLanguage;
+  /** FR-15.6: the theme the app resolved, light or dark. */
+  theme: "light" | "dark";
   /** FR-14.4: the app lock is on, so amounts are replaced with dots. */
   masked: boolean;
   /** The month the spending figure belongs to. */
@@ -138,6 +140,7 @@ export function emptySummary(
   return {
     version: SUMMARY_VERSION,
     language,
+    theme: "light",
     masked: false,
     month: monthKey(todayDate),
     updatedOn: todayDate,
@@ -161,6 +164,7 @@ export function parseSummary(raw: unknown): WidgetSummary | null {
   return {
     version: SUMMARY_VERSION,
     language: s.language === "id" ? "id" : "en",
+    theme: s.theme === "dark" ? "dark" : "light",
     masked: s.masked === true,
     month: s.month,
     updatedOn: s.updatedOn,

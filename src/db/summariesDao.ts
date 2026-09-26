@@ -30,7 +30,7 @@ export async function getCategoryBreakdown(
   db: SQLiteDatabase,
   range: DateRange,
   today: ISODate,
-  accountId: ID | null = null
+  accountId: ID | null = null,
 ): Promise<CategorySlice[]> {
   const { start, end } = clip(range, today);
   const rows = await db.getAllAsync<{
@@ -53,7 +53,7 @@ export async function getCategoryBreakdown(
     start,
     end,
     accountId,
-    accountId
+    accountId,
   );
   return rows.map((r) => ({
     categoryId: r.category_id,
@@ -75,7 +75,7 @@ export async function getSpendingTrend(
   range: DateRange,
   today: ISODate,
   bucket: "day" | "month",
-  accountId: ID | null = null
+  accountId: ID | null = null,
 ): Promise<Map<string, number>> {
   const { start, end } = clip(range, today);
   const key = bucket === "day" ? "occurred_on" : "substr(occurred_on, 1, 7)";
@@ -89,7 +89,7 @@ export async function getSpendingTrend(
     start,
     end,
     accountId,
-    accountId
+    accountId,
   );
   return new Map(rows.map((r) => [r.bucket, r.amount]));
 }
@@ -99,7 +99,7 @@ export async function hasActivity(
   db: SQLiteDatabase,
   range: DateRange,
   today: ISODate,
-  accountId: ID | null = null
+  accountId: ID | null = null,
 ): Promise<boolean> {
   const { start, end } = clip(range, today);
   const row = await db.getFirstAsync<{ found: number }>(
@@ -111,7 +111,7 @@ export async function hasActivity(
     start,
     end,
     accountId,
-    accountId
+    accountId,
   );
   return (row?.found ?? 0) === 1;
 }

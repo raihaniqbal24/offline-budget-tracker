@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { formatRupiah } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { budgetColor, colors, radius, spacing } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useBudgetColor, useTheme } from "../theme/ThemeProvider";
 import { budgetLabel } from "./budgetLabel";
 
 const SHOW_MS = 6_000;
@@ -18,6 +19,9 @@ const SHOW_MS = 6_000;
  * undo bar; tap to dismiss, or it goes after a few seconds.
  */
 export default function AlertToast() {
+  const budgetColor = useBudgetColor();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const insets = useSafeAreaInsets();
@@ -46,7 +50,10 @@ export default function AlertToast() {
       spent: formatRupiah(budget.spent, lang),
       limit: formatRupiah(budget.limit, lang),
     };
-    message = budget.level === 100 ? t("budgets.alertReached", values) : t("budgets.alertLevel", values);
+    message =
+      budget.level === 100
+        ? t("budgets.alertReached", values)
+        : t("budgets.alertLevel", values);
     accent = budgetColor(budget.percent);
     icon = budget.level === 100 ? "alert-octagon" : "alert";
   } else {
@@ -63,7 +70,10 @@ export default function AlertToast() {
   return (
     <Pressable
       onPress={dismiss}
-      style={[styles.toast, { top: insets.top + spacing.sm, borderLeftColor: accent }]}
+      style={[
+        styles.toast,
+        { top: insets.top + spacing.sm, borderLeftColor: accent },
+      ]}
       accessibilityRole="alert"
       accessibilityLiveRegion="assertive"
     >
@@ -76,7 +86,7 @@ export default function AlertToast() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   toast: {
     position: "absolute",
     left: spacing.md,
@@ -87,9 +97,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     borderLeftWidth: 5,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     elevation: 8,
   },
   body: { flex: 1 },
-  text: { fontSize: 15, color: colors.text },
-});
+  text: { fontSize: 15, color: c.text },
+}));

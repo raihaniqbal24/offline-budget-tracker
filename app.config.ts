@@ -1,6 +1,14 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 /**
+ * Build settings on top of app.json.
+ *
+ * Release builds (APP_VARIANT=release, used in phase 6 for the shared APK)
+ * also block the internet permission (NFR-3). Development builds keep it,
+ * because they load the app from your computer over the network.
+ * Expo Go ignores this file; it only matters for real builds.
+ */
+/**
  * Which build this is. The release profile in eas.json sets "release"; the
  * development profile sets "development", which is also the default when you
  * run Metro locally.
@@ -19,9 +27,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: isRelease ? "Finance Tracker" : "Finance Tracker (dev)",
   // The slug ties the project to its EAS build history: leave it alone.
   slug: config.slug ?? "budget-tracker",
+  // FR-15.2: without this, Android never tells the app the phone is in dark mode.
+  userInterfaceStyle: "automatic",
   android: {
     ...config.android,
-    // Permanent: changing it after anyone installs makes it a different app.
+    // Permanent for the release app: changing it after anyone installs makes
+    // it a different app. The development build uses its own id.
     package: isRelease
       ? "com.raihaniqbal24.financetracker"
       : "com.raihaniqbal24.financetracker.dev",

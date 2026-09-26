@@ -1,7 +1,8 @@
 import type { ComponentProps } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import Button from "./Button";
 
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
@@ -21,6 +22,8 @@ export default function EmptyState({
   actionLabel,
   onAction,
 }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.container}>
       <MaterialCommunityIcons name={icon} size={44} color={colors.textMuted} />
@@ -35,17 +38,8 @@ export default function EmptyState({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  center: {
-    textAlign: "center",
-  },
-  action: {
-    marginTop: spacing.sm,
-    alignSelf: "stretch",
-  },
-});
+const useStyles = makeStyles((c) => ({
+  container: { alignItems: "center", padding: spacing.lg, gap: spacing.sm },
+  center: { textAlign: "center" },
+  action: { marginTop: spacing.sm, alignSelf: "stretch" },
+}));

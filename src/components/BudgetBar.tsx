@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { formatRupiah, type AppLanguage } from "../lib/money";
-import { budgetColor, colors, spacing, typography } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useBudgetColor, useTheme } from "../theme/ThemeProvider";
 
 interface Props {
   label: string;
@@ -21,8 +22,10 @@ export default function BudgetBar({
   lang,
   onPress,
 }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
-  const color = budgetColor(percent);
+  const color = useBudgetColor()(percent);
   const remaining = limit - spent;
 
   const spoken = `${label}, ${percent}%, ${t("budgets.leftOf", {
@@ -94,7 +97,7 @@ export default function BudgetBar({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrapper: { gap: spacing.xs, paddingVertical: spacing.xs },
   pressed: { opacity: 0.7 },
   header: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
@@ -102,8 +105,8 @@ const styles = StyleSheet.create({
   track: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     overflow: "hidden",
   },
   fill: { height: 8, borderRadius: 4 },
-});
+}));

@@ -1,14 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { getDb } from "../db/client";
 import { getTransfer, transferEffect } from "../db/transfersDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { today } from "../lib/dates";
-import { formatNumber, formatSignedRupiah, isValidEntryAmount, parseAmount } from "../lib/money";
-import { activeAccounts, defaultAccountId, useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import {
+  formatNumber,
+  formatSignedRupiah,
+  isValidEntryAmount,
+  parseAmount,
+} from "../lib/money";
+import {
+  activeAccounts,
+  defaultAccountId,
+  useLedgerStore,
+} from "../store/ledgerStore";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { FeePaidBy, ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
@@ -28,6 +45,8 @@ const ERROR_KEYS: Record<string, string> = {
 
 /** Record or edit a transfer between two accounts, with an optional fee (FR-5.1 to FR-5.4). */
 export default function TransferFormScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const transferId = route.params?.transferId;
@@ -40,7 +59,9 @@ export default function TransferFormScreen({ route, navigation }: Props) {
   const todayDate = today();
   const [loaded, setLoaded] = useState(transferId === undefined);
   const [fromId, setFromId] = useState<ID | null>(
-    () => route.params?.fromAccountId ?? defaultAccountId(accounts, lastUsedAccountId)
+    () =>
+      route.params?.fromAccountId ??
+      defaultAccountId(accounts, lastUsedAccountId),
   );
   const [toId, setToId] = useState<ID | null>(null);
   const [amountText, setAmountText] = useState("");
@@ -79,8 +100,9 @@ export default function TransferFormScreen({ route, navigation }: Props) {
 
   // Archived accounts stay selectable only if this transfer already uses them.
   const options = useMemo(
-    () => accounts.filter((a) => !a.archived || a.id === fromId || a.id === toId),
-    [accounts, fromId, toId]
+    () =>
+      accounts.filter((a) => !a.archived || a.id === fromId || a.id === toId),
+    [accounts, fromId, toId],
   );
   const toOptions = options.filter((a) => a.id !== fromId);
 
@@ -99,22 +121,36 @@ export default function TransferFormScreen({ route, navigation }: Props) {
   };
 
   const save = async () => {
-    if (fromId === null || toId === null) return setError(t("transfers.errors.chooseAccounts"));
+    if (fromId === null || toId === null)
+      return setError(t("transfers.errors.chooseAccounts"));
     if (amount === null) return setError(t("amount.invalid"));
-    if (!isValidEntryAmount(amount)) return setError(t("amount.mustBePositive"));
+    if (!isValidEntryAmount(amount))
+      return setError(t("amount.mustBePositive"));
     if (fee === null) return setError(t("transfers.errors.invalidFee"));
 
     setError(null);
     setSaving(true);
     try {
       await saveTransfer(
-        { fromAccountId: fromId, toAccountId: toId, amount, fee, feePaidBy, occurredOn, note },
-        transferId
+        {
+          fromAccountId: fromId,
+          toAccountId: toId,
+          amount,
+          fee,
+          feePaidBy,
+          occurredOn,
+          note,
+        },
+        transferId,
       );
       navigation.goBack();
     } catch (e) {
       const code = (e as Error).message;
-      setError(ERROR_KEYS[code] ? t(ERROR_KEYS[code]) : t("errors.saveFailed", { message: code }));
+      setError(
+        ERROR_KEYS[code]
+          ? t(ERROR_KEYS[code])
+          : t("errors.saveFailed", { message: code }),
+      );
       setSaving(false);
     }
   };
@@ -125,61 +161,123 @@ export default function TransferFormScreen({ route, navigation }: Props) {
     navigation.goBack();
   };
 
-  if (!loaded) return <ActivityIndicator style={styles.loader} color={colors.primary} />;
+  if (!loaded)
+    return <ActivityIndicator style={styles.loader} color={colors.primary} />;
 
   if (activeAccounts(accounts).length < 2 && transferId === undefined) {
     return (
       <View style={[styles.screen, styles.content]}>
         <Text style={typography.body}>{t("transfers.needTwoAccounts")}</Text>
-        <Button label={t("accounts.add")} onPress={() => navigation.replace("AccountForm")} />
+        <Button
+          label={t("accounts.add")}
+          onPress={() => navigation.replace("AccountForm")}
+        />
       </View>
     );
   }
 
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={typography.label}>{t("transfers.from")}</Text>
         <View style={styles.wrap}>
           {options.map((a) => (
-            <Chip key={a.id} label={a.name} icon={ACCOUNT_TYPE_ICONS[a.type]} selected={fromId === a.id} onPress={() => chooseFrom(a.id)} />
+            <Chip
+              key={a.id}
+              label={a.name}
+              icon={ACCOUNT_TYPE_ICONS[a.type]}
+              selected={fromId === a.id}
+              onPress={() => chooseFrom(a.id)}
+            />
           ))}
         </View>
 
-        <Text style={[typography.label, styles.label]}>{t("transfers.to")}</Text>
+        <Text style={[typography.label, styles.label]}>
+          {t("transfers.to")}
+        </Text>
         <View style={styles.wrap}>
           {toOptions.map((a) => (
-            <Chip key={a.id} label={a.name} icon={ACCOUNT_TYPE_ICONS[a.type]} selected={toId === a.id} onPress={() => setToId(a.id)} />
+            <Chip
+              key={a.id}
+              label={a.name}
+              icon={ACCOUNT_TYPE_ICONS[a.type]}
+              selected={toId === a.id}
+              onPress={() => setToId(a.id)}
+            />
           ))}
         </View>
 
-        <Text style={[typography.label, styles.label]}>{t("entryForm.amount")}</Text>
-        <AmountInput value={amountText} onChangeText={setAmountText} lang={lang} autoFocus={transferId === undefined} large />
+        <Text style={[typography.label, styles.label]}>
+          {t("entryForm.amount")}
+        </Text>
+        <AmountInput
+          value={amountText}
+          onChangeText={setAmountText}
+          lang={lang}
+          autoFocus={transferId === undefined}
+          large
+        />
 
-        <Text style={[typography.label, styles.label]}>{t("transfers.fee")}</Text>
+        <Text style={[typography.label, styles.label]}>
+          {t("transfers.fee")}
+        </Text>
         <AmountInput value={feeText} onChangeText={setFeeText} lang={lang} />
         {fee !== null && fee > 0 ? (
           <View style={styles.wrap}>
-            <Chip label={t("transfers.senderPays")} selected={feePaidBy === "sender"} onPress={() => setFeePaidBy("sender")} />
-            <Chip label={t("transfers.recipientPays")} selected={feePaidBy === "recipient"} onPress={() => setFeePaidBy("recipient")} />
+            <Chip
+              label={t("transfers.senderPays")}
+              selected={feePaidBy === "sender"}
+              onPress={() => setFeePaidBy("sender")}
+            />
+            <Chip
+              label={t("transfers.recipientPays")}
+              selected={feePaidBy === "recipient"}
+              onPress={() => setFeePaidBy("recipient")}
+            />
           </View>
         ) : null}
 
         {preview ? (
           <View style={styles.preview}>
-            <PreviewLine name={fromName!} delta={preview.fromDelta} lang={lang} />
+            <PreviewLine
+              name={fromName!}
+              delta={preview.fromDelta}
+              lang={lang}
+            />
             <PreviewLine name={toName!} delta={preview.toDelta} lang={lang} />
           </View>
         ) : null}
 
-        <Text style={[typography.label, styles.label]}>{t("entryForm.date")}</Text>
-        <DateField value={occurredOn} onChange={setOccurredOn} lang={lang} todayDate={todayDate} />
+        <Text style={[typography.label, styles.label]}>
+          {t("entryForm.date")}
+        </Text>
+        <DateField
+          value={occurredOn}
+          onChange={setOccurredOn}
+          lang={lang}
+          todayDate={todayDate}
+        />
 
-        <Text style={[typography.label, styles.label]}>{t("entryForm.note")}</Text>
-        <TextInput value={note} onChangeText={setNote} style={styles.textInput} maxLength={200} />
+        <Text style={[typography.label, styles.label]}>
+          {t("entryForm.note")}
+        </Text>
+        <TextInput
+          value={note}
+          onChangeText={setNote}
+          style={styles.textInput}
+          maxLength={200}
+        />
 
         {transferId !== undefined ? (
-          <Button label={t("transfers.delete")} variant="danger" onPress={remove} style={styles.delete} />
+          <Button
+            label={t("transfers.delete")}
+            variant="danger"
+            onPress={remove}
+            style={styles.delete}
+          />
         ) : null}
       </ScrollView>
 
@@ -191,21 +289,36 @@ export default function TransferFormScreen({ route, navigation }: Props) {
   );
 }
 
-function PreviewLine({ name, delta, lang }: { name: string; delta: number; lang: "en" | "id" }) {
+function PreviewLine({
+  name,
+  delta,
+  lang,
+}: {
+  name: string;
+  delta: number;
+  lang: "en" | "id";
+}) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.previewLine}>
       <Text style={typography.body} numberOfLines={1}>
         {name}
       </Text>
-      <Text style={[typography.amount, { color: delta < 0 ? colors.expense : colors.income }]}>
+      <Text
+        style={[
+          typography.amount,
+          { color: delta < 0 ? colors.expense : colors.income },
+        ]}
+      >
         {formatSignedRupiah(delta, lang)}
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.xl },
   label: { marginTop: spacing.md },
@@ -215,28 +328,32 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  previewLine: { flexDirection: "row", justifyContent: "space-between", gap: spacing.md },
+  previewLine: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
   textInput: {
     minHeight: 52,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     fontSize: 16,
-    color: colors.text,
+    color: c.text,
   },
   delete: { marginTop: spacing.xl },
   footer: {
     padding: spacing.md,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopColor: c.border,
+    backgroundColor: c.surface,
   },
-  error: { fontSize: 13, color: colors.expense },
-});
+  error: { fontSize: 13, color: c.expense },
+}));

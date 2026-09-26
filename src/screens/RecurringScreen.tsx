@@ -18,7 +18,8 @@ import { today } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
 import { formatRupiah } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RecurringRule } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
@@ -28,6 +29,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "Recurring">;
 
 /** Recurring rules (FR-11.1). Occurrences appear as pending entries to confirm. */
 export default function RecurringScreen({ navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const accounts = useLedgerStore((s) => s.accounts);
@@ -176,8 +179,8 @@ export default function RecurringScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   pendingCard: {
@@ -186,13 +189,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: c.primarySoft,
   },
   group: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   row: {
@@ -201,11 +204,11 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
-  pressed: { backgroundColor: colors.primarySoft },
+  pressed: { backgroundColor: c.primarySoft },
   rowMiddle: { flex: 1, gap: 2 },
   flex: { flex: 1 },
   toggle: { alignSelf: "center", padding: spacing.sm },
-  link: { color: colors.primary, fontWeight: "600" },
-});
+  link: { color: c.primary, fontWeight: "600" },
+}));

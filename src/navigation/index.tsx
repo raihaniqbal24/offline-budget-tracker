@@ -1,6 +1,7 @@
 import { useEffect, type ComponentProps } from "react";
 import { AppState, StyleSheet, View } from "react-native";
 import {
+  DarkTheme,
   DefaultTheme,
   NavigationContainer,
   type Theme,
@@ -9,7 +10,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { colors } from "../theme";
+import { useTheme } from "../theme/ThemeProvider";
 import { useLedgerStore } from "../store/ledgerStore";
 import type { RootStackParamList, TabParamList } from "./types";
 import HomeScreen from "../screens/HomeScreen";
@@ -55,20 +56,26 @@ const TAB_ICONS: Record<keyof TabParamList, IconName> = {
   More: "dots-horizontal-circle-outline",
 };
 
-const navTheme: Theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: colors.primary,
-    background: colors.background,
-    card: colors.surface,
-    text: colors.text,
-    border: colors.border,
-  },
-};
+/** FR-15.4: headers, screen backgrounds and the tab bar follow the theme. */
+function useNavTheme(): Theme {
+  const { name, colors } = useTheme();
+  const base = name === "dark" ? DarkTheme : DefaultTheme;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+    },
+  };
+}
 
 function Tabs() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -128,6 +135,7 @@ function useRefreshOnForeground() {
 
 export default function AppNavigator() {
   const { t } = useTranslation();
+  const navTheme = useNavTheme();
   useRefreshOnForeground();
 
   return (

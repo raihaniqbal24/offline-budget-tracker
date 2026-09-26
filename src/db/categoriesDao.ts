@@ -5,7 +5,7 @@ import { mapCategory, SQL_NOW, type CategoryRow } from "./rows";
 /** All categories, including archived and built-in ones; screens filter. */
 export async function listCategories(db: SQLiteDatabase): Promise<Category[]> {
   const rows = await db.getAllAsync<CategoryRow>(
-    "SELECT * FROM categories ORDER BY type, sort_order, id"
+    "SELECT * FROM categories ORDER BY type, sort_order, id",
   );
   return rows.map(mapCategory);
 }
@@ -18,11 +18,16 @@ export interface CategoryInput {
 }
 
 function isUniqueViolation(error: unknown): boolean {
-  return /UNIQUE constraint failed/i.test(String((error as Error)?.message ?? error));
+  return /UNIQUE constraint failed/i.test(
+    String((error as Error)?.message ?? error),
+  );
 }
 
 /** FR-6.1: a new category goes to the end of its type's list. */
-export async function createCategory(db: SQLiteDatabase, input: CategoryInput): Promise<ID> {
+export async function createCategory(
+  db: SQLiteDatabase,
+  input: CategoryInput,
+): Promise<ID> {
   const name = input.name.trim();
   if (name.length === 0) throw new Error("name_required");
   try {
@@ -33,7 +38,7 @@ export async function createCategory(db: SQLiteDatabase, input: CategoryInput): 
       input.type,
       input.icon,
       input.color,
-      input.type
+      input.type,
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -52,7 +57,7 @@ export async function updateCategory(
   db: SQLiteDatabase,
   id: ID,
   input: Omit<CategoryInput, "type">,
-  renamed: boolean
+  renamed: boolean,
 ): Promise<void> {
   const name = input.name.trim();
   if (name.length === 0) throw new Error("name_required");
@@ -67,7 +72,7 @@ export async function updateCategory(
       input.icon,
       input.color,
       renamed ? 1 : 0,
-      id
+      id,
     );
   } catch (error) {
     if (isUniqueViolation(error)) throw new Error("duplicate_name");
@@ -76,11 +81,15 @@ export async function updateCategory(
 }
 
 /** FR-6.3: categories are archived, never deleted. Built-ins refuse (FR-6.4). */
-export async function setCategoryArchived(db: SQLiteDatabase, id: ID, archived: boolean): Promise<void> {
+export async function setCategoryArchived(
+  db: SQLiteDatabase,
+  id: ID,
+  archived: boolean,
+): Promise<void> {
   await db.runAsync(
     `UPDATE categories SET archived = ?, updated_at = ${SQL_NOW} WHERE id = ?`,
     archived ? 1 : 0,
-    id
+    id,
   );
 }
 
@@ -88,15 +97,19 @@ export async function setCategoryArchived(db: SQLiteDatabase, id: ID, archived: 
  * FR-6.2: move a category one place up or down within its type.
  * Renumbers the whole list in one transaction so ties can't build up.
  */
-export async function moveCategory(db: SQLiteDatabase, id: ID, direction: -1 | 1): Promise<void> {
+export async function moveCategory(
+  db: SQLiteDatabase,
+  id: ID,
+  direction: -1 | 1,
+): Promise<void> {
   const target = await db.getFirstAsync<{ type: CategoryType }>(
     "SELECT type FROM categories WHERE id = ? AND builtin_key IS NULL",
-    id
+    id,
   );
   if (!target) return;
   const rows = await db.getAllAsync<{ id: ID }>(
     "SELECT id FROM categories WHERE type = ? AND builtin_key IS NULL ORDER BY sort_order, id",
-    target.type
+    target.type,
   );
   const ids = rows.map((r) => r.id);
   const from = ids.indexOf(id);
@@ -106,7 +119,11 @@ export async function moveCategory(db: SQLiteDatabase, id: ID, direction: -1 | 1
 
   await db.withTransactionAsync(async () => {
     for (let i = 0; i < ids.length; i++) {
-      await db.runAsync("UPDATE categories SET sort_order = ? WHERE id = ?", i + 1, ids[i]);
+      await db.runAsync(
+        "UPDATE categories SET sort_order = ? WHERE id = ?",
+        i + 1,
+        ids[i],
+      );
     }
   });
 }

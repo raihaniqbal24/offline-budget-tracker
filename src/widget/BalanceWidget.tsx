@@ -12,14 +12,27 @@ import { widgetView, type WidgetSummary } from "./summary";
  * line is capped to one line and truncated, which stops a long amount from
  * pushing the layout past the right edge.
  */
-const LIGHT = {
-  background: "#FFFFFF",
-  text: "#12241F",
-  muted: "#6B7B76",
-  primary: "#0E6B57",
-  track: "#E6EFEC",
-  warn: "#D9822B",
-  over: "#B3261E",
+/** FR-15.6: the widget follows the app's theme choice. Literal values,
+ * because this renders outside React Native's styling. */
+const PALETTES = {
+  light: {
+    background: "#FFFFFF",
+    text: "#12241F",
+    muted: "#6B7B76",
+    primary: "#0E6B57",
+    track: "#E6EFEC",
+    warn: "#D9822B",
+    over: "#B3261E",
+  },
+  dark: {
+    background: "#19211E",
+    text: "#EAF1ED",
+    muted: "#A4B3AD",
+    primary: "#4FC3A1",
+    track: "#243029",
+    warn: "#F2C14E",
+    over: "#FF8A80",
+  },
 } as const;
 
 const SEGMENTS = 10;
@@ -29,12 +42,21 @@ const SEGMENT_GAP = 3;
 /** How many of the ten blocks are filled: anything above zero lights at least one. */
 export function filledSegments(percent: number): number {
   if (percent <= 0) return 0;
-  return Math.min(SEGMENTS, Math.max(1, Math.round((percent / 100) * SEGMENTS)));
+  return Math.min(
+    SEGMENTS,
+    Math.max(1, Math.round((percent / 100) * SEGMENTS)),
+  );
 }
 
-export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; todayDate: ISODate }) {
+export function BalanceWidget({
+  summary,
+  todayDate,
+}: {
+  summary: WidgetSummary;
+  todayDate: ISODate;
+}) {
   const view = widgetView(summary, todayDate);
-  const theme = LIGHT;
+  const theme = PALETTES[summary.theme === "dark" ? "dark" : "light"];
   const filled = view.percent === null ? 0 : filledSegments(view.percent);
   const fillColour =
     view.percent !== null && view.percent >= 100
@@ -68,7 +90,12 @@ export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; 
         text={view.balanceText}
         maxLines={1}
         truncate="END"
-        style={{ fontSize: 22, fontWeight: "700", color: theme.text, width: "match_parent" }}
+        style={{
+          fontSize: 22,
+          fontWeight: "700",
+          color: theme.text,
+          width: "match_parent",
+        }}
       />
 
       <FlexWidget style={{ height: 10, width: "match_parent" }} />
@@ -93,7 +120,12 @@ export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; 
 
       {view.percent !== null ? (
         <FlexWidget
-          style={{ flexDirection: "row", alignItems: "center", width: "wrap_content", marginTop: 7 }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "wrap_content",
+            marginTop: 7,
+          }}
         >
           {Array.from({ length: SEGMENTS }, (_, i) => (
             <FlexWidget
@@ -114,7 +146,12 @@ export function BalanceWidget({ summary, todayDate }: { summary: WidgetSummary; 
         text={view.asOfText}
         maxLines={1}
         truncate="END"
-        style={{ fontSize: 10, color: theme.muted, marginTop: 8, width: "match_parent" }}
+        style={{
+          fontSize: 10,
+          color: theme.muted,
+          marginTop: 8,
+          width: "match_parent",
+        }}
       />
     </FlexWidget>
   );

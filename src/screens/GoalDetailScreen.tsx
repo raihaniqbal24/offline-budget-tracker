@@ -23,7 +23,8 @@ import { formatDate } from "../lib/dateLabels";
 import { goalProgress } from "../lib/goals";
 import { formatRupiah, formatSignedRupiah } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
 
@@ -31,6 +32,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "GoalDetail">;
 
 /** One goal: progress (FR-12.6), the buttons that move money (FR-12.3, FR-12.4) and its history. */
 export default function GoalDetailScreen({ route, navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const { goalId } = route.params;
@@ -246,37 +249,37 @@ export default function GoalDetailScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   card: {
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   flex: { flex: 1 },
-  link: { color: colors.primary, fontWeight: "600" },
+  link: { color: c.primary, fontWeight: "600" },
   track: {
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     overflow: "hidden",
     marginTop: spacing.xs,
   },
   fill: { height: 10, borderRadius: 5 },
-  overdue: { color: colors.expense },
+  overdue: { color: c.expense },
   buttonRow: { flexDirection: "row", gap: spacing.sm },
   section: { marginTop: spacing.sm },
   group: {
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   row: {
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: c.border,
   },
   rowMiddle: { flex: 1, gap: 2 },
-});
+}));

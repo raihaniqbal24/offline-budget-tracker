@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { colors, spacing } from "../theme";
+import { spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 /** The round add button; the start of the three-tap quick-add (FR-2.8). */
 export default function Fab({
@@ -10,6 +11,8 @@ export default function Fab({
   onPress: () => void;
   label: string;
 }) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -22,7 +25,7 @@ export default function Fab({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   fab: {
     position: "absolute",
     right: spacing.md,
@@ -30,12 +33,10 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: colors.primary,
+    backgroundColor: c.primary,
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
   },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+  pressed: { opacity: 0.85 },
+}));

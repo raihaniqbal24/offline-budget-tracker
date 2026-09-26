@@ -6,7 +6,8 @@ import {
   parseAmount,
   type AppLanguage,
 } from "../lib/money";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 
 interface Props {
   value: string;
@@ -37,6 +38,8 @@ export default function AmountInput({
   error,
   placeholder,
 }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const parsed = parseAmount(value);
   const hasShorthand = /[a-z]/i.test(value);
@@ -105,7 +108,7 @@ export default function AmountInput({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrapper: { gap: spacing.sm },
   field: {
     flexDirection: "row",
@@ -115,22 +118,22 @@ const styles = StyleSheet.create({
     minHeight: 56,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: c.border,
+    backgroundColor: c.surface,
   },
-  fieldError: { borderColor: colors.expense },
+  fieldError: { borderColor: c.expense },
   sign: {
     width: 36,
     minHeight: 36,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
   },
-  signText: { fontSize: 20, fontWeight: "700", color: colors.income },
-  signNegative: { color: colors.expense },
-  currency: { fontSize: 16, color: colors.textMuted, fontWeight: "600" },
-  currencyLarge: { fontSize: 22, color: colors.textMuted, fontWeight: "600" },
+  signText: { fontSize: 20, fontWeight: "700", color: c.income },
+  signNegative: { color: c.expense },
+  currency: { fontSize: 16, color: c.textMuted, fontWeight: "600" },
+  currencyLarge: { fontSize: 22, color: c.textMuted, fontWeight: "600" },
   input: { flex: 1, paddingVertical: spacing.sm },
   suffixRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   suffix: {
@@ -139,11 +142,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primarySoft,
+    backgroundColor: c.primarySoft,
   },
   suffixPressed: { opacity: 0.7 },
-  suffixText: { fontSize: 15, fontWeight: "600", color: colors.primary },
+  suffixText: { fontSize: 15, fontWeight: "600", color: c.primary },
   previewBox: { flex: 1, alignItems: "flex-end" },
-  preview: { color: colors.primary },
-  error: { fontSize: 13, color: colors.expense },
-});
+  preview: { color: c.primary },
+  error: { fontSize: 13, color: c.expense },
+}));

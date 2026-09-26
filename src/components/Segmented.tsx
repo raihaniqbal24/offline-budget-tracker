@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, radius, spacing } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles } from "../theme/ThemeProvider";
 
 interface Props<T extends string> {
   options: { value: T; label: string }[];
@@ -8,7 +9,12 @@ interface Props<T extends string> {
 }
 
 /** A row of equal-width options with one selected, e.g. Day / Week / Month / Year. */
-export default function Segmented<T extends string>({ options, value, onChange }: Props<T>) {
+export default function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: Props<T>) {
+  const styles = useStyles();
   return (
     <View style={styles.track} accessibilityRole="tablist">
       {options.map((option) => {
@@ -21,7 +27,10 @@ export default function Segmented<T extends string>({ options, value, onChange }
             accessibilityRole="tab"
             accessibilityState={{ selected }}
           >
-            <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
+            <Text
+              style={[styles.label, selected && styles.labelSelected]}
+              numberOfLines={1}
+            >
               {option.label}
             </Text>
           </Pressable>
@@ -31,12 +40,12 @@ export default function Segmented<T extends string>({ options, value, onChange }
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   track: {
     flexDirection: "row",
     padding: 3,
     borderRadius: radius.md,
-    backgroundColor: colors.border,
+    backgroundColor: c.border,
   },
   option: {
     flex: 1,
@@ -46,17 +55,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.xs,
   },
-  selected: {
-    backgroundColor: colors.surface,
-    elevation: 1,
-  },
-  label: {
-    fontSize: 14,
-    color: colors.textMuted,
-    fontWeight: "500",
-  },
-  labelSelected: {
-    color: colors.text,
-    fontWeight: "700",
-  },
-});
+  selected: { backgroundColor: c.surface, elevation: 1 },
+  label: { fontSize: 14, color: c.textMuted, fontWeight: "500" },
+  labelSelected: { color: c.text, fontWeight: "700" },
+}));

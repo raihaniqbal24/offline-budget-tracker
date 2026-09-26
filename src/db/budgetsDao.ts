@@ -1,5 +1,10 @@
 import type { SQLiteDatabase } from "expo-sqlite";
-import { endOfMonth, monthKey, type ISODate, type MonthKey } from "../lib/dates";
+import {
+  endOfMonth,
+  monthKey,
+  type ISODate,
+  type MonthKey,
+} from "../lib/dates";
 import type { BudgetLevel, BudgetScope, ID } from "../types";
 
 /*
@@ -40,7 +45,7 @@ const SAME_TARGET = `b2.scope = b.scope
 export async function getBudgetProgress(
   db: SQLiteDatabase,
   month: MonthKey,
-  today: ISODate
+  today: ISODate,
 ): Promise<BudgetProgress[]> {
   const start = `${month}-01`;
   const monthEnd = endOfMonth(start);
@@ -69,7 +74,7 @@ export async function getBudgetProgress(
       ORDER BY CASE b.scope WHEN 'overall' THEN 0 WHEN 'account' THEN 1 ELSE 2 END, b.id`,
     start,
     end,
-    month
+    month,
   );
 
   return rows.map((r) => ({
@@ -92,32 +97,48 @@ export async function setBudgetLimit(
   db: SQLiteDatabase,
   target: BudgetTarget,
   amount: number | null,
-  month: MonthKey
+  month: MonthKey,
 ): Promise<void> {
-  if (amount !== null && (!Number.isSafeInteger(amount) || amount <= 0)) throw new Error("invalid_amount");
+  if (amount !== null && (!Number.isSafeInteger(amount) || amount <= 0))
+    throw new Error("invalid_amount");
   const { scope, categoryId, accountId } = target;
   const matches = `scope = ? AND IFNULL(category_id, 0) = IFNULL(?, 0) AND IFNULL(account_id, 0) = IFNULL(?, 0)`;
 
   await db.withTransactionAsync(async () => {
     const current = await db.getFirstAsync<{ id: ID }>(
       `SELECT id FROM budgets WHERE ${matches} AND start_month = ?`,
-      scope, categoryId, accountId, month
+      scope,
+      categoryId,
+      accountId,
+      month,
     );
     const earlier = await db.getFirstAsync<{ amount: number | null }>(
       `SELECT amount FROM budgets WHERE ${matches} AND start_month < ? ORDER BY start_month DESC LIMIT 1`,
-      scope, categoryId, accountId, month
+      scope,
+      categoryId,
+      accountId,
+      month,
     );
     const inheritedLimit = earlier?.amount ?? null;
 
     if (amount === inheritedLimit) {
       // Same as what already applies: no row needed for this month.
-      if (current) await db.runAsync("DELETE FROM budgets WHERE id = ?", current.id);
+      if (current)
+        await db.runAsync("DELETE FROM budgets WHERE id = ?", current.id);
     } else if (current) {
-      await db.runAsync("UPDATE budgets SET amount = ? WHERE id = ?", amount, current.id);
+      await db.runAsync(
+        "UPDATE budgets SET amount = ? WHERE id = ?",
+        amount,
+        current.id,
+      );
     } else {
       await db.runAsync(
         `INSERT INTO budgets (scope, category_id, account_id, amount, start_month) VALUES (?, ?, ?, ?, ?)`,
-        scope, categoryId, accountId, amount, month
+        scope,
+        categoryId,
+        accountId,
+        amount,
+        month,
       );
     }
   });
@@ -136,7 +157,10 @@ const LEVELS: BudgetLevel[] = [100, 90, 75];
  * the highest. Limits on archived accounts or categories are skipped.
  * Phase 4 sends phone notifications from the same result.
  */
-export async function checkBudgetAlerts(db: SQLiteDatabase, today: ISODate): Promise<BudgetAlert[]> {
+export async function checkBudgetAlerts(
+  db: SQLiteDatabase,
+  today: ISODate,
+): Promise<BudgetAlert[]> {
   const month = monthKey(today);
   const progress = await getBudgetProgress(db, month, today);
   const alerts: BudgetAlert[] = [];
@@ -149,7 +173,7 @@ export async function checkBudgetAlerts(db: SQLiteDatabase, today: ISODate): Pro
       const table = p.scope === "category" ? "categories" : "accounts";
       const row = await db.getFirstAsync<{ archived: number }>(
         `SELECT archived FROM ${table} WHERE id = ?`,
-        p.scope === "category" ? p.categoryId : p.accountId
+        p.scope === "category" ? p.categoryId : p.accountId,
       );
       if (row?.archived === 1) continue;
     }
@@ -157,7 +181,7 @@ export async function checkBudgetAlerts(db: SQLiteDatabase, today: ISODate): Pro
     const state = await db.getFirstAsync<{ last_level: number }>(
       "SELECT last_level FROM budget_alert_state WHERE budget_id = ? AND month = ?",
       p.budgetId,
-      month
+      month,
     );
     if (state && state.last_level >= level) continue;
 
@@ -165,7 +189,7 @@ export async function checkBudgetAlerts(db: SQLiteDatabase, today: ISODate): Pro
       `INSERT OR REPLACE INTO budget_alert_state (budget_id, month, last_level) VALUES (?, ?, ?)`,
       p.budgetId,
       month,
-      level
+      level,
     );
     alerts.push({ ...p, level });
   }

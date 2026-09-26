@@ -53,7 +53,10 @@ function likePattern(text: string): string {
 }
 
 /** WHERE clauses for entries (alias e) and transfers (alias t); all filters combine (FR-8.2). */
-function buildClauses(f: SearchFilters): { entries: Clause; transfers: Clause } {
+function buildClauses(f: SearchFilters): {
+  entries: Clause;
+  transfers: Clause;
+} {
   const e: string[] = [];
   const ep: (string | number | null)[] = [];
   const t: string[] = [];
@@ -108,7 +111,8 @@ function buildClauses(f: SearchFilters): { entries: Clause; transfers: Clause } 
     tp.push(f.endDate);
   }
 
-  const where = (parts: string[]) => (parts.length > 0 ? parts.join(" AND ") : "1");
+  const where = (parts: string[]) =>
+    parts.length > 0 ? parts.join(" AND ") : "1";
   return {
     entries: { sql: where(e), params: ep },
     transfers: { sql: where(t), params: tp },
@@ -123,7 +127,7 @@ export type SearchRow =
 export async function searchRecords(
   db: SQLiteDatabase,
   filters: SearchFilters,
-  page: { limit: number; offset: number }
+  page: { limit: number; offset: number },
 ): Promise<SearchRow[]> {
   const { entries, transfers } = buildClauses(filters);
   const refs = await db.getAllAsync<{ kind: "entry" | "transfer"; id: ID }>(
@@ -137,11 +141,13 @@ export async function searchRecords(
     ...entries.params,
     ...transfers.params,
     page.limit,
-    page.offset
+    page.offset,
   );
 
   const entryIds = refs.filter((r) => r.kind === "entry").map((r) => r.id);
-  const transferIds = refs.filter((r) => r.kind === "transfer").map((r) => r.id);
+  const transferIds = refs
+    .filter((r) => r.kind === "transfer")
+    .map((r) => r.id);
   const [entryRows, transferRows] = await Promise.all([
     listEntriesByIds(db, entryIds),
     listTransfersByIds(db, transferIds),
@@ -170,7 +176,10 @@ export interface SearchSummary {
 }
 
 /** FR-8.3: count and totals, with spending and income kept separate (decided). */
-export async function summarizeSearch(db: SQLiteDatabase, filters: SearchFilters): Promise<SearchSummary> {
+export async function summarizeSearch(
+  db: SQLiteDatabase,
+  filters: SearchFilters,
+): Promise<SearchSummary> {
   const { entries, transfers } = buildClauses(filters);
   const [e, t] = await Promise.all([
     db.getFirstAsync<{ n: number; spending: number; income: number }>(
@@ -178,11 +187,11 @@ export async function summarizeSearch(db: SQLiteDatabase, filters: SearchFilters
               COALESCE(SUM(CASE WHEN e.type = 'expense' OR (e.type = 'adjustment' AND e.amount < 0) THEN ABS(e.amount) END), 0) AS spending,
               COALESCE(SUM(CASE WHEN e.type = 'income' OR (e.type = 'adjustment' AND e.amount > 0) THEN ABS(e.amount) END), 0) AS income
          FROM entries e WHERE ${entries.sql}`,
-      ...entries.params
+      ...entries.params,
     ),
     db.getFirstAsync<{ n: number; fees: number }>(
       `SELECT COUNT(*) AS n, COALESCE(SUM(t.fee), 0) AS fees FROM transfers t WHERE ${transfers.sql}`,
-      ...transfers.params
+      ...transfers.params,
     ),
   ]);
   const entryCount = e?.n ?? 0;

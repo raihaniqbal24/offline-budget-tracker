@@ -17,7 +17,8 @@ import { today } from "../lib/dates";
 import { goalProgress } from "../lib/goals";
 import { formatRupiah } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
-import { colors, radius, spacing, typography } from "../theme";
+import { radius, spacing } from "../theme";
+import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
@@ -26,6 +27,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "Goals">;
 
 /** Savings goals with their progress (FR-12.1, FR-12.6). */
 export default function GoalsScreen({ navigation }: Props) {
+  const { colors, typography } = useTheme();
+  const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
   const dataVersion = useLedgerStore((s) => s.dataVersion);
@@ -181,31 +184,31 @@ export default function GoalsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  screen: { flex: 1, backgroundColor: c.background },
   loader: { marginTop: spacing.xl },
   content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
   card: {
     padding: spacing.md,
     gap: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  pressed: { backgroundColor: colors.primarySoft },
+  pressed: { backgroundColor: c.primarySoft },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   flex: { flex: 1 },
-  reached: { color: colors.income, fontWeight: "700" },
-  overdue: { color: colors.expense },
+  reached: { color: c.income, fontWeight: "700" },
+  overdue: { color: c.expense },
   track: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
     overflow: "hidden",
   },
   fill: { height: 8, borderRadius: 4 },
   toggle: { alignSelf: "center", padding: spacing.sm },
-  link: { color: colors.primary, fontWeight: "600" },
+  link: { color: c.primary, fontWeight: "600" },
   note: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.md },
-});
+}));
