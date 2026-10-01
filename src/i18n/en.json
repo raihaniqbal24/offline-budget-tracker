@@ -96,6 +96,8 @@
     "spent": "Spent",
     "income": "Income",
     "net": "Net",
+    "showAmounts": "Show",
+    "hideAmounts": "Hide",
     "recent": "Recent entries",
     "seeAll": "See all",
     "noEntries": "No entries yet. Tap + to add your first.",
