@@ -21,6 +21,37 @@ const variant =
   process.env.APP_VARIANT === "release" ? "release" : "development";
 const isRelease = variant === "release";
 
+/**
+ * FR-15.4: the splash screen has a light and a dark version. Android draws it
+ * before any app code runs, so it follows the phone's own dark mode setting:
+ * a Dark or Light choice made inside the app takes effect from the first
+ * screen onward.
+ *
+ * Configured here rather than in app.json, so there is exactly one entry.
+ */
+const SPLASH: [string, Record<string, unknown>] = [
+  "expo-splash-screen",
+  {
+    image: "./assets/splash-icon.png",
+    imageWidth: 220,
+    resizeMode: "contain",
+    backgroundColor: "#F0F9F9",
+    dark: {
+      image: "./assets/splash-icon-dark.png",
+      backgroundColor: "#101613",
+    },
+  },
+];
+
+/** Any splash entry in app.json is replaced by the one above. */
+function withoutSplash(
+  plugins: ExpoConfig["plugins"] = [],
+): NonNullable<ExpoConfig["plugins"]> {
+  return plugins.filter(
+    (p) => (Array.isArray(p) ? p[0] : p) !== "expo-splash-screen",
+  );
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   // The name under the icon and in the app switcher.
@@ -56,7 +87,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
   },
   plugins: [
-    ...(config.plugins ?? []),
+    ...withoutSplash(config.plugins),
+    SPLASH,
     // Decided: Android 13 (API level 33) and later.
     ["expo-build-properties", { android: { minSdkVersion: 33 } }],
     [
