@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { bootstrap, resetLocalDatabaseForDevelopment } from "./src/bootstrap";
@@ -9,10 +15,7 @@ import { ThemeProvider } from "./src/theme/ThemeProvider";
 import ThemedChrome from "./src/components/ThemedChrome";
 import "./src/widget/register";
 import Button from "./src/components/Button";
-import { LIGHT as colors, makeTypography, spacing } from "./src/theme";
-
-/** The loading and error screens draw before the theme provider mounts. */
-const typography = makeTypography(colors);
+import { DARK, LIGHT, makeTypography, spacing } from "./src/theme";
 
 type StartupState =
   | { status: "loading" }
@@ -21,6 +24,9 @@ type StartupState =
 
 export default function App() {
   const [state, setState] = useState<StartupState>({ status: "loading" });
+  // Before the stored theme is read, follow the phone, as the splash did.
+  const colors = useColorScheme() === "dark" ? DARK : LIGHT;
+  const typography = makeTypography(colors);
 
   const start = useCallback(() => {
     setState({ status: "loading" });
@@ -52,7 +58,7 @@ export default function App() {
 
   if (state.status === "loading") {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.primary} />
       </View>
     );
@@ -61,7 +67,7 @@ export default function App() {
   if (state.status === "error") {
     // Translations may not be loaded yet, so this screen shows both languages.
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <Text style={typography.title}>The app couldn't open its data.</Text>
         <Text style={typography.title}>
           Aplikasi tidak dapat membuka datanya.
@@ -108,7 +114,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: spacing.lg,
     gap: spacing.sm,
-    backgroundColor: colors.background,
   },
   detail: { textAlign: "center" },
   devBox: { alignSelf: "stretch", marginTop: spacing.lg, gap: spacing.sm },
