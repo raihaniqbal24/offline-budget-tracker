@@ -96,6 +96,8 @@
     "spent": "Pengeluaran",
     "income": "Pemasukan",
     "net": "Selisih",
+    "showAmounts": "Tampilkan",
+    "hideAmounts": "Sembunyikan",
     "recent": "Transaksi terbaru",
     "seeAll": "Lihat semua",
     "noEntries": "Belum ada transaksi. Ketuk + untuk menambahkan yang pertama.",

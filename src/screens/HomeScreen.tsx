@@ -28,6 +28,8 @@ import Fab from "../components/Fab";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
+const HIDDEN_AMOUNT = "••••••";
+
 export default function HomeScreen() {
   const { colors, typography } = useTheme();
   const styles = useStyles();
@@ -49,6 +51,10 @@ export default function HomeScreen() {
   const [totals, setTotals] = useState<PeriodTotals | null>(null);
   const [recent, setRecent] = useState<EntryWithDetails[]>([]);
   const [budgets, setBudgets] = useState<BudgetProgress[]>([]);
+  // Amounts in the summary card start hidden every time the app opens.
+  const [amountsShown, setAmountsShown] = useState(false);
+  const amount = (value: number) =>
+    amountsShown ? formatRupiah(value, lang) : HIDDEN_AMOUNT;
 
   useEffect(() => {
     let cancelled = false;
@@ -125,9 +131,31 @@ export default function HomeScreen() {
         ) : null}
 
         <View style={styles.card}>
-          <Text style={typography.label}>{t("home.totalInAccounts")}</Text>
-          <Text style={[typography.amountLarge, total < 0 && styles.negative]}>
-            {formatRupiah(total, lang)}
+          <View style={styles.sectionHeader}>
+            <Text style={typography.label}>{t("home.totalInAccounts")}</Text>
+            <Pressable
+              onPress={() => setAmountsShown((shown) => !shown)}
+              hitSlop={8}
+              style={styles.inlineAction}
+              accessibilityRole="button"
+            >
+              <MaterialCommunityIcons
+                name={amountsShown ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color={colors.primary}
+              />
+              <Text style={styles.link}>
+                {amountsShown ? t("home.hideAmounts") : t("home.showAmounts")}
+              </Text>
+            </Pressable>
+          </View>
+          <Text
+            style={[
+              typography.amountLarge,
+              amountsShown && total < 0 && styles.negative,
+            ]}
+          >
+            {amount(total)}
           </Text>
 
           {totalInGoals > 0 ? (
@@ -151,18 +179,22 @@ export default function HomeScreen() {
           <View style={styles.statsRow}>
             <Stat
               label={t("home.spent")}
-              value={formatRupiah(totals?.spending ?? 0, lang)}
+              value={amount(totals?.spending ?? 0)}
               color={colors.expense}
             />
             <Stat
               label={t("home.income")}
-              value={formatRupiah(totals?.income ?? 0, lang)}
+              value={amount(totals?.income ?? 0)}
               color={colors.income}
             />
             <Stat
               label={t("home.net")}
-              value={formatRupiah(totals?.net ?? 0, lang)}
-              color={(totals?.net ?? 0) < 0 ? colors.expense : colors.text}
+              value={amount(totals?.net ?? 0)}
+              color={
+                amountsShown && (totals?.net ?? 0) < 0
+                  ? colors.expense
+                  : colors.text
+              }
             />
           </View>
         </View>
