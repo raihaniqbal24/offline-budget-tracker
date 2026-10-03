@@ -22,6 +22,7 @@ import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PendingConfirm">;
 
@@ -111,7 +112,7 @@ export default function PendingConfirmScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -177,7 +178,7 @@ export default function PendingConfirmScreen({ route, navigation }: Props) {
       <View style={styles.footer}>
         <Button label={t("pending.confirm")} onPress={confirm} loading={busy} />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 

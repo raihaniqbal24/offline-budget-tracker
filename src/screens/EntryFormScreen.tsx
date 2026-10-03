@@ -27,6 +27,7 @@ import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS } from "../components/accountTypes";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 import Chip from "../components/Chip";
 import DateField from "../components/DateField";
 
@@ -165,7 +166,7 @@ export default function EntryFormScreen({ route, navigation }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -261,7 +262,7 @@ export default function EntryFormScreen({ route, navigation }: Props) {
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button label={t("common.save")} onPress={save} loading={saving} />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 

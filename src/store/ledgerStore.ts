@@ -209,6 +209,9 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
    */
   refresh: async () => {
     const db = await getDb();
+    // FR-11.2: Android usually resumes the app instead of starting it again,
+    // so occurrences that came due while it sat in the background are added here.
+    await generatePendingEntries(db, today());
     const accounts = await listAccountsWithBalances(db, today());
     const alerts = await checkBudgetAlerts(db, today());
     const crossed = await checkBalanceAlerts(db, accounts);
@@ -360,8 +363,8 @@ export const useLedgerStore = create<LedgerState>()((set, get) => ({
       id === undefined
         ? await createRule(db, input)
         : (await updateRule(db, id, input), id);
-    // A new or changed rule may already have occurrences due (FR-11.2, FR-11.7).
-    await generatePendingEntries(db, today());
+    // A new or changed rule may already have occurrences due (FR-11.2, FR-11.7);
+    // refresh adds them.
     await get().refresh();
     return ruleId;
   },

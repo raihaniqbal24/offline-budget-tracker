@@ -17,6 +17,7 @@ import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { CategoryType } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 import CategoryIcon from "../components/CategoryIcon";
 import Segmented from "../components/Segmented";
 import { CATEGORY_COLORS, CATEGORY_ICONS } from "../components/categoryPalette";
@@ -91,7 +92,7 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -203,7 +204,7 @@ export default function CategoryFormScreen({ route, navigation }: Props) {
       <View style={styles.footer}>
         <Button label={t("common.save")} onPress={save} loading={saving} />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 

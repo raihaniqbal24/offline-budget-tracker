@@ -20,6 +20,7 @@ import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 import DateField from "../components/DateField";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Reconcile">;
@@ -87,7 +88,7 @@ export default function ReconcileScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -180,7 +181,7 @@ export default function ReconcileScreen({ route, navigation }: Props) {
           disabled={isFuture || appBalance === null}
         />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 
