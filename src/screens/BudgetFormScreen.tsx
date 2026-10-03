@@ -26,6 +26,7 @@ import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import BudgetBar from "../components/BudgetBar";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 import { budgetLabel } from "../components/budgetLabel";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BudgetForm">;
@@ -98,7 +99,7 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -150,7 +151,7 @@ export default function BudgetFormScreen({ route, navigation }: Props) {
       <View style={styles.footer}>
         <Button label={t("common.save")} onPress={save} loading={saving} />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 

@@ -12,6 +12,7 @@ import type { RootStackParamList } from "../navigation/types";
 import { ACCOUNT_TYPE_ICONS, ACCOUNT_TYPES } from "../components/accountTypes";
 import AmountInput from "../components/AmountInput";
 import Button from "../components/Button";
+import KeyboardAvoider from "../components/KeyboardAvoider";
 import Chip from "../components/Chip";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AccountForm">;
@@ -98,7 +99,7 @@ export default function AccountFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoider style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -215,7 +216,7 @@ export default function AccountFormScreen({ route, navigation }: Props) {
       <View style={styles.footer}>
         <Button label={t("common.save")} onPress={save} loading={saving} />
       </View>
-    </View>
+    </KeyboardAvoider>
   );
 }
 
