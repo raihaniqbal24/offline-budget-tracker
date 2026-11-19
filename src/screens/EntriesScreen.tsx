@@ -4,7 +4,6 @@ import {
   Pressable,
   SectionList,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,13 +14,14 @@ import { getDb } from "../db/client";
 import { listEntries, type EntryWithDetails } from "../db/entriesDao";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { today } from "../lib/dates";
-import { formatDayHeader } from "../lib/dateLabels";
+import { groupByDay } from "../lib/daySections";
 import { useLedgerStore } from "../store/ledgerStore";
 import { spacing } from "../theme";
 import { makeStyles, useTheme } from "../theme/ThemeProvider";
 import type { RootStackParamList } from "../navigation/types";
+import DayHeader from "../components/DayHeader";
 import EmptyState from "../components/EmptyState";
-import EntryRow from "../components/EntryRow";
+import EntryRow, { signedAmount } from "../components/EntryRow";
 import Fab from "../components/Fab";
 import { usePagedList } from "../hooks/usePagedList";
 
@@ -30,14 +30,11 @@ const entryKey = (e: EntryWithDetails) => String(e.id);
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-interface Section {
-  date: string;
-  data: EntryWithDetails[];
-}
+const entryDate = (e: EntryWithDetails) => e.occurredOn;
 
 /** All entries, newest first, grouped by day and loaded 100 at a time. */
 export default function EntriesScreen() {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   const styles = useStyles();
   const { t } = useTranslation();
   const lang = useAppLanguage();
@@ -74,6 +71,7 @@ export default function EntriesScreen() {
   const {
     items: entries,
     loading,
+    hasMore,
     loadMore,
   } = usePagedList<EntryWithDetails>({
     fetchPage,
@@ -83,15 +81,10 @@ export default function EntriesScreen() {
     pageSize: PAGE_SIZE,
   });
 
-  const sections = useMemo<Section[]>(() => {
-    const out: Section[] = [];
-    for (const entry of entries) {
-      const last = out[out.length - 1];
-      if (last && last.date === entry.occurredOn) last.data.push(entry);
-      else out.push({ date: entry.occurredOn, data: [entry] });
-    }
-    return out;
-  }, [entries]);
+  const sections = useMemo(
+    () => groupByDay(entries, entryDate, signedAmount, hasMore),
+    [entries, hasMore],
+  );
 
   const todayDate = today();
   const openEntry = useCallback(
@@ -116,9 +109,14 @@ export default function EntriesScreen() {
             />
           )}
           renderSectionHeader={({ section }) => (
-            <Text style={[typography.label, styles.header]}>
-              {formatDayHeader(section.date, todayDate, lang)}
-            </Text>
+            <DayHeader
+              date={section.date}
+              todayDate={todayDate}
+              lang={lang}
+              spending={section.spending}
+              income={section.income}
+              showTotals={section.complete}
+            />
           )}
           ItemSeparatorComponent={Separator}
           stickySectionHeadersEnabled
@@ -153,13 +151,6 @@ const useStyles = makeStyles((c) => ({
   screen: { flex: 1, backgroundColor: c.background },
   headerButton: { marginRight: spacing.md },
   loader: { marginTop: spacing.xl },
-  header: {
-    backgroundColor: c.background,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xs,
-    fontWeight: "600",
-  },
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: c.border,
