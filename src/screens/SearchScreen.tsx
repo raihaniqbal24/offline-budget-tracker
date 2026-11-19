@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   ScrollView,
+  SectionList,
   StyleSheet,
   Text,
   TextInput,
@@ -28,6 +28,7 @@ import { categoryLabel } from "../i18n";
 import { useAppLanguage } from "../i18n/useAppLanguage";
 import { parseISODate, toISODate, today, type ISODate } from "../lib/dates";
 import { formatDate } from "../lib/dateLabels";
+import { groupByDay } from "../lib/daySections";
 import { formatRupiah, parseAmount } from "../lib/money";
 import { useLedgerStore } from "../store/ledgerStore";
 import { radius, spacing } from "../theme";
@@ -36,8 +37,9 @@ import type { ID } from "../types";
 import type { RootStackParamList } from "../navigation/types";
 import AmountInput from "../components/AmountInput";
 import Chip from "../components/Chip";
+import DayHeader from "../components/DayHeader";
 import EmptyState from "../components/EmptyState";
-import EntryRow from "../components/EntryRow";
+import EntryRow, { signedAmount } from "../components/EntryRow";
 import Segmented from "../components/Segmented";
 import TransferRow from "../components/TransferRow";
 import { usePagedList } from "../hooks/usePagedList";
@@ -49,6 +51,13 @@ const TYPES: SearchType[] = ["expense", "income", "transfer", "adjustment"];
 
 const rowKey = (r: SearchRow) =>
   r.kind === "entry" ? `e${r.entry.id}` : `t${r.transfer.id}`;
+
+const rowDate = (r: SearchRow): ISODate =>
+  r.kind === "entry" ? r.entry.occurredOn : r.transfer.occurredOn;
+
+/** Transfers move money between accounts, so they count in neither total. */
+const rowSigned = (r: SearchRow): number | null =>
+  r.kind === "entry" ? signedAmount(r.entry) : null;
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value)
@@ -138,13 +147,22 @@ export default function SearchScreen({ navigation }: Props) {
       searchRecords(await getDb(), filters, { limit, offset }),
     [filters],
   );
-  const { items: rows, loadMore } = usePagedList<SearchRow>({
+  const {
+    items: rows,
+    hasMore,
+    loadMore,
+  } = usePagedList<SearchRow>({
     fetchPage,
     keyOf: rowKey,
     resetKey: filterKey,
     refreshKey: dataVersion,
     pageSize: PAGE_SIZE,
   });
+
+  const sections = useMemo(
+    () => groupByDay(rows, rowDate, rowSigned, hasMore),
+    [rows, hasMore],
+  );
 
   // Count and totals for the header (FR-8.3).
   useEffect(() => {
@@ -433,10 +451,21 @@ export default function SearchScreen({ navigation }: Props) {
   );
 
   return (
-    <FlatList
+    <SectionList
       style={styles.screen}
-      data={rows}
+      sections={sections}
       keyExtractor={rowKey}
+      stickySectionHeadersEnabled
+      renderSectionHeader={({ section }) => (
+        <DayHeader
+          date={section.date}
+          todayDate={todayDate}
+          lang={lang}
+          spending={section.spending}
+          income={section.income}
+          showTotals={section.complete}
+        />
+      )}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={header}
       renderItem={({ item }) =>
