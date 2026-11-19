@@ -2,7 +2,7 @@
   "expo": {
     "name": "offline-budget-tracker",
     "slug": "offline-budget-tracker",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,6 +10,7 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 7,
       "adaptiveIcon": {
         "backgroundColor": "#F0F9F9",
         "foregroundImage": "./assets/adaptive-icon.png"
